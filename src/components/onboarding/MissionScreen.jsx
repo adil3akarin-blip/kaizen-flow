@@ -13,14 +13,14 @@ export default function MissionScreen({ onComplete }) {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-warm-text/25 px-6 backdrop-blur-sm">
+    <div className="fixed inset-0 z-40 flex items-end justify-center overflow-y-auto bg-warm-text/25 px-4 py-6 backdrop-blur-sm sm:items-center sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        className="w-full max-w-md rounded-2xl border border-cream-dark/60 bg-white p-6 shadow-xl"
+        className="my-auto w-full max-w-md rounded-2xl border border-cream-dark/60 bg-white p-5 shadow-xl sm:rounded-2xl sm:p-6"
       >
-        <h2 className="m-0 font-serif text-xl font-medium text-warm-text">
+        <h2 className="m-0 font-serif text-lg font-medium text-warm-text sm:text-xl">
           Что для тебя сейчас главное?
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-warm-muted">

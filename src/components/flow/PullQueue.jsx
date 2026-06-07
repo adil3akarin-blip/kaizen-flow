@@ -15,7 +15,7 @@ import CardEditSheet from '../cards/CardEditSheet'
 import WipGateDialog from './WipGateDialog'
 import EnergyGuardDialog from './EnergyGuardDialog'
 
-export default function PullQueue({ highlighted = false, onGateOpenChange }) {
+export default function PullQueue({ excludeCardId, onGateOpenChange }) {
   const cards = useCardsStore((s) => s.cards)
   const columnOrder = useCardsStore((s) => s.columnOrder)
   const pullToWip = useCardsStore((s) => s.pullToWip)
@@ -33,6 +33,14 @@ export default function PullQueue({ highlighted = false, onGateOpenChange }) {
   const pullQueue = useMemo(
     () => selectOrderedPullQueue(cards, columnOrder),
     [cards, columnOrder],
+  )
+
+  const visibleQueue = useMemo(
+    () =>
+      excludeCardId
+        ? pullQueue.filter((card) => card.id !== excludeCardId)
+        : pullQueue,
+    [pullQueue, excludeCardId],
   )
 
   const guardAlternatives = useMemo(
@@ -102,26 +110,21 @@ export default function PullQueue({ highlighted = false, onGateOpenChange }) {
     }
   }
 
-  if (pullQueue.length === 0) {
+  if (visibleQueue.length === 0) {
     return null
   }
 
   return (
-    <section
-      className={clsx(
-        'rounded-2xl transition-colors',
-        highlighted && 'bg-warm-accent/5 ring-1 ring-warm-accent/15',
-      )}
-    >
-      <h3 className="m-0 px-1 font-serif text-base font-medium text-warm-text">
+    <section>
+      <h3 className="m-0 font-serif text-base font-medium text-warm-text">
         Очередь
         <span className="ml-2 text-sm font-normal text-warm-muted">
-          {pullQueue.length}
+          {visibleQueue.length}
         </span>
       </h3>
 
       <ul className="mt-3 flex list-none flex-col gap-2 p-0">
-        {pullQueue.map((card) => {
+        {visibleQueue.map((card) => {
           const dimmed = isCardEnergyDimmed(card, energyPreset)
 
           return (

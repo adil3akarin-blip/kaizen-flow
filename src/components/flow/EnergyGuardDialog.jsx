@@ -20,13 +20,13 @@ export default function EnergyGuardDialog({
           exit={{ opacity: 0 }}
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-warm-text/20 px-0 backdrop-blur-sm sm:items-center sm:px-6"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-warm-text/20 px-0 backdrop-blur-sm md:items-center md:px-6"
         >
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
-            className="w-full max-w-sm rounded-t-2xl border border-cream-dark/60 bg-white p-6 shadow-xl sm:rounded-2xl"
+            className="w-full max-w-sm rounded-t-2xl border border-cream-dark/60 bg-white p-6 shadow-xl md:rounded-2xl"
           >
             <p className="m-0 font-serif text-base font-medium text-warm-text">
               Похоже, ресурс на исходе

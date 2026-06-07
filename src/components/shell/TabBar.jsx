@@ -1,11 +1,12 @@
 import clsx from 'clsx'
-import { Kanban, Inbox, Plus, Workflow } from 'lucide-react'
+import { Inbox, Kanban, Plus, Settings, Workflow } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
 
 const NAV_ITEMS = [
   { id: TABS.flow, label: 'Поток', icon: Workflow },
   { id: TABS.review, label: 'Разбор', icon: Inbox },
   { id: TABS.kanban, label: 'Канбан', icon: Kanban },
+  { id: TABS.settings, label: 'Ещё', icon: Settings },
 ]
 
 export default function TabBar() {
@@ -30,15 +31,19 @@ export default function TabBar() {
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id
-          const isSilenced = silenceWeek && item.id !== TABS.review
+          const isSilenced =
+            silenceWeek &&
+            item.id !== TABS.review &&
+            item.id !== TABS.settings
 
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => setTab(item.id)}
+              aria-label={item.id === TABS.settings ? 'Настройки' : item.label}
               className={clsx(
-                'relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-colors',
+                'relative flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-colors',
                 isActive
                   ? 'font-medium text-warm-text'
                   : isSilenced
@@ -48,7 +53,7 @@ export default function TabBar() {
             >
               <Icon
                 className={clsx(
-                  'h-5 w-5',
+                  'h-5 w-5 shrink-0',
                   isActive
                     ? 'text-warm-accent'
                     : isSilenced
@@ -57,9 +62,9 @@ export default function TabBar() {
                 )}
                 strokeWidth={1.75}
               />
-              {item.label}
+              <span className="truncate">{item.label}</span>
               {item.id === TABS.kanban && elephantsPending && !isActive && (
-                <span className="absolute right-1/4 top-1 h-2 w-2 rounded-full bg-warm-accent" />
+                <span className="absolute right-[18%] top-1 h-2 w-2 rounded-full bg-warm-accent" />
               )}
               {isActive && (
                 <span className="absolute bottom-1 h-1 w-1 rounded-full bg-warm-accent" />

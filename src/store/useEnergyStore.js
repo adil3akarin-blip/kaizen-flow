@@ -1,6 +1,10 @@
 import { create } from 'zustand'
-import { getPresetAxisDefaults } from '../lib/energyUtils'
+import { derivePresetFromAxes, getPresetAxisDefaults } from '../lib/energyUtils'
 import { pruneHeavyCompletions } from '../lib/willpowerGuard'
+
+function withBriskPauseDismissed(preset, patch = {}) {
+  return preset === 'brisk' ? { ...patch, pauseDismissed: true } : patch
+}
 
 export const useEnergyStore = create((set) => ({
   preset: 'medium',
@@ -10,16 +14,20 @@ export const useEnergyStore = create((set) => ({
   pauseDismissed: false,
 
   setPreset: (preset) =>
-    set({
-      preset,
-      axes: getPresetAxisDefaults(preset),
-      fineTuneOpen: false,
-    }),
+    set(
+      withBriskPauseDismissed(preset, {
+        preset,
+        axes: getPresetAxisDefaults(preset),
+        fineTuneOpen: false,
+      }),
+    ),
 
   setAxis: (axisId, value) =>
-    set((state) => ({
-      axes: { ...state.axes, [axisId]: value },
-    })),
+    set((state) => {
+      const axes = { ...state.axes, [axisId]: value }
+      const preset = derivePresetFromAxes(axes)
+      return withBriskPauseDismissed(preset, { axes, preset })
+    }),
 
   setFineTuneOpen: (open) => set({ fineTuneOpen: open }),
 

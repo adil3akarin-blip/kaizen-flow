@@ -53,8 +53,8 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-cream">
-      <header className="border-b border-cream-dark/60 bg-white/40 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex min-h-0 flex-col overflow-hidden bg-cream">
+      <header className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 md:px-8">
         <button
           type="button"
           onClick={onClose}
@@ -70,7 +70,7 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
         </p>
       </header>
 
-      <div className="flex flex-1 flex-col overflow-y-auto px-6 py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
         {step === 'done' && (
           <>
             <p className="m-0 font-serif text-base text-warm-text">
@@ -162,7 +162,7 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
         )}
       </div>
 
-      <footer className="border-t border-cream-dark/60 px-6 py-4">
+      <footer className="shrink-0 border-t border-cream-dark/60 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 md:px-8 md:pb-4">
         {stepIndex < STEPS.length - 1 ? (
           <button
             type="button"

@@ -14,8 +14,8 @@ export default function YearBoard({ onBack }) {
 
   if (selectedMonth && monthData) {
     return (
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="border-b border-cream-dark/60 bg-white/40 px-6 py-4">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <header className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 md:px-8">
           <button
             type="button"
             onClick={() => setSelectedMonth(null)}
@@ -28,7 +28,7 @@ export default function YearBoard({ onBack }) {
           </h3>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
           {monthData.elephant && (
             <div className="mb-6 rounded-2xl border border-warm-accent/20 bg-warm-accent/5 px-5 py-4">
               <p className="m-0 text-xs font-medium text-warm-accent">
@@ -62,8 +62,8 @@ export default function YearBoard({ onBack }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="border-b border-cream-dark/60 bg-white/40 px-6 py-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <header className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 md:px-8">
         {onBack && (
           <button
             type="button"
@@ -79,7 +79,7 @@ export default function YearBoard({ onBack }) {
         <p className="mt-1 text-sm text-warm-muted">Музей побед</p>
       </header>
 
-      <div className="grid flex-1 grid-cols-2 gap-3 overflow-y-auto px-6 py-6 md:grid-cols-3">
+      <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-y-auto px-4 py-4 sm:gap-3 sm:px-6 sm:py-6 md:grid-cols-3 md:px-8">
         {mockYearMonths.map((month) => (
           <button
             key={month.month}

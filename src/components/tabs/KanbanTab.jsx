@@ -37,14 +37,16 @@ export default function KanbanTab() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="border-b border-cream-dark/60 bg-white/40 px-6 py-5">
-        <div className="flex items-start justify-between gap-4">
-          <TabPageHeader
-            title="Канбан"
-            subtitle="Сам вытягиваешь следующее дело"
-          />
-          <div className="flex shrink-0 flex-col items-end gap-2">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 sm:py-5 md:px-8">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0 flex-1">
+            <TabPageHeader
+              title="Канбан"
+              subtitle="Сам вытягиваешь следующее дело"
+            />
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
             {elephantsPending && (
               <button
                 type="button"
@@ -92,7 +94,7 @@ export default function KanbanTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden px-6 py-4">
+      <div className="min-h-0 flex-1 overflow-x-auto overscroll-x-contain px-4 py-4 [-webkit-overflow-scrolling:touch] sm:px-6 md:overflow-x-visible md:px-8">
         {kanbanCards.length > 0 ? (
           <KanbanBoard view={view} />
         ) : (

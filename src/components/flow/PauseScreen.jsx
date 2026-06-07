@@ -1,16 +1,11 @@
-const RECOVERY_IDEAS = [
-  'Прогулка без телефона',
-  '10 минут тишины',
-  'Чай и ничего не делать',
-  'Лёгкое дело из очереди',
-]
+import { RECOVERY_IDEAS } from '../../lib/energyUtils'
 
 export default function PauseScreen({ onOpenHub, onContinue }) {
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-6 sm:py-12">
         <div className="w-full max-w-md text-center">
-          <p className="m-0 font-serif text-2xl font-medium text-warm-text">
+          <p className="m-0 font-serif text-xl font-medium text-warm-text sm:text-2xl">
             Похоже, ресурс на исходе
           </p>
           <p className="mt-3 text-sm leading-relaxed text-warm-muted">

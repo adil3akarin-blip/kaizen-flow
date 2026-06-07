@@ -39,7 +39,8 @@ export default function EnergySnapshot({ onOpenHub }) {
         />
       </div>
       <div className="min-w-0">
-        <p className="m-0 text-sm font-medium text-warm-text">{config.label}</p>
+        <p className="m-0 text-xs text-warm-muted">Энергия</p>
+        <p className="mt-0.5 text-sm font-medium text-warm-text">{config.label}</p>
         <p className="mt-0.5 truncate text-xs text-warm-muted">{advice}</p>
       </div>
     </button>

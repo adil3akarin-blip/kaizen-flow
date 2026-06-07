@@ -11,13 +11,13 @@ export default function WipGateDialog({ open, onComplete, onRelease, onCancel })
           exit={{ opacity: 0 }}
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-warm-text/20 px-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-warm-text/20 px-0 backdrop-blur-sm md:items-center md:px-6"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-sm rounded-2xl border border-cream-dark/60 bg-white p-6 shadow-xl"
+            className="w-full max-w-sm rounded-t-2xl border border-cream-dark/60 bg-white p-6 shadow-xl md:rounded-2xl"
           >
             <p className="m-0 font-serif text-base font-medium text-warm-text">
               Сначала завершить или отложить текущее?

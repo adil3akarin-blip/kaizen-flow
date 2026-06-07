@@ -1,22 +1,28 @@
 import NotificationSettings from './NotificationSettings'
+import { TABS, useAppStore } from '../../store/useAppStore'
 
-export default function SettingsScreen({ onBack }) {
+export default function SettingsScreen() {
+  const setTab = useAppStore((s) => s.setTab)
+
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="border-b border-cream-dark/60 bg-white/40 px-6 py-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-cream">
+      <header className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 md:px-8">
         <button
           type="button"
-          onClick={onBack}
-          className="text-sm text-warm-muted hover:text-warm-text"
+          onClick={() => setTab(TABS.flow)}
+          className="hidden min-h-10 text-sm text-warm-muted hover:text-warm-text md:inline"
         >
           ← Назад
         </button>
-        <h2 className="m-0 mt-2 font-serif text-xl font-medium text-warm-text">
+        <h2 className="m-0 font-serif text-xl font-medium text-warm-text md:mt-1">
           Настройки
         </h2>
+        <p className="m-0 mt-1.5 text-sm text-warm-muted">
+          Приглашения и уведомления
+        </p>
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
         <NotificationSettings />
       </div>
     </div>

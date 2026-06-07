@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AlertCircle } from 'lucide-react'
 import StuckSheet from './StuckSheet'
 
 export default function StuckNudge({ stuckCards }) {
@@ -16,8 +17,9 @@ export default function StuckNudge({ stuckCards }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-xl border border-amber-400/30 bg-amber-50/50 px-4 py-3 text-left text-sm text-warm-text transition-colors hover:bg-amber-50"
+        className="flex items-center gap-2 text-left text-sm text-amber-700/90 transition-colors hover:text-amber-800"
       >
+        <AlertCircle className="h-4 w-4 shrink-0" strokeWidth={1.5} />
         {label}
       </button>
 

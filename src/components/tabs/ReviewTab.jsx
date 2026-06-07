@@ -19,10 +19,10 @@ export default function ReviewTab() {
 
   if (silenceWeek) {
     return (
-      <section className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center justify-between border-b border-cream-dark bg-white/40 px-6 py-4 md:px-8">
-          <div>
-            <h2 className="m-0 font-serif text-xl font-medium tracking-tight text-warm-text">
+      <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <header className="flex shrink-0 flex-col gap-3 border-b border-cream-dark bg-white/40 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 md:px-8">
+          <div className="min-w-0">
+            <h2 className="m-0 font-serif text-lg font-medium tracking-tight text-warm-text sm:text-xl">
               Неделя тишины
             </h2>
             <p className="mt-1 text-sm text-warm-muted">
@@ -32,7 +32,7 @@ export default function ReviewTab() {
           <button
             type="button"
             onClick={openMissionScreen}
-            className="shrink-0 rounded-lg border border-cream-dark bg-white px-4 py-2 text-sm text-warm-muted shadow-sm transition-colors hover:bg-cream-dark hover:text-warm-text"
+            className="w-full shrink-0 rounded-lg border border-cream-dark bg-white px-4 py-2 text-sm text-warm-muted shadow-sm transition-colors hover:bg-cream-dark hover:text-warm-text sm:w-auto"
           >
             Готов разбирать
           </button>
@@ -46,11 +46,16 @@ export default function ReviewTab() {
   return (
     <div
       className={clsx(
-        'flex flex-1 flex-col overflow-hidden',
-        filterCardId && 'md:grid md:grid-cols-2',
+        'flex min-h-0 flex-1 flex-col overflow-hidden',
+        filterCardId && 'md:grid md:min-h-0 md:grid-cols-2 md:overflow-hidden',
       )}
     >
-      <div className={clsx(filterCardId && 'hidden md:flex md:flex-col')}>
+      <div
+        className={clsx(
+          'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
+          filterCardId && 'hidden md:flex',
+        )}
+      >
         <ReviewInbox onFilter={setFilterCardId} />
       </div>
 

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import clsx from 'clsx'
 import { MoreHorizontal } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useEnergyStore } from '../../store/useEnergyStore'
@@ -10,7 +11,41 @@ import StructuredCard from '../cards/StructuredCard'
 import CardEditSheet from '../cards/CardEditSheet'
 import EnergyGuardDialog from './EnergyGuardDialog'
 
-export default function WipSlot({ suggestedCard, onPullSuggested, onGuardOpenChange }) {
+function HeroLabel({ children, className }) {
+  return (
+    <p
+      className={clsx(
+        'm-0 font-serif text-base font-medium text-warm-text',
+        className,
+      )}
+    >
+      {children}
+    </p>
+  )
+}
+
+function WipHeroShell({ accent = false, className, children }) {
+  return (
+    <section
+      className={clsx(
+        'rounded-2xl px-5 py-6',
+        accent
+          ? 'bg-warm-accent/5 ring-1 ring-warm-accent/15'
+          : 'bg-white/50',
+        className,
+      )}
+    >
+      {children}
+    </section>
+  )
+}
+
+export default function WipSlot({
+  suggestedCard,
+  emptyCta,
+  onPullSuggested,
+  onGuardOpenChange,
+}) {
   const cards = useCardsStore((s) => s.cards)
   const columnOrder = useCardsStore((s) => s.columnOrder)
   const completeWip = useCardsStore((s) => s.completeWip)
@@ -58,46 +93,76 @@ export default function WipSlot({ suggestedCard, onPullSuggested, onGuardOpenCha
     onGuardOpenChange?.(false)
   }
 
+  const guardDialog = (
+    <EnergyGuardDialog
+      open={guardOpen}
+      card={suggestedCard}
+      alternatives={guardAlternatives}
+      onPullAlternative={(id) => {
+        closeGuard()
+        onPullSuggested(id)
+      }}
+      onForcePull={() => {
+        closeGuard()
+        onPullSuggested(suggestedCard.id)
+      }}
+      onCancel={closeGuard}
+    />
+  )
+
   if (!wipCard) {
-    return (
-      <>
-        <section className="rounded-2xl border border-dashed border-cream-dark/80 bg-white/50 px-5 py-8">
-          <p className="m-0 text-center font-serif text-base font-medium text-warm-text">
-            Одно дело в единицу времени
-          </p>
-          {suggestedCard && (
+    if (emptyCta) {
+      return (
+        <WipHeroShell className="py-8">
+          <HeroLabel className="text-center">Поток свободен</HeroLabel>
+          <button
+            type="button"
+            onClick={emptyCta.onAction}
+            className="mt-4 w-full rounded-xl border border-cream-dark/50 bg-white px-4 py-3 text-left text-sm text-warm-muted shadow-sm transition-colors hover:bg-cream/50"
+          >
+            {emptyCta.message} →{' '}
+            <span className="text-warm-accent">{emptyCta.targetLabel}</span>
+          </button>
+        </WipHeroShell>
+      )
+    }
+
+    if (suggestedCard) {
+      return (
+        <>
+          <WipHeroShell accent>
+            <HeroLabel>Одно дело в единицу времени</HeroLabel>
             <button
               type="button"
               onClick={handleSuggestedPull}
-              className="mt-4 w-full rounded-xl border border-cream-dark/50 bg-cream/50 px-4 py-3 text-left transition-colors hover:bg-cream-dark/40"
+              className="mt-4 w-full text-left transition-opacity hover:opacity-90"
             >
-              <p className="m-0 text-xs text-warm-muted">Можно начать с:</p>
-              <p className="mt-1 text-sm text-warm-text">{suggestedCard.text}</p>
+              <StructuredCard
+                card={suggestedCard}
+                className="ring-1 ring-warm-accent/20"
+              />
             </button>
-          )}
-        </section>
+            <button
+              type="button"
+              onClick={handleSuggestedPull}
+              className="mt-4 w-full rounded-lg bg-warm-accent py-3 text-sm font-medium text-white hover:bg-warm-accent-hover"
+            >
+              Начать
+            </button>
+          </WipHeroShell>
+          {guardDialog}
+        </>
+      )
+    }
 
-        <EnergyGuardDialog
-          open={guardOpen}
-          card={suggestedCard}
-          alternatives={guardAlternatives}
-          onPullAlternative={(id) => {
-            closeGuard()
-            onPullSuggested(id)
-          }}
-          onForcePull={() => {
-            closeGuard()
-            onPullSuggested(suggestedCard.id)
-          }}
-          onCancel={closeGuard}
-        />
-      </>
-    )
+    return null
   }
 
   return (
-    <section>
-      <div className="relative">
+    <WipHeroShell accent>
+      <HeroLabel>Сейчас в работе</HeroLabel>
+
+      <div className="relative mt-4">
         <StructuredCard card={wipCard} className="px-5 py-5 text-base" />
         <button
           type="button"
@@ -131,6 +196,6 @@ export default function WipSlot({ suggestedCard, onPullSuggested, onGuardOpenCha
         open={editOpen}
         onClose={() => setEditOpen(false)}
       />
-    </section>
+    </WipHeroShell>
   )
 }

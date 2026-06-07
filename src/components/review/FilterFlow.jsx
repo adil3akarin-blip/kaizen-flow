@@ -219,8 +219,8 @@ export default function FilterFlow({ cardId, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col bg-cream md:static md:z-auto md:border-l md:border-cream-dark/60">
-      <header className="flex items-center gap-3 border-b border-cream-dark/60 bg-white/40 px-4 py-4 md:px-6">
+    <div className="fixed inset-0 z-30 flex flex-col bg-cream md:static md:z-auto md:min-h-0 md:overflow-hidden md:border-l md:border-cream-dark/60">
+      <header className="flex shrink-0 items-center gap-3 border-b border-cream-dark/60 bg-white/40 px-4 py-4 md:px-6">
         <button
           type="button"
           onClick={onClose}
@@ -248,7 +248,7 @@ export default function FilterFlow({ cardId, onClose }) {
         </button>
       </header>
 
-      <div className="flex flex-1 flex-col overflow-y-auto px-6 py-6">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
         {isWantStep && (
           <div className="mx-auto flex w-full max-w-md flex-col gap-6">
             <SwipeCard
@@ -398,7 +398,7 @@ export default function FilterFlow({ cardId, onClose }) {
       </div>
 
       {!isFinalStep && step > 0 && (
-        <div className="border-t border-cream-dark/60 px-6 py-3">
+        <div className="shrink-0 border-t border-cream-dark/60 px-4 py-3 sm:px-6 md:px-8">
           <button
             type="button"
             onClick={() => setStep((s) => Math.max(0, s - 1))}

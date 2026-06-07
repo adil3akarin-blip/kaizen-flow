@@ -56,7 +56,7 @@ function InboxCard({ card, isEditing, onStartEdit, onSaveEdit, onFilter, onDelet
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-3 p-4">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start">
           <button
             type="button"
             onClick={() => {
@@ -65,12 +65,12 @@ function InboxCard({ card, isEditing, onStartEdit, onSaveEdit, onFilter, onDelet
             }}
             className="min-w-0 flex-1 text-left"
           >
-            <p className="m-0 text-[15px] leading-snug text-warm-text">
+            <p className="m-0 break-words text-[15px] leading-snug text-warm-text">
               {card.text}
             </p>
           </button>
 
-          <div className="relative flex shrink-0 flex-col items-end gap-2">
+          <div className="relative flex shrink-0 flex-row items-center justify-end gap-2 sm:flex-col sm:items-end">
             <button
               type="button"
               onClick={() => onFilter(card.id)}
@@ -130,7 +130,7 @@ export default function ReviewInbox({ onFilter }) {
 
   if (rawCards.length === 0) {
     return (
-      <div className="flex flex-1 flex-col px-6 py-8">
+      <div className="flex min-h-0 flex-1 flex-col px-4 py-8 sm:px-6 md:px-8">
         <TabPageHeader
           title="Разбор"
           subtitle="Фильтруй мысли, когда будешь готов"
@@ -145,15 +145,15 @@ export default function ReviewInbox({ onFilter }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="border-b border-cream-dark/60 bg-white/40 px-6 py-5">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 sm:py-5 md:px-8">
         <TabPageHeader
           title="Разбор"
           subtitle={`${rawCards.length} ${rawCards.length === 1 ? 'мысль' : rawCards.length < 5 ? 'мысли' : 'мыслей'} ждут разбора`}
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 md:px-8">
         <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {rawCards.map((card) => (
             <li key={card.id}>

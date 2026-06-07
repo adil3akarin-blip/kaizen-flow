@@ -1,10 +1,24 @@
-import { useState } from 'react'
 import clsx from 'clsx'
+import { BatteryFull, BatteryLow, BatteryMedium } from 'lucide-react'
 import { useEnergyStore } from '../../store/useEnergyStore'
+import { hapticTap } from '../../lib/haptics'
+import {
+  countRecentHeavyCompletions,
+} from '../../lib/willpowerGuard'
 import {
   ENERGY_AXES,
   ENERGY_PRESETS,
+  getAxisNuance,
+  getEnergyAdvice,
+  RECOVERY_IDEAS,
+  shouldShowRecoverySection,
 } from '../../lib/energyUtils'
+
+const PRESET_ICONS = {
+  brisk: BatteryFull,
+  medium: BatteryMedium,
+  depleted: BatteryLow,
+}
 
 function AxisSlider({ axis, value, onChange }) {
   return (
@@ -25,88 +39,25 @@ function AxisSlider({ axis, value, onChange }) {
   )
 }
 
-function StandaloneCalculator() {
-  const [open, setOpen] = useState(false)
-  const [gain, setGain] = useState('')
-  const [cost, setCost] = useState('')
-  const [verdict, setVerdict] = useState(null)
-
-  const handleVerdict = (v) => {
-    setVerdict(v)
-    setOpen(false)
-  }
-
-  const verdictLabels = {
-    yes: 'Да, стоит',
-    maybe: 'Сомневаюсь',
-    no: 'Нет, не сейчас',
-  }
-
+function RecoverySection() {
   return (
-    <section className="rounded-2xl border border-cream-dark/50 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl border border-warm-accent/20 bg-warm-accent/5 p-5">
       <p className="m-0 font-serif text-base font-medium text-warm-text">
-        Результат / Затраты
+        Восстановление
       </p>
       <p className="mt-1 text-xs text-warm-muted">
-        Сначала оценка, потом действие
+        Несколько идей, если ресурс на исходе
       </p>
-
-      {verdict && !open && (
-        <p className="mt-3 text-sm text-warm-text">
-          Вердикт:{' '}
-          <span className="font-medium">{verdictLabels[verdict]}</span>
-        </p>
-      )}
-
-      {open ? (
-        <div className="mt-4">
-          <textarea
-            value={gain}
-            onChange={(e) => setGain(e.target.value)}
-            placeholder="Что получу?"
-            rows={2}
-            className="w-full resize-none rounded-lg border border-cream-dark bg-cream/30 px-3 py-2 text-sm text-warm-text outline-none focus:ring-2 focus:ring-warm-accent/30"
-          />
-          <textarea
-            value={cost}
-            onChange={(e) => setCost(e.target.value)}
-            placeholder="Что отдам?"
-            rows={2}
-            className="mt-2 w-full resize-none rounded-lg border border-cream-dark bg-cream/30 px-3 py-2 text-sm text-warm-text outline-none focus:ring-2 focus:ring-warm-accent/30"
-          />
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => handleVerdict('yes')}
-              className="rounded-lg bg-warm-accent px-3 py-1.5 text-xs font-medium text-white"
-            >
-              Да, стоит
-            </button>
-            <button
-              type="button"
-              onClick={() => handleVerdict('maybe')}
-              className="rounded-lg border border-cream-dark px-3 py-1.5 text-xs text-warm-muted"
-            >
-              Сомневаюсь
-            </button>
-            <button
-              type="button"
-              onClick={() => handleVerdict('no')}
-              className="rounded-lg border border-cream-dark px-3 py-1.5 text-xs text-warm-muted"
-            >
-              Нет, не сейчас
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="mt-4 rounded-lg border border-cream-dark px-4 py-2 text-sm text-warm-muted hover:bg-cream-dark"
-        >
-          {verdict ? 'Пересчитать' : 'Открыть калькулятор'}
-        </button>
-      )}
+      <ul className="mt-4 flex list-none flex-col gap-2 p-0">
+        {RECOVERY_IDEAS.map((idea) => (
+          <li
+            key={idea}
+            className="rounded-xl border border-cream-dark/50 bg-white px-4 py-3 text-sm text-warm-text"
+          >
+            {idea}
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
@@ -115,13 +66,31 @@ export default function EnergyHub({ onBack }) {
   const preset = useEnergyStore((s) => s.preset)
   const axes = useEnergyStore((s) => s.axes)
   const fineTuneOpen = useEnergyStore((s) => s.fineTuneOpen)
+  const heavyCompletions = useEnergyStore((s) => s.heavyCompletions)
   const setPreset = useEnergyStore((s) => s.setPreset)
   const setAxis = useEnergyStore((s) => s.setAxis)
   const setFineTuneOpen = useEnergyStore((s) => s.setFineTuneOpen)
 
+  const presetConfig = ENERGY_PRESETS[preset]
+  const PresetIcon = PRESET_ICONS[preset] || BatteryMedium
+  const advice = getEnergyAdvice(preset)
+  const axisNuance = getAxisNuance(preset, axes)
+  const recentHeavyCount = countRecentHeavyCompletions(heavyCompletions)
+  const showRecovery = shouldShowRecoverySection(preset, recentHeavyCount)
+
+  const handlePresetTap = (presetId) => {
+    hapticTap()
+    setPreset(presetId)
+  }
+
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="border-b border-cream-dark/60 bg-white/40 px-6 py-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <header
+        className={clsx(
+          'shrink-0 border-b border-cream-dark/60 px-4 py-4 sm:px-6 md:px-8',
+          preset === 'depleted' ? 'bg-warm-accent/5' : 'bg-white/40',
+        )}
+      >
         <button
           type="button"
           onClick={onBack}
@@ -132,30 +101,46 @@ export default function EnergyHub({ onBack }) {
         <h2 className="m-0 mt-2 font-serif text-xl font-medium text-warm-text">
           Энергия
         </h2>
-        <p className="m-0 mt-1 text-sm text-warm-muted">
-          Как ты сейчас?
-        </p>
+        <p className="m-0 mt-1 text-sm text-warm-muted">Как ты сейчас?</p>
+        <div className="mt-3 flex items-start gap-3">
+          <div
+            className={clsx(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+              preset === 'depleted' ? 'bg-warm-accent/15' : 'bg-cream',
+            )}
+          >
+            <PresetIcon className="h-5 w-5 text-warm-accent" strokeWidth={1.5} />
+          </div>
+          <div className="min-w-0">
+            <p className="m-0 text-sm font-medium text-warm-text">
+              {presetConfig.label}
+            </p>
+            <p className="m-0 mt-0.5 text-sm leading-relaxed text-warm-muted">
+              {advice}
+            </p>
+          </div>
+        </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
         <section>
           <p className="m-0 text-xs font-medium uppercase tracking-wide text-warm-muted">
             Быстрый ввод
           </p>
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-2">
             {Object.values(ENERGY_PRESETS).map((p) => (
               <button
                 key={p.id}
                 type="button"
-                onClick={() => setPreset(p.id)}
+                onClick={() => handlePresetTap(p.id)}
                 className={clsx(
-                  'rounded-xl border px-3 py-4 text-center transition-colors',
+                  'rounded-xl border px-2 py-3 text-center transition-colors sm:px-3 sm:py-4',
                   preset === p.id
                     ? 'border-warm-accent bg-warm-accent/10 text-warm-text'
                     : 'border-cream-dark/50 bg-white text-warm-muted hover:bg-cream/50',
                 )}
               >
-                <span className="block text-sm font-medium">{p.label}</span>
+                <span className="block text-xs font-medium sm:text-sm">{p.label}</span>
               </button>
             ))}
           </div>
@@ -175,6 +160,10 @@ export default function EnergyHub({ onBack }) {
             </button>
           </div>
 
+          {axisNuance && !fineTuneOpen && (
+            <p className="mt-2 text-sm text-warm-muted">{axisNuance}</p>
+          )}
+
           {fineTuneOpen && (
             <div className="mt-4 flex flex-col gap-5">
               {ENERGY_AXES.map((axis) => (
@@ -185,11 +174,14 @@ export default function EnergyHub({ onBack }) {
                   onChange={(v) => setAxis(axis.id, v)}
                 />
               ))}
+              {axisNuance && (
+                <p className="text-sm text-warm-muted">{axisNuance}</p>
+              )}
             </div>
           )}
         </section>
 
-        <StandaloneCalculator />
+        {showRecovery && <RecoverySection />}
       </div>
     </div>
   )

@@ -5,14 +5,14 @@ export default function ManifestScreen() {
   const completeOnboarding = useAppStore((s) => s.completeOnboarding)
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-8">
+    <div className="flex min-h-screen flex-col items-center justify-center overflow-y-auto bg-cream px-4 py-8 sm:px-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        className="flex w-full max-w-md flex-col items-center rounded-2xl border border-cream-dark/50 bg-white px-8 py-10 text-center shadow-sm"
+        className="flex w-full max-w-md flex-col items-center rounded-2xl border border-cream-dark/50 bg-white px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10"
       >
-        <h1 className="m-0 font-serif text-2xl font-medium tracking-tight text-warm-text">
+        <h1 className="m-0 font-serif text-xl font-medium tracking-tight text-warm-text sm:text-2xl">
           KaizenFlow
         </h1>
         <p className="mt-1 text-sm text-warm-muted">Power & Focus</p>

@@ -12,36 +12,22 @@ const TAB_CONTENT = {
   [TABS.flow]: FlowTab,
   [TABS.review]: ReviewTab,
   [TABS.kanban]: KanbanTab,
+  [TABS.settings]: SettingsScreen,
 }
 
 export default function AppShell() {
   const onboardingComplete = useAppStore((s) => s.onboardingComplete)
   const activeTab = useAppStore((s) => s.activeTab)
-  const settingsOpen = useAppStore((s) => s.settingsOpen)
-  const closeSettings = useAppStore((s) => s.closeSettings)
   const Content = TAB_CONTENT[activeTab]
 
   if (!onboardingComplete) {
     return <ManifestScreen />
   }
 
-  if (settingsOpen) {
-    return (
-      <div className="flex min-h-screen bg-cream">
-        <Sidebar />
-        <main className="flex flex-1 flex-col pb-32 md:pb-0">
-          <SettingsScreen onBack={closeSettings} />
-        </main>
-        <TabBar />
-        <DumpOverlay />
-      </div>
-    )
-  }
-
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-cream">
       <Sidebar />
-      <main className="flex flex-1 flex-col pb-32 md:pb-0">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-0">
         <Content />
       </main>
       <TabBar />

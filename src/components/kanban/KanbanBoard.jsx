@@ -112,7 +112,7 @@ function KanbanColumn({ column, cards, dragEnabled, onMoveTap, onEditTap }) {
   })
 
   return (
-    <div className="flex w-64 shrink-0 select-none flex-col">
+    <div className="flex w-[min(16rem,82vw)] shrink-0 snap-start flex-col sm:w-64">
       <div className="mb-3 flex items-center justify-between px-1">
         <h3 className="m-0 font-serif text-sm font-medium text-warm-text">
           {column.label}
@@ -168,7 +168,8 @@ function KanbanSortableCard({
     <div
       ref={dragEnabled ? ref : undefined}
       className={clsx(
-        'group relative touch-none select-none',
+        'group relative select-none',
+        dragEnabled && 'touch-none',
         stuck && 'rounded-xl ring-2 ring-amber-400/60',
         isDragging && 'opacity-40',
       )}
@@ -398,7 +399,7 @@ export default function KanbanBoard({ view }) {
       >
         <div
           className={clsx(
-            'flex select-none gap-4 overflow-x-auto pb-4',
+            'flex w-max min-w-full snap-x snap-mandatory gap-3 pb-2 pr-4 sm:gap-4 md:w-full md:snap-none md:pr-0',
             gateOpen && 'invisible',
           )}
         >

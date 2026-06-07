@@ -1,6 +1,11 @@
 import { create } from 'zustand'
 
-export const TABS = { flow: 'flow', review: 'review', kanban: 'kanban' }
+export const TABS = {
+  flow: 'flow',
+  review: 'review',
+  kanban: 'kanban',
+  settings: 'settings',
+}
 
 export const useAppStore = create((set) => ({
   activeTab: TABS.flow,
@@ -13,11 +18,8 @@ export const useAppStore = create((set) => ({
     (localStorage.getItem('kaizenflow-onboarding') === '1' &&
       localStorage.getItem('kaizenflow-elephants-pending') !== '0'),
 
-  settingsOpen: false,
-
   setTab: (tab) => set({ activeTab: tab }),
-  openSettings: () => set({ settingsOpen: true }),
-  closeSettings: () => set({ settingsOpen: false }),
+  openSettings: () => set({ activeTab: TABS.settings }),
   openDump: () => set({ dumpOpen: true }),
   closeDump: () => set({ dumpOpen: false }),
   completeOnboarding: () => {

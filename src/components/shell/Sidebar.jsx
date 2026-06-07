@@ -14,8 +14,6 @@ export default function Sidebar() {
   const activeTab = useAppStore((s) => s.activeTab)
   const setTab = useAppStore((s) => s.setTab)
   const openDump = useAppStore((s) => s.openDump)
-  const openSettings = useAppStore((s) => s.openSettings)
-  const settingsOpen = useAppStore((s) => s.settingsOpen)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
   const elephantsPending = useAppStore((s) => s.elephantsPending)
   const cards = useCardsStore((s) => s.cards)
@@ -111,10 +109,10 @@ export default function Sidebar() {
 
         <button
           type="button"
-          onClick={openSettings}
+          onClick={() => setTab(TABS.settings)}
           className={clsx(
             'mt-auto flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-            settingsOpen
+            activeTab === TABS.settings
               ? 'bg-white font-medium text-warm-text shadow-sm'
               : 'text-warm-text/80 hover:bg-white/60 hover:text-warm-text',
           )}

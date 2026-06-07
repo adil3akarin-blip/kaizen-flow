@@ -14,8 +14,8 @@ export default function SilenceCanvas() {
   const rawCards = useMemo(() => selectRawCards(cards), [cards])
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden">
-      <div className="relative flex-1 overflow-auto">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="relative min-h-0 flex-1 overflow-auto">
         <div
           className="relative min-h-full min-w-full md:min-w-[720px]"
           style={{

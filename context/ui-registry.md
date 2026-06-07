@@ -303,8 +303,11 @@ header h2: font-serif
 **Role:** Home dashboard — WIP + pull queue + energy + hints
 
 ```
-layout: md:grid-cols-2 — left: WipSlot + PullQueue; right: EnergySnapshot + FlowHint
-empty: EmptyState «Поток свободен» when no wip and no pull queue
+layout: mobile order WIP → Pull → Energy/nudges; md:grid-cols-2 — left: WipSlot + PullQueue; right: EnergySnapshot + FlowHint + StuckNudge
+header: title only «Поток» (no subtitle)
+empty: WipSlot shows «Поток свободен» + priority CTA (lib/flowEmptyState.js); FlowHint hidden
+FlowHint: text link row (warm-muted → accent «Разбор»); shown only when pull queue non-empty
+PullQueue: excludeCardId = suggestedCard?.id (hero dedupe)
 ```
 
 ---
@@ -312,11 +315,14 @@ empty: EmptyState «Поток свободен» when no wip and no pull queue
 ### WipSlot
 
 **File:** `src/components/flow/WipSlot.jsx`  
-**Role:** Single WIP card or dashed placeholder with suggested pull
+**Role:** Hero WIP zone — active card, recommendation, or empty CTA
 
 ```
-empty: border-dashed rounded-2xl «Одно дело в единицу времени»
+shell: WipHeroShell — rounded-2xl px-5 py-6; accent states: bg-warm-accent/5 ring-1 ring-warm-accent/15; empty: bg-white/50 only
+labels: font-serif base medium — «Сейчас в работе» (filled) · «Одно дело в единицу времени» (queue-ready) · «Поток свободен» (empty)
+queue-ready: StructuredCard ring-warm-accent/20 + tap + full-width «Начать» (both pull)
 filled: StructuredCard + «Сделано» / «Не актуально» + ⋯ → CardEditSheet
+flow-empty: centered label + CTA card (raw → Разбор · next_week → Канбан · else → Выгрузить)
 ```
 
 ---
@@ -324,11 +330,12 @@ filled: StructuredCard + «Сделано» / «Не актуально» + ⋯ 
 ### PullQueue
 
 **File:** `src/components/flow/PullQueue.jsx`  
-**Role:** Filtered cards — tap pull, ⋯ edit, WIP gate dialog
+**Role:** Secondary queue list — tap pull, ⋯ edit, WIP gate dialog
 
 ```
-highlighted: bg-warm-accent/5 ring-1 ring-warm-accent/15 when WIP empty
-dimmed: opacity-45 for heavy cards when energy depleted (stub)
+excludeCardId: skip hero-promoted card; hide section when visible list empty
+no highlight ring — hero handles call-to-action
+dimmed: opacity-45 for heavy cards when energy depleted
 ```
 
 ---
@@ -353,6 +360,7 @@ dimmed: opacity-45 for heavy cards when energy depleted (stub)
 **Role:** Compact energy indicator on Flow tab — tap opens EnergyHub
 
 ```
+label: «Энергия» (xs muted) above preset name
 preset icons: BatteryFull (brisk) · BatteryMedium (medium) · BatteryLow (depleted)
 depleted: border-warm-accent/20 bg-warm-accent/5
 advice: from energyUtils.getEnergyAdvice
@@ -363,13 +371,17 @@ advice: from energyUtils.getEnergyAdvice
 ### EnergyHub
 
 **File:** `src/components/flow/EnergyHub.jsx`  
-**Role:** Drill-down from Flow — presets, fine-tune sliders, standalone calculator
+**Role:** Drill-down from Flow — presets, fine-tune sliders, recovery
 
 ```
-header: ← Поток back link
-presets: 3-col grid — Бодрый · Средне · На нуле
-fine-tune: 2 axes (workRest, tensionRelaxation) via range inputs
-calculator: standalone Result/Effort session tool
+header: ← Поток · «Как ты сейчас?» · battery icon + preset label + getEnergyAdvice
+        depleted header: bg-warm-accent/5
+presets: 3-col grid — Бодрый · Средне · На нуле; hapticTap on tap; highlight syncs with axes
+fine-tune: 2 axes (workRest, tensionRelaxation); axes → derivePresetFromAxes (60/40 weighted)
+axis nuance: getAxisNuance inside «Точнее» block (deviation >20 from preset defaults)
+recovery: when depleted OR ≥2 heavy completions — RECOVERY_IDEAS list (warm-accent tint)
+order: presets → fine-tune → recovery (if)
+note: Result/Effort calculator — only in FilterFlow (heavy cards), not in hub
 ```
 
 ---
@@ -399,14 +411,28 @@ CTA: «Открыть хаб энергии» · «Всё равно продо�
 
 ---
 
+### TabBar
+
+**File:** `src/components/shell/TabBar.jsx`  
+**Role:** Mobile bottom nav — 4 tabs + center dump FAB
+
+```
+tabs: Поток · Разбор · Канбан · Ещё (settings)
+FAB: center above tab bar
+silence week: only Разбор + Ещё active
+```
+
+---
+
 ### SettingsScreen
 
 **File:** `src/components/settings/SettingsScreen.jsx`  
-**Role:** Drill-down settings — header + NotificationSettings
+**Role:** Settings tab — header + NotificationSettings
 
 ```
-header: ← Назад
-access: Sidebar «Настройки» (desktop) · FlowTab link (mobile)
+layout: tab content inside shell · max-w-lg centered content
+access: TabBar «Ещё» (mobile) · Sidebar «Настройки» (desktop)
+back: ← Назад on md+ only
 ```
 
 ---
@@ -417,9 +443,10 @@ access: Sidebar «Настройки» (desktop) · FlowTab link (mobile)
 **Role:** Push type toggles + pre-prompt on first enable (Q30, Q33)
 
 ```
-toggle: h-6 w-11 rounded-full switch — warm-accent when on
+section title: «Что можем напомнить»
+row: label + when + example · full-width tap · ToggleSwitch h-7 w-12
 types: morning · stuck · elephants · inactive · energy
-pre-prompt: portal dialog before Notification.requestPermission()
+pre-prompt: bottom sheet on mobile, centered dialog on sm+
 ```
 
 ---
@@ -476,6 +503,10 @@ overlay: scale + shadow + accent ring (no rotation)
 
 **Files:** `src/components/flow/StuckNudge.jsx`, `StuckSheet.jsx`  
 **Role:** Flow tab nudge for cards stuck ≥5 days; actions: kanban / next week / release
+
+```
+nudge: text row — AlertCircle amber + text-amber-700/90; no card chrome
+```
 
 ---
 
@@ -579,6 +610,6 @@ empty: «Нажми ◉ внизу — выгрузи первую мысль»
 
 | Component | Phase | Notes |
 |---|---|---|
-| `EnergyHub` | 6 | Presets + sliders + calculator |
+| `EnergyHub` | 6 | Presets + sliders + recovery |
 
 Add each to this registry when implemented.
