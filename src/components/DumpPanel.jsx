@@ -195,7 +195,7 @@ export default function DumpPanel() {
               >
                 Выгрузить
               </motion.button>
-              <p className="max-w-[220px] text-center text-sm leading-relaxed text-warm-muted">
+              <p className="max-w-[220px] text-center text-sm leading-relaxed text-warm-text/80">
                 Одна кнопка — одна мысль. Без планирования, без фильтров.
               </p>
             </motion.div>
