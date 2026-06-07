@@ -1,0 +1,59 @@
+---
+description: How to use context/ and project skills — read order, authority, and workflow by task type
+alwaysApply: true
+---
+
+# Context & Skills Workflow
+
+## Authority (when docs conflict)
+
+1. User's explicit request in chat
+2. `AGENTS.md` — stack, invariants, folder layout
+3. `context/IDEA.md` — product truth (what to build)
+4. `context/progress-tracker.md` — what's done and what's next
+5. `docs/superpowers/specs/` — phase specs (e.g. UI shell)
+6. Other `context/` files — how to build
+7. General training knowledge — last resort; verify against `package.json`
+
+## Context read order by task
+
+| Task | Read first |
+|---|---|
+| Any work | `progress-tracker.md` |
+| New feature / module | `IDEA.md` → relevant roadmap/spec → `project-overview.md` → `architecture.md` |
+| UI component | `ui-registry.md` → `ui-rules.md` → `ui-tokens.md` |
+| Store / state | `architecture.md` (card model) → `code-standards.md` (Zustand) |
+| New dependency | `code-standards.md` (Dependencies) — update list before installing |
+| Library API | `library-docs.md` → `AGENTS.md` |
+
+Do not assume. If `progress-tracker.md` or specs contradict memory, trust the files.
+
+## Project skills (`.cursor/skills/`)
+
+Invoke by reading the skill file before acting — never skip when it applies.
+
+| Skill | When |
+|---|---|
+| **architect** | Before any non-trivial feature — plan + confirm before code |
+| **imprint** | After every new UI component — update `context/ui-registry.md` |
+| **review** | After a feature is built — verify against plan, architecture, UI rules |
+| **remember save** | End of session — hand off state for next session |
+| **remember restore** | Start of session — restore prior context |
+| **recover** | Build went wrong — diagnose failure type before more prompting |
+| **grill-me** | User wants to stress-test a plan or design |
+
+Superpowers skills (brainstorming, TDD, verification-before-completion, etc.) apply when relevant — check skill descriptions; brainstorming before creative work, verification before claiming done.
+
+## Standard workflows
+
+**New feature:** `progress-tracker` → `architect` → read context above → implement → `imprint` (if UI) → `review` → update `progress-tracker` → `npm run lint`
+
+**Bug fix:** read affected area in `architecture.md` → fix minimally → `npm run lint`
+
+**Session end:** update `progress-tracker.md` if status changed → `/remember save`
+
+## Context maintenance
+
+When you change stack, dependencies, architecture, or UI patterns — update the matching `context/` file in the same session. Never leave context stale after a structural change.
+
+**Do not** duplicate `AGENTS.md` or full context files in chat — cite paths and read what you need.

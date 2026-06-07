@@ -12,7 +12,9 @@
 
 Зафиксировать целевую информационную архитектуру и UX-паттерны KaizenFlow после абстрагирования от текущего split-view (сайдбар «Выгрузить» + холст). Документ — источник истины для реализации навигации (S2), экранов модулей и визуального языка карточек.
 
-**Не входит в scope:** pixel-perfect wireframes, API персистентности, технический план реализации (отдельный implementation plan).
+**Не входит в scope:** pixel-perfect wireframes, детальный API IndexedDB.
+
+**Implementation plan:** [2026-06-07-kaizenflow-ui-shell.md](../plans/2026-06-07-kaizenflow-ui-shell.md)
 
 ---
 
