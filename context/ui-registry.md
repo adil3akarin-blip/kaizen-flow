@@ -380,8 +380,22 @@ presets: 3-col grid — Бодрый · Средне · На нуле; hapticTap
 fine-tune: 2 axes (workRest, tensionRelaxation); axes → derivePresetFromAxes (60/40 weighted)
 axis nuance: getAxisNuance inside «Точнее» block (deviation >20 from preset defaults)
 recovery: when depleted OR ≥2 heavy completions — RECOVERY_IDEAS list (warm-accent tint)
-order: presets → fine-tune → recovery (if)
-note: Result/Effort calculator — only in FilterFlow (heavy cards), not in hub
+standalone calculator: ResultEffortCalculator section; persists in useEnergyStore
+order: presets → fine-tune → recovery (if) → calculator
+```
+
+---
+
+### ResultEffortCalculator
+
+**File:** `src/components/flow/ResultEffortCalculator.jsx`  
+**Role:** Shared «Результат / Затраты» — filter (card-bound) + EnergyHub (standalone)
+
+```
+fields: «Что получу?» · «Что отдам?» · verdict yes/maybe/no
+filter mode: showSuggestions → maybe/no → «Пока не ясно» / «Отпустить» / «Оставить оценку»
+standalone: saves to useEnergyStore.standaloneResultEffort (localStorage)
+ResultEffortSummary: read-only block for CardEditSheet + hub
 ```
 
 ---

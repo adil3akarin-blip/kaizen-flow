@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** S2 UI Shell — Phase 7 complete  
-**Last completed:** PWA shell, тактильность, настройки уведомлений  
-**Next:** S1 Persistence (localStorage → IndexedDB) или Phase 2 backlog (Mission & Criteria)
+**Phase:** Phase 4 — Task 16 complete  
+**Last completed:** Полный калькулятор Result/Effort — shared component, filter + hub, CardEditSheet  
+**Next:** S1 Persistence или Phase 2 backlog (Mission & Criteria)
 
 ---
 
@@ -36,7 +36,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] 06 Filter Pipeline UI
 - [ ] 07 Mission & Criteria
 - [ ] 08 Time Investment + Energy Tags
-- [ ] 09 Result/Effort Calculator (light)
+- [x] 09 Result/Effort Calculator (light)
 
 ### Phase 3 — «Канбан-поток»
 
@@ -49,7 +49,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 - [x] 14 Energy Store + Hub UI
 - [x] 15 Willpower Guard
-- [ ] 16 Result/Effort Calculator (full)
+- [x] 16 Result/Effort Calculator (full)
 
 ### Phase 5 — Push & Polish
 

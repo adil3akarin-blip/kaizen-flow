@@ -11,6 +11,7 @@ import {
   shouldShowSwipeHint,
 } from '../../lib/filterUtils'
 import StructuredCard from '../cards/StructuredCard'
+import ResultEffortCalculator from '../flow/ResultEffortCalculator'
 
 const SWIPE_THRESHOLD = 72
 
@@ -68,74 +69,6 @@ function SwipeButtons({ leftLabel, rightLabel, onLeft, onRight, centerLabel, onC
       >
         {rightLabel} →
       </button>
-    </div>
-  )
-}
-
-function CalculatorPanel({ card, onUpdate, onClose }) {
-  const [gain, setGain] = useState(card.resultEffort?.gain || '')
-  const [cost, setCost] = useState(card.resultEffort?.cost || '')
-
-  const saveVerdict = (verdict) => {
-    onUpdate({
-      resultEffort: {
-        gain: gain.trim(),
-        cost: cost.trim(),
-        verdict,
-      },
-    })
-    onClose()
-  }
-
-  return (
-    <div className="mt-4 rounded-xl border border-cream-dark/50 bg-cream/50 p-4">
-      <p className="m-0 font-serif text-sm font-medium text-warm-text">
-        Результат / Затраты
-      </p>
-      <textarea
-        value={gain}
-        onChange={(e) => setGain(e.target.value)}
-        placeholder="Что получу?"
-        rows={2}
-        className="mt-3 w-full resize-none rounded-lg border border-cream-dark bg-white px-3 py-2 text-sm text-warm-text outline-none focus:ring-2 focus:ring-warm-accent/30"
-      />
-      <textarea
-        value={cost}
-        onChange={(e) => setCost(e.target.value)}
-        placeholder="Что отдам?"
-        rows={2}
-        className="mt-2 w-full resize-none rounded-lg border border-cream-dark bg-white px-3 py-2 text-sm text-warm-text outline-none focus:ring-2 focus:ring-warm-accent/30"
-      />
-      <div className="mt-3 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => saveVerdict('yes')}
-          className="rounded-lg bg-warm-accent px-3 py-1.5 text-xs font-medium text-white"
-        >
-          Да, стоит
-        </button>
-        <button
-          type="button"
-          onClick={() => saveVerdict('maybe')}
-          className="rounded-lg border border-cream-dark px-3 py-1.5 text-xs text-warm-muted"
-        >
-          Сомневаюсь
-        </button>
-        <button
-          type="button"
-          onClick={() => saveVerdict('no')}
-          className="rounded-lg border border-cream-dark px-3 py-1.5 text-xs text-warm-muted"
-        >
-          Нет
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-3 py-1.5 text-xs text-warm-muted"
-        >
-          Закрыть
-        </button>
-      </div>
     </div>
   )
 }
@@ -362,10 +295,14 @@ export default function FilterFlow({ cardId, onClose }) {
                 </button>
               )}
               {showCalculator && (
-                <CalculatorPanel
-                  card={{ ...card, ...draft }}
-                  onUpdate={patchDraft}
+                <ResultEffortCalculator
+                  value={draft.resultEffort}
+                  onSave={(resultEffort) => patchDraft({ resultEffort })}
                   onClose={() => setShowCalculator(false)}
+                  showSuggestions
+                  onSuggestUnclear={handleUnclear}
+                  onSuggestRelease={handleRelease}
+                  className="mt-4"
                 />
               )}
             </div>
