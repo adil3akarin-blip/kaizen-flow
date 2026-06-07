@@ -1,36 +1,99 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+
+const DRAG_THRESHOLD = 5
+
+function autoResize(textarea) {
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  textarea.style.height = `${textarea.scrollHeight}px`
+}
 
 export default function StickyNote({
   card,
   onDelete,
   onMove,
+  onUpdate,
   isNew = false,
   className,
 }) {
   const [isDragging, setIsDragging] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editText, setEditText] = useState(card.text)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const dragStart = useRef(null)
+  const isDraggingRef = useRef(false)
+  const inputRef = useRef(null)
+  const cardRef = useRef(null)
+
+  useEffect(() => {
+    if (!isEditing) setEditText(card.text)
+  }, [card.text, isEditing])
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus()
+      autoResize(inputRef.current)
+    }
+  }, [isEditing])
+
+  const startEdit = () => {
+    setEditText(card.text)
+    setIsEditing(true)
+  }
+
+  const saveEdit = () => {
+    const saved = onUpdate(card.id, editText)
+    if (saved) {
+      setIsEditing(false)
+    } else {
+      setEditText(card.text)
+      setIsEditing(false)
+    }
+  }
+
+  const cancelEdit = () => {
+    setEditText(card.text)
+    setIsEditing(false)
+  }
+
+  const handleTextDoubleClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    startEdit()
+  }
 
   const handlePointerDown = (e) => {
-    if (e.button !== 0) return
-    e.currentTarget.setPointerCapture(e.pointerId)
+    if (isEditing || e.button !== 0) return
+
+    isDraggingRef.current = false
     dragStart.current = {
       pointerX: e.clientX,
       pointerY: e.clientY,
       cardX: card.x,
       cardY: card.y,
     }
-    setIsDragging(true)
   }
 
   const handlePointerMove = (e) => {
     if (!dragStart.current) return
-    setOffset({
-      x: e.clientX - dragStart.current.pointerX,
-      y: e.clientY - dragStart.current.pointerY,
-    })
+
+    const dx = e.clientX - dragStart.current.pointerX
+    const dy = e.clientY - dragStart.current.pointerY
+
+    if (
+      !isDraggingRef.current &&
+      (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)
+    ) {
+      isDraggingRef.current = true
+      setIsDragging(true)
+      cardRef.current?.setPointerCapture(e.pointerId)
+    }
+
+    if (isDraggingRef.current) {
+      setOffset({ x: dx, y: dy })
+    }
   }
 
   const finishDrag = (clientX, clientY) => {
@@ -38,38 +101,44 @@ export default function StickyNote({
 
     const { pointerX, pointerY, cardX, cardY } = dragStart.current
     dragStart.current = null
+    isDraggingRef.current = false
     setIsDragging(false)
     setOffset({ x: 0, y: 0 })
 
     const dx = clientX - pointerX
     const dy = clientY - pointerY
-    if (dx !== 0 || dy !== 0) {
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
       onMove(card.id, cardX + dx, cardY + dy)
     }
   }
 
-  const handlePointerUp = (e) => {
-    finishDrag(e.clientX, e.clientY)
-  }
-
-  const handlePointerCancel = (e) => {
-    finishDrag(e.clientX, e.clientY)
+  const handleEditKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      saveEdit()
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      cancelEdit()
+    }
   }
 
   const x = card.x + offset.x
   const y = card.y + offset.y
+  const isRaised = isDragging || isEditing
 
   return (
     <div
-      className={clsx('absolute w-[180px] select-none', className)}
+      className={clsx('absolute w-[180px]', className)}
       style={{
         left: x,
         top: y,
         rotate: card.rotation,
-        zIndex: isDragging ? 50 : 1,
+        zIndex: isRaised ? 50 : 1,
       }}
     >
       <motion.div
+        ref={cardRef}
         initial={
           isNew ? { opacity: 0, x: -220, y: 10, scale: 0.82 } : false
         }
@@ -78,30 +147,65 @@ export default function StickyNote({
         transition={{ type: 'spring', stiffness: 280, damping: 24 }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
+        onPointerUp={(e) => finishDrag(e.clientX, e.clientY)}
+        onPointerCancel={(e) => finishDrag(e.clientX, e.clientY)}
         className={clsx(
-          'relative rounded-sm px-4 py-3 shadow-md transition-shadow duration-200 touch-none',
+          'relative rounded-sm px-4 py-3 shadow-md transition-shadow duration-200',
+          isEditing ? 'select-text ring-2 ring-warm-accent/40' : 'touch-none select-none',
           isDragging ? 'cursor-grabbing shadow-xl' : 'cursor-grab group-hover:shadow-lg',
-          !isDragging && 'group',
+          !isDragging && !isEditing && 'group',
         )}
         style={{
           backgroundColor: card.color.bg,
-          boxShadow: isDragging
+          boxShadow: isRaised
             ? `4px 6px 16px ${card.color.shadow}88, 0 2px 4px rgba(0,0,0,0.1)`
             : `2px 3px 8px ${card.color.shadow}55, 0 1px 2px rgba(0,0,0,0.06)`,
         }}
       >
-        <button
-          type="button"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={() => onDelete(card.id)}
-          aria-label="Удалить карточку"
-          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-warm-text/80 text-xs text-white opacity-0 shadow transition-opacity duration-150 hover:bg-warm-text group-hover:opacity-100"
-        >
-          ✕
-        </button>
-        <p className="m-0 text-[14px] leading-snug text-warm-text">{card.text}</p>
+        {!isEditing && (
+          <>
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={startEdit}
+              aria-label="Редактировать карточку"
+              className="absolute -left-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-warm-text/80 text-xs text-white opacity-0 shadow transition-opacity duration-150 hover:bg-warm-text group-hover:opacity-100"
+            >
+              ✎
+            </button>
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onDelete(card.id)}
+              aria-label="Удалить карточку"
+              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-warm-text/80 text-xs text-white opacity-0 shadow transition-opacity duration-150 hover:bg-warm-text group-hover:opacity-100"
+            >
+              ✕
+            </button>
+            <p
+              onDoubleClick={handleTextDoubleClick}
+              title="Дважды кликни, чтобы редактировать"
+              className="m-0 cursor-text text-[14px] leading-snug text-warm-text"
+            >
+              {card.text}
+            </p>
+          </>
+        )}
+
+        {isEditing && (
+          <textarea
+            ref={inputRef}
+            value={editText}
+            onChange={(e) => {
+              setEditText(e.target.value)
+              autoResize(e.target)
+            }}
+            onKeyDown={handleEditKeyDown}
+            onBlur={saveEdit}
+            rows={1}
+            className="m-0 w-full resize-none overflow-hidden border-none bg-transparent p-0 text-[14px] leading-snug text-warm-text outline-none"
+          />
+        )}
       </motion.div>
     </div>
   )

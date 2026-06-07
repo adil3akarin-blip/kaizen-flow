@@ -6,6 +6,7 @@ export default function Canvas() {
   const cards = useCardsStore((s) => s.cards)
   const removeCard = useCardsStore((s) => s.removeCard)
   const moveCard = useCardsStore((s) => s.moveCard)
+  const updateCardText = useCardsStore((s) => s.updateCardText)
   const newCardId = useCardsStore((s) => s.lastAddedId)
 
   return (
@@ -20,7 +21,7 @@ export default function Canvas() {
               : cards.length < 5
                 ? 'мысли'
                 : 'мыслей'}{' '}
-            — перетаскивай, чтобы раздвинуть
+            — перетаскивай · дважды кликни, чтобы редактировать
           </p>
         </div>
       </header>
@@ -41,6 +42,7 @@ export default function Canvas() {
                 card={card}
                 onDelete={removeCard}
                 onMove={moveCard}
+                onUpdate={updateCardText}
                 isNew={card.id === newCardId}
               />
             ))}

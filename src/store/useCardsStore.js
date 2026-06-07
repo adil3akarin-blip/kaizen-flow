@@ -66,4 +66,16 @@ export const useCardsStore = create((set, get) => ({
       ),
     }))
   },
+
+  updateCardText: (id, text) => {
+    const trimmed = text.trim()
+    if (!trimmed) return false
+
+    set((state) => ({
+      cards: state.cards.map((c) =>
+        c.id === id ? { ...c, text: trimmed } : c,
+      ),
+    }))
+    return true
+  },
 }))
