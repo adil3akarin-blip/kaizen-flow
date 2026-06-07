@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 1 — Module «Чистая голова» (partial)  
-**Last completed:** Dump UI + Canvas + StickyNote + undo toast  
-**Next:** S1 Persistence (localStorage)
+**Phase:** S2 UI Shell — Phase 2 complete  
+**Last completed:** Онбординг + «Неделя тишины» — ManifestScreen, SilenceCanvas, MissionScreen  
+**Next:** Phase 3 — Inbox + фильтр «Хочу/Должен» (ReviewInbox, FilterFlow)
 
 ---
 
@@ -19,7 +19,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Cross-Cutting
 
 - [ ] S1 Persistence (localStorage → IndexedDB)
-- [ ] S2 UI Shell & Navigation
+- [x] S2 UI Shell & Navigation (foundation — placeholders, shell chrome)
 - [ ] S3 PWA Shell
 - [ ] S4 Tactile Feedback (Web Vibration)
 
@@ -28,7 +28,7 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] 01 Dump UI (`DumpPanel` — idle / capturing / flow)
 - [x] 02 Canvas + StickyNote (drag, edit, delete)
 - [ ] 03 Persistence
-- [ ] 04 Silence Week Mode
+- [x] 04 Silence Week Mode (onboarding + canvas + mission exit)
 
 ### Phase 2 — «Фильтрация и Осознанность»
 
@@ -70,5 +70,6 @@ Update this file after every completed feature. Any AI agent reading this should
 ## Notes
 
 - Demo data in `mockCards.js` — replace with persisted storage in S1
-- `DumpPanel` 360px sidebar will be refactored into `DumpOverlay` during S2
+- `DumpPanel` deprecated — logic moved to `DumpOverlay`; `Canvas` returns in Phase 2 as `SilenceCanvas`
+- S1 Persistence deferred until page designs approved on mock data
 - UI shell spec has 40 agreed design decisions — reference before building navigation

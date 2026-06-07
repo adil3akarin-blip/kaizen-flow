@@ -150,39 +150,213 @@ exit: opacity 0 scale 0.85 duration 0.15
 
 ---
 
+### Toast
+
+**File:** `src/components/Toast.jsx` · **Store:** `useToastStore.js`
+
+**Success (dump save):**
+
+```
+fixed bottom-28 md:bottom-8 z-50
+border border-cream-dark/60 border-l-4 border-l-warm-accent bg-white shadow-xl
+text-sm text-warm-text · action text-warm-accent · 4s auto-dismiss · replace on rapid save
+```
+
+**Destructive (undo delete):**
+
+```
+bg-warm-text text-white rounded-xl shadow-xl
+action text-[#FFE0B2] · 5s · onDismiss clears pendingDelete
+```
+
+**Motion:** spring stiffness 400 damping 28; enter y 24→0
+
+---
+
 ### UndoToast
 
-**File:** `src/components/UndoToast.jsx`  
-**Role:** 5-second undo after card delete
-
-**Toast bar:**
-
-```
-fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4
-rounded-xl bg-warm-text px-5 py-3 text-sm text-white shadow-xl
-```
-
-**Undo button:**
-
-```
-font-medium text-[#FFE0B2] underline-offset-2 hover:underline
-```
-
-**Motion:** spring stiffness 400 damping 28; enter y 24→0, exit y 12
+**Removed** — merged into `Toast.jsx` (destructive variant).
 
 ---
 
 ### App (root layout)
 
 **File:** `src/App.jsx`  
-**Role:** Current split-view shell
+**Role:** Tab shell + global undo toast
 
 ```
-div: flex h-full min-h-screen
-  DumpPanel | Canvas | UndoToast
+AppShell | Toast
 ```
 
-Will be replaced by tab shell + overlay in S2.
+---
+
+### AppShell
+
+**File:** `src/components/shell/AppShell.jsx`  
+**Role:** Root layout — sidebar (desktop) + active tab + tab bar (mobile) + dump overlay
+
+```
+div: flex min-h-screen bg-cream
+  Sidebar | main.flex-1.pb-24.md:pb-0 | TabBar | DumpOverlay
+```
+
+---
+
+### TabBar
+
+**File:** `src/components/shell/TabBar.jsx`  
+**Role:** Mobile bottom navigation — 3 tabs + FAB above bar
+
+```
+FAB: fixed bottom-[calc(3.75rem+safe-area)] center, h-14 w-14 rounded-full
+  bg-warm-accent ring-4 ring-cream shadow-lg shadow-warm-accent/30
+  Lucide Plus icon
+
+nav: fixed bottom-0 border-t bg-cream/95 backdrop-blur-sm
+  3 equal tabs: Lucide icon + label + accent dot when active
+```
+
+---
+
+### Sidebar
+
+**File:** `src/components/shell/Sidebar.jsx`  
+**Role:** Desktop navigation + dump trigger + Ctrl+Enter shortcut
+
+```
+aside: hidden md:flex w-60 shrink-0 flex-col border-r border-cream-dark bg-cream
+brand: font-serif text-xl
+```
+
+**Dump button:**
+
+```
+w-full rounded-lg bg-warm-accent py-2.5 + Lucide Plus
+hover:bg-warm-accent-hover shadow-sm shadow-warm-accent/20
+```
+
+**Nav item:**
+
+```
+flex items-center gap-2.5 rounded-lg border-l-2 px-3 py-2.5
+active: border-warm-accent bg-white font-medium shadow-sm + accent icon
+inactive: border-transparent text-warm-muted hover:bg-white/60
+Lucide: Workflow (Поток), Inbox (Разбор), Kanban (Канбан)
+```
+
+---
+
+### EmptyState
+
+**File:** `src/components/ui/EmptyState.jsx`  
+**Role:** Shared placeholder card for tab empty states
+
+```
+white card: rounded-2xl border border-cream-dark/50 bg-white shadow-sm
+optional Lucide icon text-warm-accent/45
+title: font-serif text-base font-medium
+```
+
+---
+
+### TabPageHeader
+
+**File:** `src/components/ui/TabPageHeader.jsx`  
+**Role:** Serif tab title + muted subtitle
+
+```
+h2: font-serif text-2xl font-medium tracking-tight
+subtitle: text-sm text-warm-muted mt-1.5
+```
+
+---
+
+### DumpOverlay
+
+**File:** `src/components/shell/DumpOverlay.jsx`  
+**Role:** Global thought dump — bottom sheet (mobile) / centered modal (desktop)
+
+**Backdrop:**
+
+```
+fixed inset-0 z-30 bg-warm-text/25 backdrop-blur-sm
+```
+
+**Panel:**
+
+```
+relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl border border-cream-dark/60
+mobile: rounded-t-2xl (items-end)
+desktop: centered (md:items-center md:p-6)
+header h2: font-serif
+```
+
+**Modes:** idle → capturing → flow (same logic as former DumpPanel)
+
+**Close:** backdrop / Esc / «Закрыть» — collapse dialog if unsaved text
+
+---
+
+### FlowTab / KanbanTab
+
+**Files:** `src/components/tabs/FlowTab.jsx`, `KanbanTab.jsx`  
+**Role:** Tab placeholders — TabPageHeader + EmptyState with Lucide icon
+
+---
+
+### ReviewTab
+
+**File:** `src/components/tabs/ReviewTab.jsx`  
+**Role:** «Разбор» — silence week canvas OR inbox placeholder
+
+**Silence week header:**
+
+```
+border-b bg-white/40 px-6 py-4
+title: font-serif «Неделя тишины» + secondary button bg-white shadow-sm
+```
+
+**Inbox placeholder:** TabPageHeader + EmptyState (Inbox icon)
+
+---
+
+### ManifestScreen
+
+**File:** `src/components/onboarding/ManifestScreen.jsx`  
+**Role:** First-run fullscreen manifest — philosophy copy + «Начать»
+
+```
+flex min-h-screen items-center justify-center bg-cream px-8
+card: rounded-2xl border border-cream-dark/50 bg-white px-8 py-10 shadow-sm
+title: font-serif text-2xl font-medium
+```
+
+---
+
+### MissionScreen
+
+**File:** `src/components/onboarding/MissionScreen.jsx`  
+**Role:** Personal mission capture on silence week exit
+
+```
+fixed inset-0 z-40 flex items-center justify-center bg-warm-text/25 backdrop-blur-sm
+card: rounded-2xl border border-cream-dark/60 bg-white p-6 shadow-xl
+h2: font-serif text-xl
+```
+
+---
+
+### SilenceCanvas
+
+**File:** `src/components/review/SilenceCanvas.jsx`  
+**Role:** Dot-grid canvas for raw cards in silence week (reuses StickyNote)
+
+```
+flex-1 overflow-auto
+dot-grid: radial-gradient #e8e0d4 1px, 24px grid (same as Canvas.jsx)
+filters: cards where status === 'raw'
+empty: «Нажми ◉ внизу — выгрузи первую мысль»
+```
 
 ---
 
@@ -190,8 +364,7 @@ Will be replaced by tab shell + overlay in S2.
 
 | Component | Phase | Notes |
 |---|---|---|
-| `DumpOverlay` | S2 | Refactor of DumpPanel — sheet/modal |
-| `TabBar` / `Sidebar` | S2 | Navigation chrome |
+| `ReviewInbox` | S2 Phase 3 | Raw card list with inline edit |
 | `FlowDashboard` | 3 | WIP + pull queue |
 | `ReviewInbox` | 2 | Raw card list |
 | `FilterPipeline` | 2 | Swipe filter screens |

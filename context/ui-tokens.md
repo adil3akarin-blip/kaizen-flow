@@ -35,6 +35,8 @@ className="bg-[#faf6f0]"
 
 ```css
 @import 'tailwindcss';
+@import '@fontsource/lora/500.css';
+@import '@fontsource/lora/600.css';
 
 @theme {
   --color-cream: #faf6f0;
@@ -44,6 +46,7 @@ className="bg-[#faf6f0]"
   --color-warm-accent: #c4956a;
   --color-warm-accent-hover: #b08050;
   --font-sans: 'Segoe UI', system-ui, sans-serif;
+  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
 }
 ```
 
@@ -129,14 +132,14 @@ Use **only** in «Неделя тишины» / raw sticky canvas — never on F
 
 | Element | Size | Weight | Color |
 |---|---|---|---|
-| App title (DumpPanel) | `text-xl` | `font-medium` | `text-warm-text` |
-| Section heading (Canvas) | `text-lg` | `font-medium` | `text-warm-text` |
+| App title / tab h2 | `font-serif text-2xl` | `font-medium` | `text-warm-text` |
+| Section heading (Review silence week) | `font-serif text-xl` | `font-medium` | `text-warm-text` |
 | Body / card text | `text-sm`–`text-[15px]` | normal | `text-warm-text` |
 | Hints / subtitles | `text-xs`–`text-sm` | normal | `text-warm-muted` |
 | Primary button label | `text-sm` | `font-medium` | `text-white` |
 | Sticky note text | `text-[14px]` | normal | `text-warm-text` |
 
-Font family: **Segoe UI, system-ui, sans-serif** via `--font-sans`. No Google Fonts import required for v1.
+Font family: **Segoe UI, system-ui, sans-serif** via `--font-sans` for body. **Lora** via `@fontsource/lora` and `--font-serif` for headings (`font-serif`).
 
 ---
 
@@ -195,10 +198,21 @@ placeholder:text-warm-muted/60
 focus:shadow-md focus:ring-2 focus:ring-warm-accent/30
 ```
 
+### Empty State Card
+
+```
+flex max-w-sm flex-col items-center rounded-2xl
+border border-cream-dark/50 bg-white px-8 py-10 shadow-sm
+icon: Lucide h-8 w-8 text-warm-accent/45 strokeWidth 1.5
+title: font-serif text-base font-medium text-warm-text
+description: text-sm text-warm-muted
+```
+
 ### Dialog / Sheet Surface
 
 ```
-rounded-xl border border-cream-dark bg-white p-5 shadow-lg
+rounded-2xl border border-cream-dark/60 bg-white shadow-xl
+overlay backdrop: bg-warm-text/25 backdrop-blur-sm
 ```
 
 ### Undo Toast

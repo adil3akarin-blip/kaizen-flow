@@ -1,13 +1,11 @@
-import DumpPanel from './components/DumpPanel'
-import Canvas from './components/Canvas'
-import UndoToast from './components/UndoToast'
+import AppShell from './components/shell/AppShell'
+import Toast from './components/Toast'
 
 export default function App() {
   return (
-    <div className="flex h-full min-h-screen">
-      <DumpPanel />
-      <Canvas />
-      <UndoToast />
-    </div>
+    <>
+      <AppShell />
+      <Toast />
+    </>
   )
 }

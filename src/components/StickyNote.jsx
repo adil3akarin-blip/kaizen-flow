@@ -28,10 +28,6 @@ export default function StickyNote({
   const cardRef = useRef(null)
 
   useEffect(() => {
-    if (!isEditing) setEditText(card.text)
-  }, [card.text, isEditing])
-
-  useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus()
       autoResize(inputRef.current)

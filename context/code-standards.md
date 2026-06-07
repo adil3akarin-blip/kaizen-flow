@@ -147,6 +147,8 @@ Never install a new package without a clear reason. Before installing anything c
 | `zustand` | Client state management |
 | `framer-motion` | Spring-based animations |
 | `clsx` | Conditional class names |
+| `@fontsource/lora` | Serif headings (Lora 500/600, self-hosted) |
+| `lucide-react` | Navigation and empty-state icons (tree-shaken) |
 | `postcss`, `autoprefixer` | CSS pipeline for Tailwind |
 
 ### Approved dev dependencies

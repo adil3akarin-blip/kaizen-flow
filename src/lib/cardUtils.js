@@ -47,5 +47,6 @@ export function createCard(text, existingCards) {
     rotation: randomRotation(),
     ...generatePosition(existingCards),
     createdAt: Date.now(),
+    status: 'raw',
   }
 }

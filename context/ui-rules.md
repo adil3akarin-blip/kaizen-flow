@@ -15,9 +15,11 @@ Concise rules for building KaizenFlow UI. Read [ui-tokens.md](./ui-tokens.md) fo
 
 ## Font
 
-System stack via `@theme`: `'Segoe UI', system-ui, sans-serif`.
+**Body:** system stack via `@theme`: `'Segoe UI', system-ui, sans-serif` — `font-sans` / body default.
 
-No font import required. Apply through `body { font-family: var(--font-sans) }` in `index.css`.
+**Headings & brand:** Lora serif via `@fontsource/lora` — `font-serif` on app title, tab h2, overlay titles.
+
+Apply through `body { font-family: var(--font-sans) }` in `index.css`. Import Lora weights in `index.css`.
 
 ---
 
@@ -45,7 +47,7 @@ Three tabs: **Поток · Разбор · Канбан**
 - Global dump = center action (mobile) or sidebar button + Ctrl+Enter (desktop)
 - No floating FAB
 
-Active tab: accent color or weight change — no heavy underline.
+Active tab: white pill + `border-l-2 border-warm-accent` (sidebar) or accent icon + dot (mobile tab bar). Lucide icons in nav only.
 
 ---
 
@@ -135,7 +137,8 @@ Equal weight for WIP actions: **«Сделано»** (accent) and **«Не ак�
 Every screen that can be empty needs one. Keep minimal:
 
 - Short muted text (`text-warm-muted`)
-- One optional soft nudge — never stack multiple CTAs
+- White card surface: `bg-white rounded-2xl shadow-sm border border-cream-dark/50`
+- One optional muted Lucide icon above title — never stack multiple CTAs
 - Examples: «Холст пуст», «Поток свободен», «N мыслей ждут разбора»
 
 Priority when multiple nudges apply: unprocessed thoughts first.
@@ -147,7 +150,7 @@ Priority when multiple nudges apply: unprocessed thoughts first.
 - **Framer Motion** springs for enter/exit — see existing components
 - **Web Vibration** on: successful dump, pull to WIP, «Сделано» (when API available)
 - New card animation: fly-in from dump panel direction
-- Undo toast: spring from bottom, dark bar, 5s window
+- **Toast** (`Toast.jsx` + `useToastStore`): success (light card + accent stripe, 4s) and destructive/undo (dark bar, 5s); replace on rapid saves with counter
 
 ---
 
@@ -177,7 +180,7 @@ Priority when multiple nudges apply: unprocessed thoughts first.
 | Edit card | Bottom sheet | Sheet or modal |
 | Collapse with unsaved text | In-panel dialog | Same |
 
-Backdrop: `bg-cream/80 backdrop-blur-[2px]`
+Backdrop: `bg-warm-text/25 backdrop-blur-sm` · Panel: `bg-white shadow-xl rounded-2xl`
 
 ---
 

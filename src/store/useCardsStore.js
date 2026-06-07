@@ -1,11 +1,15 @@
 import { create } from 'zustand'
 import { mockCards } from '../data/mockCards'
 import { createCard } from '../lib/cardUtils'
+import { useToastStore } from './useToastStore'
 
-const UNDO_TIMEOUT_MS = 5000
+const onboardingDone = localStorage.getItem('kaizenflow-onboarding') === '1'
+const initialCards = onboardingDone
+  ? mockCards.map((c) => ({ status: 'raw', ...c }))
+  : []
 
 export const useCardsStore = create((set, get) => ({
-  cards: mockCards,
+  cards: initialCards,
   pendingDelete: null,
   lastAddedId: null,
 
@@ -24,29 +28,26 @@ export const useCardsStore = create((set, get) => ({
     const card = get().cards.find((c) => c.id === id)
     if (!card) return
 
-    const existing = get().pendingDelete
-    if (existing?.timeoutId) clearTimeout(existing.timeoutId)
-
     set((state) => ({
       cards: state.cards.filter((c) => c.id !== id),
+      pendingDelete: { card },
     }))
 
-    const timeoutId = setTimeout(() => {
-      set((state) =>
-        state.pendingDelete?.card.id === id
-          ? { pendingDelete: null }
-          : state,
-      )
-    }, UNDO_TIMEOUT_MS)
-
-    set({ pendingDelete: { card, timeoutId } })
+    useToastStore.getState().showToast({
+      variant: 'destructive',
+      message: 'Карточка удалена',
+      actionLabel: 'Отменить',
+      key: 'undo-delete',
+      onAction: () => get().undoDelete(),
+      onDismiss: () => get().dismissUndo(),
+    })
   },
 
   undoDelete: () => {
     const { pendingDelete } = get()
     if (!pendingDelete) return
 
-    clearTimeout(pendingDelete.timeoutId)
+    useToastStore.getState().clearToast()
     set((state) => ({
       cards: [...state.cards, pendingDelete.card],
       pendingDelete: null,
@@ -54,8 +55,6 @@ export const useCardsStore = create((set, get) => ({
   },
 
   dismissUndo: () => {
-    const { pendingDelete } = get()
-    if (pendingDelete?.timeoutId) clearTimeout(pendingDelete.timeoutId)
     set({ pendingDelete: null })
   },
 

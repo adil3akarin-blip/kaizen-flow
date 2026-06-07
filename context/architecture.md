@@ -45,7 +45,7 @@ No backend server in current architecture — client-side PWA with local persist
 │   │   ├── DumpPanel.jsx       →   Module 1: thought dump panel
 │   │   ├── Canvas.jsx          →   Canvas with sticky notes
 │   │   ├── StickyNote.jsx      →   Draggable editable card
-│   │   └── UndoToast.jsx       →   Undo delete toast
+│   │   └── Toast.jsx             →   Global toast (success + undo)
 │   ├── store/
 │   │   └── useCardsStore.js    →   Cards state + actions
 │   ├── lib/
@@ -110,7 +110,7 @@ createCard() in lib/cardUtils.js — id, color, position, rotation
 Store appends card; Canvas re-renders StickyNote list
         ↓
 User drags → moveCard(id, x, y)
-User deletes → removeCard(id) → UndoToast with 5s undo window
+User deletes → removeCard(id) → Toast (destructive, 5s undo window)
 ```
 
 ### Persistence (planned S1)
