@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** S2 UI Shell — Phase 2 complete  
-**Last completed:** Онбординг + «Неделя тишины» — ManifestScreen, SilenceCanvas, MissionScreen  
-**Next:** Phase 3 — Inbox + фильтр «Хочу/Должен» (ReviewInbox, FilterFlow)
+**Phase:** S2 UI Shell — Phase 7 complete  
+**Last completed:** PWA shell, тактильность, настройки уведомлений  
+**Next:** S1 Persistence (localStorage → IndexedDB) или Phase 2 backlog (Mission & Criteria)
 
 ---
 
@@ -20,8 +20,8 @@ Update this file after every completed feature. Any AI agent reading this should
 
 - [ ] S1 Persistence (localStorage → IndexedDB)
 - [x] S2 UI Shell & Navigation (foundation — placeholders, shell chrome)
-- [ ] S3 PWA Shell
-- [ ] S4 Tactile Feedback (Web Vibration)
+- [x] S3 PWA Shell
+- [x] S4 Tactile Feedback (Web Vibration)
 
 ### Phase 1 — «Чистая голова»
 
@@ -32,28 +32,28 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ### Phase 2 — «Фильтрация и Осознанность»
 
-- [ ] 05 Review Inbox UI
-- [ ] 06 Filter Pipeline UI
+- [x] 05 Review Inbox UI
+- [x] 06 Filter Pipeline UI
 - [ ] 07 Mission & Criteria
 - [ ] 08 Time Investment + Energy Tags
 - [ ] 09 Result/Effort Calculator (light)
 
 ### Phase 3 — «Канбан-поток»
 
-- [ ] 10 Flow Dashboard UI
-- [ ] 11 Kanban Day/Week UI
-- [ ] 12 Stagnation Detector
-- [ ] 13 Elephants Retrospective + Year Board
+- [x] 10 Flow Dashboard UI
+- [x] 11 Kanban Day/Week UI
+- [x] 12 Stagnation Detector
+- [x] 13 Elephants Retrospective + Year Board
 
 ### Phase 4 — «Хаб Power Management»
 
-- [ ] 14 Energy Store + Hub UI
-- [ ] 15 Willpower Guard
+- [x] 14 Energy Store + Hub UI
+- [x] 15 Willpower Guard
 - [ ] 16 Result/Effort Calculator (full)
 
 ### Phase 5 — Push & Polish
 
-- [ ] 17 Push Notification Settings
+- [x] 17 Push Notification Settings
 
 ---
 

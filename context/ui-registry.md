@@ -297,10 +297,185 @@ header h2: font-serif
 
 ---
 
-### FlowTab / KanbanTab
+### FlowTab
 
-**Files:** `src/components/tabs/FlowTab.jsx`, `KanbanTab.jsx`  
-**Role:** Tab placeholders — TabPageHeader + EmptyState with Lucide icon
+**File:** `src/components/tabs/FlowTab.jsx`  
+**Role:** Home dashboard — WIP + pull queue + energy + hints
+
+```
+layout: md:grid-cols-2 — left: WipSlot + PullQueue; right: EnergySnapshot + FlowHint
+empty: EmptyState «Поток свободен» when no wip and no pull queue
+```
+
+---
+
+### WipSlot
+
+**File:** `src/components/flow/WipSlot.jsx`  
+**Role:** Single WIP card or dashed placeholder with suggested pull
+
+```
+empty: border-dashed rounded-2xl «Одно дело в единицу времени»
+filled: StructuredCard + «Сделано» / «Не актуально» + ⋯ → CardEditSheet
+```
+
+---
+
+### PullQueue
+
+**File:** `src/components/flow/PullQueue.jsx`  
+**Role:** Filtered cards — tap pull, ⋯ edit, WIP gate dialog
+
+```
+highlighted: bg-warm-accent/5 ring-1 ring-warm-accent/15 when WIP empty
+dimmed: opacity-45 for heavy cards when energy depleted (stub)
+```
+
+---
+
+### WipGateDialog
+
+**File:** `src/components/flow/WipGateDialog.jsx`  
+**Role:** WIP-full gate — завершить / отложить / отмена
+
+---
+
+### CardEditSheet
+
+**File:** `src/components/cards/CardEditSheet.jsx`  
+**Role:** Bottom sheet edit — text, вернуть в очередь, разобрать заново, удалить
+
+---
+
+### EnergySnapshot
+
+**File:** `src/components/flow/EnergySnapshot.jsx`  
+**Role:** Compact energy indicator on Flow tab — tap opens EnergyHub
+
+```
+preset icons: BatteryFull (brisk) · BatteryMedium (medium) · BatteryLow (depleted)
+depleted: border-warm-accent/20 bg-warm-accent/5
+advice: from energyUtils.getEnergyAdvice
+```
+
+---
+
+### EnergyHub
+
+**File:** `src/components/flow/EnergyHub.jsx`  
+**Role:** Drill-down from Flow — presets, fine-tune sliders, standalone calculator
+
+```
+header: ← Поток back link
+presets: 3-col grid — Бодрый · Средне · На нуле
+fine-tune: 2 axes (workRest, tensionRelaxation) via range inputs
+calculator: standalone Result/Effort session tool
+```
+
+---
+
+### EnergyGuardDialog
+
+**File:** `src/components/flow/EnergyGuardDialog.jsx`  
+**Role:** Willpower guard — depleted + heavy pull → light alternatives + force continue
+
+```
+copy: «Похоже, ресурс на исходе»
+portal modal; bottom sheet on mobile
+always: «Всё равно взять это дело» override
+```
+
+---
+
+### PauseScreen
+
+**File:** `src/components/flow/PauseScreen.jsx`  
+**Role:** Full-screen pause after ≥3 heavy completions in ~2h
+
+```
+recovery ideas list (static)
+CTA: «Открыть хаб энергии» · «Всё равно продолжу»
+```
+
+---
+
+### SettingsScreen
+
+**File:** `src/components/settings/SettingsScreen.jsx`  
+**Role:** Drill-down settings — header + NotificationSettings
+
+```
+header: ← Назад
+access: Sidebar «Настройки» (desktop) · FlowTab link (mobile)
+```
+
+---
+
+### NotificationSettings
+
+**File:** `src/components/settings/NotificationSettings.jsx`  
+**Role:** Push type toggles + pre-prompt on first enable (Q30, Q33)
+
+```
+toggle: h-6 w-11 rounded-full switch — warm-accent when on
+types: morning · stuck · elephants · inactive · energy
+pre-prompt: portal dialog before Notification.requestPermission()
+```
+
+---
+
+### KanbanTab
+
+**File:** `src/components/tabs/KanbanTab.jsx`  
+**Role:** Kanban — day/week toggle, KanbanBoard, Elephants badge, Year drill-down
+
+```
+toggle: inline-flex rounded-lg border p-1 — День · Неделя
+badge: «Слоны →» when elephantsPending
+```
+
+---
+
+### KanbanBoard
+
+**File:** `src/components/kanban/KanbanBoard.jsx`  
+**Role:** Horizontal sortable columns — touch: tap→MoveCardSheet; fine-pointer desktop: dnd-kit drag; ⋯→edit/move
+
+```
+columns: day 3 / week 4 (queue, progress, done, next_week)
+order: columnOrder in useCardsStore
+stuck: ring-2 ring-amber-400/60
+WIP gate + drag suspend on progress conflict
+overlay: scale + shadow + accent ring (no rotation)
+```
+
+---
+
+### MoveCardSheet
+
+**File:** `src/components/kanban/MoveCardSheet.jsx`  
+**Role:** Mobile column picker bottom sheet
+
+---
+
+### ElephantsFlow
+
+**File:** `src/components/kanban/ElephantsFlow.jsx`  
+**Role:** 3-step monthly retrospective — done / carry / elephant
+
+---
+
+### YearBoard
+
+**File:** `src/components/kanban/YearBoard.jsx`  
+**Role:** Read-only 12-month «музей побед» with month drill-down
+
+---
+
+### StuckNudge / StuckSheet
+
+**Files:** `src/components/flow/StuckNudge.jsx`, `StuckSheet.jsx`  
+**Role:** Flow tab nudge for cards stuck ≥5 days; actions: kanban / next week / release
 
 ---
 
@@ -316,7 +491,47 @@ border-b bg-white/40 px-6 py-4
 title: font-serif «Неделя тишины» + secondary button bg-white shadow-sm
 ```
 
-**Inbox placeholder:** TabPageHeader + EmptyState (Inbox icon)
+**Inbox mode:** `ReviewInbox` + `FilterFlow` (see below)
+
+---
+
+### ReviewInbox
+
+**File:** `src/components/review/ReviewInbox.jsx`  
+**Role:** Chronological list of `raw` cards — tap inline edit, «Разобрать», ⋯ delete
+
+```
+card: rounded-xl border border-cream-dark/50 bg-white shadow-sm p-4
+edit: ring-2 ring-warm-accent/20
+«Разобрать»: rounded-lg bg-warm-accent text-xs font-medium
+```
+
+---
+
+### FilterFlow
+
+**File:** `src/components/review/FilterFlow.jsx`  
+**Role:** Full filter pipeline — swipe steps + final commit
+
+```
+mobile: fixed inset-0 z-30 bg-cream
+desktop: md:static md:border-l md:grid-cols-2 right panel
+steps: Хочу/Должен → criteria (1 screen each) → final (tags + energy + actions)
+swipe: motion drag x, threshold 72px + duplicate buttons
+final actions: В поток · Пока не ясно · Отпустить
+```
+
+---
+
+### StructuredCard
+
+**File:** `src/components/cards/StructuredCard.jsx`  
+**Role:** Flat post-filter card — white, no rotation, optional chips
+
+```
+rounded-xl border border-cream-dark/50 bg-white shadow-sm px-4 py-3
+chips: rounded-full bg-cream text-xs text-warm-muted
+```
 
 ---
 
@@ -364,12 +579,6 @@ empty: «Нажми ◉ внизу — выгрузи первую мысль»
 
 | Component | Phase | Notes |
 |---|---|---|
-| `ReviewInbox` | S2 Phase 3 | Raw card list with inline edit |
-| `FlowDashboard` | 3 | WIP + pull queue |
-| `ReviewInbox` | 2 | Raw card list |
-| `FilterPipeline` | 2 | Swipe filter screens |
-| `KanbanBoard` | 3 | Day/week columns |
-| `EnergyHub` | 4 | Presets + sliders |
-| `FlowCard` | 2 | Flat card variant (post-filter) |
+| `EnergyHub` | 6 | Presets + sliders + calculator |
 
 Add each to this registry when implemented.

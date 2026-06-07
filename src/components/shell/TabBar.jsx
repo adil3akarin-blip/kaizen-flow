@@ -13,6 +13,7 @@ export default function TabBar() {
   const setTab = useAppStore((s) => s.setTab)
   const openDump = useAppStore((s) => s.openDump)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
+  const elephantsPending = useAppStore((s) => s.elephantsPending)
 
   return (
     <>
@@ -57,6 +58,9 @@ export default function TabBar() {
                 strokeWidth={1.75}
               />
               {item.label}
+              {item.id === TABS.kanban && elephantsPending && !isActive && (
+                <span className="absolute right-1/4 top-1 h-2 w-2 rounded-full bg-warm-accent" />
+              )}
               {isActive && (
                 <span className="absolute bottom-1 h-1 w-1 rounded-full bg-warm-accent" />
               )}

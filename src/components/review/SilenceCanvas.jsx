@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useCardsStore } from '../../store/useCardsStore'
+import { selectRawCards } from '../../lib/cardSelectors'
 import StickyNote from '../StickyNote'
 
 export default function SilenceCanvas() {
@@ -10,10 +11,7 @@ export default function SilenceCanvas() {
   const updateCardText = useCardsStore((s) => s.updateCardText)
   const newCardId = useCardsStore((s) => s.lastAddedId)
 
-  const rawCards = useMemo(
-    () => cards.filter((c) => c.status === 'raw'),
-    [cards],
-  )
+  const rawCards = useMemo(() => selectRawCards(cards), [cards])
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">

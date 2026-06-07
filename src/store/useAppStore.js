@@ -8,8 +8,16 @@ export const useAppStore = create((set) => ({
   onboardingComplete: localStorage.getItem('kaizenflow-onboarding') === '1',
   silenceWeek: localStorage.getItem('kaizenflow-silence-week') === '1',
   missionScreenOpen: false,
+  elephantsPending:
+    localStorage.getItem('kaizenflow-elephants-pending') === '1' ||
+    (localStorage.getItem('kaizenflow-onboarding') === '1' &&
+      localStorage.getItem('kaizenflow-elephants-pending') !== '0'),
+
+  settingsOpen: false,
 
   setTab: (tab) => set({ activeTab: tab }),
+  openSettings: () => set({ settingsOpen: true }),
+  closeSettings: () => set({ settingsOpen: false }),
   openDump: () => set({ dumpOpen: true }),
   closeDump: () => set({ dumpOpen: false }),
   completeOnboarding: () => {
@@ -33,5 +41,13 @@ export const useAppStore = create((set) => ({
       localStorage.removeItem('kaizenflow-silence-week')
     }
     set({ silenceWeek: v })
+  },
+  setElephantsPending: (v) => {
+    if (v) {
+      localStorage.setItem('kaizenflow-elephants-pending', '1')
+    } else {
+      localStorage.removeItem('kaizenflow-elephants-pending')
+    }
+    set({ elephantsPending: v })
   },
 }))

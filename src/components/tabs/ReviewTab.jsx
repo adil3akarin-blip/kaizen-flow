@@ -1,32 +1,17 @@
-import { Inbox } from 'lucide-react'
+import { useState } from 'react'
+import clsx from 'clsx'
 import { useAppStore } from '../../store/useAppStore'
 import SilenceCanvas from '../review/SilenceCanvas'
+import ReviewInbox from '../review/ReviewInbox'
+import FilterFlow from '../review/FilterFlow'
 import MissionScreen from '../onboarding/MissionScreen'
-import EmptyState from '../ui/EmptyState'
-import TabPageHeader from '../ui/TabPageHeader'
-
-function ReviewInboxPlaceholder() {
-  return (
-    <div className="flex flex-1 flex-col px-6 py-8">
-      <TabPageHeader
-        title="Разбор"
-        subtitle="Фильтруй мысли, когда будешь готов"
-      />
-
-      <EmptyState
-        icon={Inbox}
-        title="Пока нет карточек для разбора"
-        description="Выгрузи мысль — она появится здесь"
-      />
-    </div>
-  )
-}
 
 export default function ReviewTab() {
   const silenceWeek = useAppStore((s) => s.silenceWeek)
   const missionScreenOpen = useAppStore((s) => s.missionScreenOpen)
   const openMissionScreen = useAppStore((s) => s.openMissionScreen)
   const exitSilenceWeek = useAppStore((s) => s.exitSilenceWeek)
+  const [filterCardId, setFilterCardId] = useState(null)
 
   if (missionScreenOpen) {
     return <MissionScreen onComplete={exitSilenceWeek} />
@@ -58,5 +43,23 @@ export default function ReviewTab() {
     )
   }
 
-  return <ReviewInboxPlaceholder />
+  return (
+    <div
+      className={clsx(
+        'flex flex-1 flex-col overflow-hidden',
+        filterCardId && 'md:grid md:grid-cols-2',
+      )}
+    >
+      <div className={clsx(filterCardId && 'hidden md:flex md:flex-col')}>
+        <ReviewInbox onFilter={setFilterCardId} />
+      </div>
+
+      {filterCardId && (
+        <FilterFlow
+          cardId={filterCardId}
+          onClose={() => setFilterCardId(null)}
+        />
+      )}
+    </div>
+  )
 }

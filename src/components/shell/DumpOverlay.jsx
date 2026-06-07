@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useCardsStore } from '../../store/useCardsStore'
 import { TABS, useAppStore } from '../../store/useAppStore'
 import { useToastStore } from '../../store/useToastStore'
+import { hapticTap } from '../../lib/haptics'
 
 function DestinationHint({ children }) {
   return (
@@ -154,6 +155,7 @@ export default function DumpOverlay() {
     }
 
     showSavedToast(count)
+    hapticTap()
     requestAnimationFrame(() => inputRef.current?.focus())
   }
 

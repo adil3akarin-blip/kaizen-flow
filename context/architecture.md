@@ -9,6 +9,7 @@
 | Styling | Tailwind CSS v4 (`@tailwindcss/vite`) | Utility-first CSS; tokens in `src/index.css` |
 | State | Zustand 5 | Client stores per domain |
 | Animation | Framer Motion 12 | Spring-based motion |
+| Drag and drop | @dnd-kit/react | Kanban column moves (desktop) |
 | Utilities | clsx | Conditional class names |
 | Lint | ESLint 10 | Flat config, React Hooks + Refresh |
 | Language | JavaScript (ES modules) | `.js` / `.jsx` throughout |
@@ -187,6 +188,7 @@ Current shape (from `createCard`):
 | `timeInvestment` | 2 | Optional investment tags |
 | `energyCost` | 2–4 | light / medium / heavy |
 | `column` | 3 | Kanban column id |
+| `columnOrder` | 3 | Per-column id arrays in store (`columnOrder`) |
 | `stuckAt` | 3 | Stagnation detector timestamp |
 | `visualMode` | S2 | `sticky` vs `card` (raw vs flow) |
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import clsx from 'clsx'
-import { Kanban, Inbox, Plus, Workflow } from 'lucide-react'
+import { Kanban, Inbox, Plus, Settings, Workflow } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
 import { useCardsStore } from '../../store/useCardsStore'
 
@@ -14,7 +14,10 @@ export default function Sidebar() {
   const activeTab = useAppStore((s) => s.activeTab)
   const setTab = useAppStore((s) => s.setTab)
   const openDump = useAppStore((s) => s.openDump)
+  const openSettings = useAppStore((s) => s.openSettings)
+  const settingsOpen = useAppStore((s) => s.settingsOpen)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
+  const elephantsPending = useAppStore((s) => s.elephantsPending)
   const cards = useCardsStore((s) => s.cards)
   const rawCount = useMemo(
     () => cards.filter((c) => c.status === 'raw').length,
@@ -98,10 +101,27 @@ export default function Sidebar() {
                     {rawCount}
                   </span>
                 )}
+                {item.id === TABS.kanban && elephantsPending && (
+                  <span className="ml-auto h-2 w-2 rounded-full bg-warm-accent" />
+                )}
               </button>
             )
           })}
         </nav>
+
+        <button
+          type="button"
+          onClick={openSettings}
+          className={clsx(
+            'mt-auto flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+            settingsOpen
+              ? 'bg-white font-medium text-warm-text shadow-sm'
+              : 'text-warm-text/80 hover:bg-white/60 hover:text-warm-text',
+          )}
+        >
+          <Settings className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+          Настройки
+        </button>
       </div>
     </aside>
   )
