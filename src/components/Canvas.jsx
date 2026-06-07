@@ -5,6 +5,7 @@ import StickyNote from './StickyNote'
 export default function Canvas() {
   const cards = useCardsStore((s) => s.cards)
   const removeCard = useCardsStore((s) => s.removeCard)
+  const moveCard = useCardsStore((s) => s.moveCard)
   const newCardId = useCardsStore((s) => s.lastAddedId)
 
   return (
@@ -19,7 +20,7 @@ export default function Canvas() {
               : cards.length < 5
                 ? 'мысли'
                 : 'мыслей'}{' '}
-            — только просмотр
+            — перетаскивай, чтобы раздвинуть
           </p>
         </div>
       </header>
@@ -39,6 +40,7 @@ export default function Canvas() {
                 key={card.id}
                 card={card}
                 onDelete={removeCard}
+                onMove={moveCard}
                 isNew={card.id === newCardId}
               />
             ))}

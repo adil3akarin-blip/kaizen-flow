@@ -58,4 +58,12 @@ export const useCardsStore = create((set, get) => ({
     if (pendingDelete?.timeoutId) clearTimeout(pendingDelete.timeoutId)
     set({ pendingDelete: null })
   },
+
+  moveCard: (id, x, y) => {
+    set((state) => ({
+      cards: state.cards.map((c) =>
+        c.id === id ? { ...c, x: Math.max(0, x), y: Math.max(0, y) } : c,
+      ),
+    }))
+  },
 }))
