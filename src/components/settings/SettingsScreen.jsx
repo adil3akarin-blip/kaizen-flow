@@ -1,3 +1,4 @@
+import FilterSettings from './FilterSettings'
 import NotificationSettings from './NotificationSettings'
 import { TABS, useAppStore } from '../../store/useAppStore'
 
@@ -18,11 +19,12 @@ export default function SettingsScreen() {
           Настройки
         </h2>
         <p className="m-0 mt-1.5 text-sm text-warm-muted">
-          Приглашения и уведомления
+          Миссия, фильтры и уведомления
         </p>
       </header>
 
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
+        <FilterSettings />
         <NotificationSettings />
       </div>
     </div>

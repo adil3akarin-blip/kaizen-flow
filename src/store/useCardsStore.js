@@ -17,15 +17,38 @@ import {
   resolveKanbanColumn,
   shouldResetStuckSince,
 } from '../lib/kanbanUtils'
+import {
+  createDebouncedPersist,
+  loadCardsPersisted,
+  saveCardsPersisted,
+} from '../lib/persistStorage'
 import { useToastStore } from './useToastStore'
 
-const onboardingDone = localStorage.getItem('kaizenflow-onboarding') === '1'
-const initialCards = onboardingDone
-  ? [
-      ...mockCards.map((c) => ({ status: 'raw', ...c })),
-      ...mockPullCards,
-    ]
-  : []
+function getInitialCardsState() {
+  const persisted = loadCardsPersisted()
+  if (persisted) {
+    return {
+      cards: persisted.cards,
+      columnOrder:
+        persisted.columnOrder ?? buildColumnOrderFromCards(persisted.cards),
+    }
+  }
+
+  const onboardingDone = localStorage.getItem('kaizenflow-onboarding') === '1'
+  const cards = onboardingDone
+    ? [
+        ...mockCards.map((c) => ({ status: 'raw', ...c })),
+        ...mockPullCards,
+      ]
+    : []
+
+  return {
+    cards,
+    columnOrder: buildColumnOrderFromCards(cards),
+  }
+}
+
+const initialState = getInitialCardsState()
 
 function maybeHapticForColumn(columnId) {
   if (columnId === IN_PROGRESS_COLUMN || columnId === DONE_COLUMN) {
@@ -34,8 +57,8 @@ function maybeHapticForColumn(columnId) {
 }
 
 export const useCardsStore = create((set, get) => ({
-  cards: initialCards,
-  columnOrder: buildColumnOrderFromCards(initialCards),
+  cards: initialState.cards,
+  columnOrder: initialState.columnOrder,
   pendingDelete: null,
   lastAddedId: null,
 
@@ -314,3 +337,16 @@ export const useCardsStore = create((set, get) => ({
     }))
   },
 }))
+
+const debouncedPersistCards = createDebouncedPersist((cards, columnOrder) => {
+  saveCardsPersisted(cards, columnOrder)
+})
+
+useCardsStore.subscribe((state, prev) => {
+  if (
+    state.cards !== prev.cards ||
+    state.columnOrder !== prev.columnOrder
+  ) {
+    debouncedPersistCards(state.cards, state.columnOrder)
+  }
+})

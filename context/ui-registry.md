@@ -494,12 +494,26 @@ silence week: only Разбор + Ещё active
 ### SettingsScreen
 
 **File:** `src/components/settings/SettingsScreen.jsx`  
-**Role:** Settings tab — header + NotificationSettings
+**Role:** Settings tab — FilterSettings + NotificationSettings
 
 ```
 layout: tab content inside shell · max-w-lg centered content
 access: TabBar «Ещё» (mobile) · Sidebar «Настройки» (desktop)
 back: ← Назад on md+ only
+subtitle: «Миссия, фильтры и уведомления»
+```
+
+---
+
+### FilterSettings
+
+**File:** `src/components/settings/FilterSettings.jsx`  
+**Role:** Mission textarea + custom filter criteria (up to 5)
+
+```
+two sections: rounded-2xl border border-cream-dark/50 bg-white p-4 shadow-sm
+mission: textarea + «Сохранить» (disabled when clean) + «Сохранено» flash
+criteria: preview chain · list rows with X remove · input + «Добавить» · «N из 5»
 ```
 
 ---

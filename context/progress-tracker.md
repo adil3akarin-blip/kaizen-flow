@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 4 — Task 16 complete  
-**Last completed:** Полный калькулятор Result/Effort — shared component, filter + hub, CardEditSheet  
-**Next:** S1 Persistence или Phase 2 backlog (Mission & Criteria)
+**Phase:** MVP closure  
+**Last completed:** S1 Persistence (cards) + Mission & Criteria settings UI  
+**Next:** Smoke QA по shell checklist; energy store persist (optional)
 
 ---
 
@@ -18,7 +18,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ### Cross-Cutting
 
-- [ ] S1 Persistence (localStorage → IndexedDB)
+- [x] S1 Persistence (localStorage → IndexedDB)
 - [x] S2 UI Shell & Navigation (foundation — placeholders, shell chrome)
 - [x] S3 PWA Shell
 - [x] S4 Tactile Feedback (Web Vibration)
@@ -27,15 +27,15 @@ Update this file after every completed feature. Any AI agent reading this should
 
 - [x] 01 Dump UI (`DumpPanel` — idle / capturing / flow)
 - [x] 02 Canvas + StickyNote (drag, edit, delete)
-- [ ] 03 Persistence
+- [x] 03 Persistence
 - [x] 04 Silence Week Mode (onboarding + canvas + mission exit)
 
 ### Phase 2 — «Фильтрация и Осознанность»
 
 - [x] 05 Review Inbox UI
 - [x] 06 Filter Pipeline UI
-- [ ] 07 Mission & Criteria
-- [ ] 08 Time Investment + Energy Tags
+- [x] 07 Mission & Criteria
+- [x] 08 Time Investment + Energy Tags (filter UI; tag customization post-MVP)
 - [x] 09 Result/Effort Calculator (light)
 
 ### Phase 3 — «Канбан-поток»
