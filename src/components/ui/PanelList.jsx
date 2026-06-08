@@ -1,10 +1,11 @@
 import clsx from 'clsx'
 
-export function PanelList({ children, className }) {
+export function PanelList({ children, className, clip = true }) {
   return (
     <div
       className={clsx(
-        'overflow-hidden rounded-2xl border border-cream-dark/50 bg-white shadow-sm',
+        'rounded-2xl border border-cream-dark/50 bg-white shadow-sm',
+        clip ? 'overflow-hidden' : 'overflow-visible',
         className,
       )}
     >

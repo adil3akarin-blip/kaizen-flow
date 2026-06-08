@@ -1,4 +1,9 @@
 import { create } from 'zustand'
+import {
+  loadReviewView,
+  REVIEW_VIEWS,
+  saveReviewView,
+} from '../lib/reviewUtils'
 
 export const TABS = {
   flow: 'flow',
@@ -13,6 +18,7 @@ export const useAppStore = create((set) => ({
   onboardingComplete: localStorage.getItem('kaizenflow-onboarding') === '1',
   silenceWeek: localStorage.getItem('kaizenflow-silence-week') === '1',
   missionScreenOpen: false,
+  reviewView: loadReviewView(),
   elephantsPending:
     localStorage.getItem('kaizenflow-elephants-pending') === '1' ||
     (localStorage.getItem('kaizenflow-onboarding') === '1' &&
@@ -25,16 +31,27 @@ export const useAppStore = create((set) => ({
   completeOnboarding: () => {
     localStorage.setItem('kaizenflow-onboarding', '1')
     localStorage.setItem('kaizenflow-silence-week', '1')
+    saveReviewView(REVIEW_VIEWS.canvas)
     set({
       onboardingComplete: true,
       activeTab: TABS.review,
       silenceWeek: true,
+      reviewView: REVIEW_VIEWS.canvas,
     })
+  },
+  setReviewView: (view) => {
+    saveReviewView(view)
+    set({ reviewView: view })
   },
   openMissionScreen: () => set({ missionScreenOpen: true }),
   exitSilenceWeek: () => {
     localStorage.removeItem('kaizenflow-silence-week')
-    set({ silenceWeek: false, missionScreenOpen: false })
+    saveReviewView(REVIEW_VIEWS.inbox)
+    set({
+      silenceWeek: false,
+      missionScreenOpen: false,
+      reviewView: REVIEW_VIEWS.inbox,
+    })
   },
   setSilenceWeek: (v) => {
     if (v) {

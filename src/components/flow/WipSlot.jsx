@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useEnergyStore } from '../../store/useEnergyStore'
@@ -41,6 +41,11 @@ export default function WipSlot({
   )
 
   const wipCard = selectWipCard(cards)
+  const guardActive = guardOpen && Boolean(suggestedCard)
+
+  useEffect(() => {
+    onGuardOpenChange?.(guardActive)
+  }, [guardActive, onGuardOpenChange])
 
   const handleComplete = () => {
     if (wipCard?.energyCost === 'heavy') {
@@ -66,7 +71,7 @@ export default function WipSlot({
 
   const guardDialog = (
     <EnergyGuardDialog
-      open={guardOpen}
+      open={guardActive}
       card={suggestedCard}
       alternatives={guardAlternatives}
       onPullAlternative={(id) => {

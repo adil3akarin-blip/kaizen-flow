@@ -89,15 +89,53 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
     ? cards.find((c) => c.id === editCardId)
     : null
 
+  const liveGuardCard = guardCard
+    ? cards.find((c) => c.id === guardCard.id) ?? null
+    : null
+
+  const wipCard = selectWipCard(cards)
+  const gateActive = gateOpen && Boolean(wipCard)
+  const guardActive = guardOpen && Boolean(liveGuardCard)
+
   useEffect(() => {
-    onGateOpenChange?.(gateOpen || guardOpen)
-  }, [gateOpen, guardOpen, onGateOpenChange])
+    onGateOpenChange?.(gateActive || guardActive)
+  }, [gateActive, guardActive, onGateOpenChange])
 
   const executePull = (id) => {
+    const card = useCardsStore.getState().cards.find((c) => c.id === id)
+    if (!card || card.status !== 'filtered') {
+      setPendingPullId(null)
+      return false
+    }
+
     const result = pullToWip(id)
     if (!result.ok && result.reason === 'wip-full') {
       setPendingPullId(id)
       setGateOpen(true)
+      return false
+    }
+    if (result.ok) {
+      setGateOpen(false)
+      setPendingPullId(null)
+    }
+    return result.ok
+  }
+
+  const flushPendingPull = (id) => {
+    const card = useCardsStore.getState().cards.find((c) => c.id === id)
+    if (!card || card.status !== 'filtered') {
+      setPendingPullId(null)
+      return
+    }
+
+    if (shouldShowDepletedHeavyDialog(energyPreset, card)) {
+      setGuardCard(card)
+      setGuardOpen(true)
+      return
+    }
+
+    if (executePull(id)) {
+      setPendingPullId(null)
     }
   }
 
@@ -113,28 +151,32 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
   const closeGuard = () => {
     setGuardOpen(false)
     setGuardCard(null)
+    setPendingPullId(null)
   }
 
   const handleGuardPullAlternative = (id) => {
-    closeGuard()
+    setGuardOpen(false)
+    setGuardCard(null)
+    setPendingPullId(null)
     executePull(id)
   }
 
   const handleGuardForcePull = (id) => {
-    closeGuard()
+    setGuardOpen(false)
+    setGuardCard(null)
+    setPendingPullId(null)
     executePull(id)
   }
 
   const handleGateComplete = () => {
-    const wip = selectWipCard(cards)
+    const wip = selectWipCard(useCardsStore.getState().cards)
     if (wip?.energyCost === 'heavy') {
       recordHeavyCompletion(wip.id)
     }
     completeWip()
     setGateOpen(false)
     if (pendingPullId) {
-      executePull(pendingPullId)
-      setPendingPullId(null)
+      flushPendingPull(pendingPullId)
     }
   }
 
@@ -142,8 +184,7 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
     releaseWip()
     setGateOpen(false)
     if (pendingPullId) {
-      executePull(pendingPullId)
-      setPendingPullId(null)
+      flushPendingPull(pendingPullId)
     }
   }
 
@@ -197,7 +238,7 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
       />
 
       <WipGateDialog
-        open={gateOpen}
+        open={gateActive}
         onComplete={handleGateComplete}
         onRelease={handleGateRelease}
         onCancel={() => {
@@ -207,8 +248,8 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
       />
 
       <EnergyGuardDialog
-        open={guardOpen}
-        card={guardCard}
+        open={guardActive}
+        card={liveGuardCard}
         alternatives={guardAlternatives}
         onPullAlternative={handleGuardPullAlternative}
         onForcePull={handleGuardForcePull}

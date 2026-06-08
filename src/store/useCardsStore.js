@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { mockCards } from '../data/mockCards'
-import { mockPullCards } from '../data/mockPullCards'
 import { createCard } from '../lib/cardUtils'
+import { sanitizeCardsOnLoad } from '../lib/cardSanitize'
 import { selectWipCard } from '../lib/cardSelectors'
 import { hapticTap } from '../lib/haptics'
 import {
@@ -9,6 +9,7 @@ import {
   moveInColumnOrder,
   removeIdFromColumnOrder,
   reorderInColumnOrder,
+  syncColumnOrderWithCards,
 } from '../lib/kanbanOrderUtils'
 import {
   columnToStatus,
@@ -27,19 +28,17 @@ import { useToastStore } from './useToastStore'
 function getInitialCardsState() {
   const persisted = loadCardsPersisted()
   if (persisted) {
-    return {
-      cards: persisted.cards,
-      columnOrder:
-        persisted.columnOrder ?? buildColumnOrderFromCards(persisted.cards),
-    }
+    const cards = sanitizeCardsOnLoad(persisted.cards)
+    const columnOrder = syncColumnOrderWithCards(
+      cards,
+      persisted.columnOrder ?? buildColumnOrderFromCards(cards),
+    )
+    return { cards, columnOrder }
   }
 
   const onboardingDone = localStorage.getItem('kaizenflow-onboarding') === '1'
   const cards = onboardingDone
-    ? [
-        ...mockCards.map((c) => ({ status: 'raw', ...c })),
-        ...mockPullCards,
-      ]
+    ? mockCards.map((c) => ({ status: 'raw', ...c }))
     : []
 
   return {
@@ -147,12 +146,17 @@ export const useCardsStore = create((set, get) => ({
   updateCardFilterFields: (id, fields) => {
     set((state) => ({
       cards: state.cards.map((c) =>
-        c.id === id ? { ...c, ...fields } : c,
+        c.id === id && c.status === 'raw' ? { ...c, ...fields } : c,
       ),
     }))
   },
 
   commitCardToPull: (id) => {
+    const card = get().cards.find((c) => c.id === id)
+    if (!card || card.status !== 'raw') {
+      return { ok: false, reason: card ? 'invalid-status' : 'not-found' }
+    }
+
     set((state) => {
       const columnOrder = moveInColumnOrder(state.columnOrder, id, 'queue', {
         via: 'sheet',
@@ -176,12 +180,14 @@ export const useCardsStore = create((set, get) => ({
         }),
       }
     })
+
+    return { ok: true }
   },
 
   resetCardFilterProgress: (id) => {
     set((state) => ({
       cards: state.cards.map((c) => {
-        if (c.id !== id) return c
+        if (c.id !== id || c.status !== 'raw') return c
         return {
           ...c,
           wantMust: null,
@@ -197,6 +203,12 @@ export const useCardsStore = create((set, get) => ({
   pullToWip: (id) => {
     const wip = selectWipCard(get().cards)
     if (wip) return { ok: false, reason: 'wip-full' }
+
+    const card = get().cards.find((c) => c.id === id)
+    if (!card) return { ok: false, reason: 'not-found' }
+    if (card.status !== 'filtered') {
+      return { ok: false, reason: 'invalid-status' }
+    }
 
     set((state) => ({
       columnOrder: moveInColumnOrder(state.columnOrder, id, IN_PROGRESS_COLUMN, {

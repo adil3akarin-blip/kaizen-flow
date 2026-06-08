@@ -1,6 +1,13 @@
 import { create } from 'zustand'
 import { derivePresetFromAxes, getPresetAxisDefaults } from '../lib/energyUtils'
+import {
+  createDebouncedPersist,
+  loadEnergyPersisted,
+  saveEnergyPersisted,
+} from '../lib/persistStorage'
 import { pruneHeavyCompletions } from '../lib/willpowerGuard'
+
+const VALID_PRESETS = new Set(['brisk', 'medium', 'depleted'])
 
 function withBriskPauseDismissed(preset, patch = {}) {
   return preset === 'brisk' ? { ...patch, pauseDismissed: true } : patch
@@ -17,12 +24,33 @@ function loadStandaloneResult() {
   }
 }
 
+function loadInitialEnergyState() {
+  const persisted = loadEnergyPersisted()
+  const preset = VALID_PRESETS.has(persisted?.preset)
+    ? persisted.preset
+    : 'medium'
+
+  return {
+    preset,
+    axes:
+      persisted?.axes && typeof persisted.axes === 'object'
+        ? { ...getPresetAxisDefaults(preset), ...persisted.axes }
+        : getPresetAxisDefaults(preset),
+    heavyCompletions: Array.isArray(persisted?.heavyCompletions)
+      ? pruneHeavyCompletions(persisted.heavyCompletions)
+      : [],
+    pauseDismissed: Boolean(persisted?.pauseDismissed),
+  }
+}
+
+const initialEnergy = loadInitialEnergyState()
+
 export const useEnergyStore = create((set) => ({
-  preset: 'medium',
-  axes: getPresetAxisDefaults('medium'),
+  preset: initialEnergy.preset,
+  axes: initialEnergy.axes,
   fineTuneOpen: false,
-  heavyCompletions: [],
-  pauseDismissed: false,
+  heavyCompletions: initialEnergy.heavyCompletions,
+  pauseDismissed: initialEnergy.pauseDismissed,
   standaloneResultEffort: loadStandaloneResult(),
 
   setPreset: (preset) =>
@@ -67,3 +95,23 @@ export const useEnergyStore = create((set) => ({
     set({ standaloneResultEffort: result })
   },
 }))
+
+const debouncedPersistEnergy = createDebouncedPersist((state) => {
+  saveEnergyPersisted({
+    preset: state.preset,
+    axes: state.axes,
+    heavyCompletions: state.heavyCompletions,
+    pauseDismissed: state.pauseDismissed,
+  })
+})
+
+useEnergyStore.subscribe((state, prev) => {
+  if (
+    state.preset !== prev.preset ||
+    state.axes !== prev.axes ||
+    state.heavyCompletions !== prev.heavyCompletions ||
+    state.pauseDismissed !== prev.pauseDismissed
+  ) {
+    debouncedPersistEnergy(state)
+  }
+})

@@ -1,4 +1,5 @@
 const CARDS_KEY = 'kaizenflow-cards'
+const ENERGY_KEY = 'kaizenflow-energy'
 
 export function loadCardsPersisted() {
   try {
@@ -20,6 +21,28 @@ export function loadCardsPersisted() {
 export function saveCardsPersisted(cards, columnOrder) {
   try {
     localStorage.setItem(CARDS_KEY, JSON.stringify({ cards, columnOrder }))
+  } catch {
+    // quota or private mode — degrade silently
+  }
+}
+
+export function loadEnergyPersisted() {
+  try {
+    const raw = localStorage.getItem(ENERGY_KEY)
+    if (!raw) return null
+
+    const data = JSON.parse(raw)
+    if (!data || typeof data !== 'object') return null
+
+    return data
+  } catch {
+    return null
+  }
+}
+
+export function saveEnergyPersisted(data) {
+  try {
+    localStorage.setItem(ENERGY_KEY, JSON.stringify(data))
   } catch {
     // quota or private mode — degrade silently
   }

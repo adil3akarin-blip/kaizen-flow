@@ -10,7 +10,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** MVP closure  
 **Last completed:** S1 Persistence (cards) + Mission & Criteria settings UI  
-**Next:** Smoke QA по shell checklist; energy store persist (optional)
+**Next:** Smoke QA по shell checklist
 
 ---
 

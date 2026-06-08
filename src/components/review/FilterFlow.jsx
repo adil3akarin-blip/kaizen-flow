@@ -7,7 +7,10 @@ import { useSettingsStore } from '../../store/useSettingsStore'
 import { hapticTap } from '../../lib/haptics'
 import {
   buildFilterCriteria,
+  buildFilterDraft,
   incrementFilterHintCount,
+  resolveFilterStep,
+  sanitizeCriteriaResults,
   shouldShowSwipeHint,
 } from '../../lib/filterUtils'
 import StructuredCard from '../cards/StructuredCard'
@@ -89,28 +92,46 @@ export default function FilterFlow({ cardId, onClose }) {
     [personalMission, filterCriteria],
   )
 
-  const [step, setStep] = useState(0)
-  const [draft, setDraft] = useState({
-    wantMust: card?.wantMust ?? null,
-    missionCriteriaResults: card?.missionCriteriaResults ?? [],
-    timeInvestment: card?.timeInvestment ?? null,
-    energyCost: card?.energyCost ?? null,
-    resultEffort: card?.resultEffort ?? null,
-  })
+  const initialDraft = useMemo(
+    () => (card ? buildFilterDraft(card, criteria) : null),
+    [card, criteria],
+  )
+
+  const [step, setStep] = useState(() =>
+    card ? resolveFilterStep(card, criteria) : 0,
+  )
+  const [draft, setDraft] = useState(() => initialDraft ?? buildFilterDraft({}, criteria))
   const [showCalculator, setShowCalculator] = useState(false)
   const showHint = shouldShowSwipeHint()
 
-  if (!card) return null
+  if (!card || card.status !== 'raw' || !initialDraft) return null
 
   const totalSteps = 1 + criteria.length + 1
-  const isWantStep = step === 0
-  const isFinalStep = step === totalSteps - 1
-  const criterionIndex = step - 1
-  const currentCriterion = !isWantStep && !isFinalStep ? criteria[criterionIndex] : null
+  const clampedStep = Math.min(step, totalSteps - 1)
+  const displayStep =
+    clampedStep > 0 &&
+    clampedStep < totalSteps - 1 &&
+    !criteria[clampedStep - 1]
+      ? totalSteps - 1
+      : clampedStep
+  const showWantStep = displayStep === 0
+  const showFinalStep = displayStep === totalSteps - 1
+  const activeCriterion =
+    displayStep > 0 && displayStep < totalSteps - 1
+      ? criteria[displayStep - 1]
+      : null
 
   const patchDraft = (fields) => {
-    setDraft((prev) => ({ ...prev, ...fields }))
-    updateCardFilterFields(cardId, fields)
+    const nextFields = { ...fields }
+    if (nextFields.missionCriteriaResults) {
+      nextFields.missionCriteriaResults = sanitizeCriteriaResults(
+        nextFields.missionCriteriaResults,
+        criteria,
+      )
+    }
+
+    setDraft((prev) => ({ ...prev, ...nextFields }))
+    updateCardFilterFields(cardId, nextFields)
   }
 
   const handleWantMust = (value) => {
@@ -121,8 +142,8 @@ export default function FilterFlow({ cardId, onClose }) {
 
   const handleCriterionAnswer = (answer) => {
     const results = [...draft.missionCriteriaResults]
-    const existing = results.findIndex((r) => r.criterionId === currentCriterion.id)
-    const entry = { criterionId: currentCriterion.id, answer }
+    const existing = results.findIndex((r) => r.criterionId === activeCriterion.id)
+    const entry = { criterionId: activeCriterion.id, answer }
 
     if (existing >= 0) results[existing] = entry
     else results.push(entry)
@@ -136,7 +157,8 @@ export default function FilterFlow({ cardId, onClose }) {
       ...draft,
       energyCost: draft.energyCost || 'medium',
     })
-    commitCardToPull(cardId)
+    const result = commitCardToPull(cardId)
+    if (!result.ok) return
     hapticTap()
     onClose()
   }
@@ -164,12 +186,12 @@ export default function FilterFlow({ cardId, onClose }) {
         </button>
         <div className="min-w-0 flex-1">
           <h3 className="m-0 font-serif text-lg font-medium text-warm-text">
-            {isWantStep && 'Хочу или должен?'}
-            {currentCriterion && currentCriterion.label}
-            {isFinalStep && 'Куда направить?'}
+            {showWantStep && 'Хочу или должен?'}
+            {activeCriterion && activeCriterion.label}
+            {showFinalStep && 'Куда направить?'}
           </h3>
           <p className="mt-0.5 text-xs text-warm-muted">
-            Шаг {step + 1} из {totalSteps}
+            Шаг {displayStep + 1} из {totalSteps}
           </p>
         </div>
         <button
@@ -182,7 +204,7 @@ export default function FilterFlow({ cardId, onClose }) {
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 sm:px-6 md:px-8">
-        {isWantStep && (
+        {showWantStep && (
           <div className="mx-auto flex w-full max-w-md flex-col gap-6">
             <SwipeCard
               hint={showHint ? '← Должен · Хочу →' : null}
@@ -204,7 +226,7 @@ export default function FilterFlow({ cardId, onClose }) {
           </div>
         )}
 
-        {currentCriterion && (
+        {activeCriterion && (
           <div className="mx-auto flex w-full max-w-md flex-col gap-6">
             <SwipeCard
               onSwipeLeft={() => handleCriterionAnswer('no')}
@@ -225,7 +247,7 @@ export default function FilterFlow({ cardId, onClose }) {
           </div>
         )}
 
-        {isFinalStep && (
+        {showFinalStep && (
           <div className="mx-auto flex w-full max-w-md flex-col gap-6">
             <StructuredCard
               card={{ ...card, ...draft, energyCost: draft.energyCost || 'medium' }}
@@ -334,7 +356,7 @@ export default function FilterFlow({ cardId, onClose }) {
         )}
       </div>
 
-      {!isFinalStep && step > 0 && (
+      {!showFinalStep && displayStep > 0 && (
         <div className="shrink-0 border-t border-cream-dark/60 px-4 py-3 sm:px-6 md:px-8">
           <button
             type="button"

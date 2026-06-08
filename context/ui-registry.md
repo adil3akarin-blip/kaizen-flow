@@ -617,7 +617,22 @@ border-b bg-white/40 px-6 py-4
 title: font-serif «Неделя тишины» + secondary button bg-white shadow-sm
 ```
 
-**Inbox mode:** `ReviewInbox` + `FilterFlow` (see below)
+**Inbox mode:** `ReviewInbox` + `FilterFlow` (see below)  
+**View toggle:** `ReviewViewToggle` — холст (LayoutGrid) · список (List); persisted in `useAppStore.reviewView`
+
+---
+
+### ReviewViewToggle
+
+**File:** `src/components/review/ReviewViewToggle.jsx`  
+**Role:** Switch between canvas and inbox in «Разбор»
+
+```
+rounded-lg border border-cream-dark bg-cream/50 p-0.5
+active: bg-white shadow-sm text-warm-text
+inactive: text-warm-muted
+icons: LayoutGrid (холст) · List (список)
+```
 
 ---
 

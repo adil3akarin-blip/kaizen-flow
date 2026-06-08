@@ -15,6 +15,7 @@ export default function StickyNote({
   onDelete,
   onMove,
   onUpdate,
+  onFilter,
   isNew = false,
   className,
 }) {
@@ -125,6 +126,7 @@ export default function StickyNote({
 
   return (
     <div
+      data-card-id={card.id}
       className={clsx('absolute w-[180px]', className)}
       style={{
         left: x,
@@ -185,6 +187,16 @@ export default function StickyNote({
             >
               {card.text}
             </p>
+            {onFilter && (
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => onFilter(card.id)}
+                className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-warm-accent px-2.5 py-0.5 text-[10px] font-medium text-white opacity-0 shadow transition-opacity duration-150 hover:bg-warm-accent-hover group-hover:opacity-100"
+              >
+                Разобрать
+              </button>
+            )}
           </>
         )}
 
