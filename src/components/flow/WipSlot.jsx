@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import clsx from 'clsx'
 import { MoreHorizontal } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useEnergyStore } from '../../store/useEnergyStore'
@@ -9,36 +8,8 @@ import { findLightAlternatives } from '../../lib/energyUtils'
 import { shouldShowDepletedHeavyDialog } from '../../lib/willpowerGuard'
 import StructuredCard from '../cards/StructuredCard'
 import CardEditSheet from '../cards/CardEditSheet'
+import SectionLabel from '../ui/SectionLabel'
 import EnergyGuardDialog from './EnergyGuardDialog'
-
-function HeroLabel({ children, className }) {
-  return (
-    <p
-      className={clsx(
-        'm-0 font-serif text-base font-medium text-warm-text',
-        className,
-      )}
-    >
-      {children}
-    </p>
-  )
-}
-
-function WipHeroShell({ accent = false, className, children }) {
-  return (
-    <section
-      className={clsx(
-        'rounded-2xl px-5 py-6',
-        accent
-          ? 'bg-warm-accent/5 ring-1 ring-warm-accent/15'
-          : 'bg-white/50',
-        className,
-      )}
-    >
-      {children}
-    </section>
-  )
-}
 
 export default function WipSlot({
   suggestedCard,
@@ -113,8 +84,8 @@ export default function WipSlot({
   if (!wipCard) {
     if (emptyCta) {
       return (
-        <WipHeroShell className="py-8">
-          <HeroLabel className="text-center">Поток свободен</HeroLabel>
+        <section>
+          <SectionLabel className="text-center">Поток свободен</SectionLabel>
           <button
             type="button"
             onClick={emptyCta.onAction}
@@ -123,19 +94,19 @@ export default function WipSlot({
             {emptyCta.message} →{' '}
             <span className="text-warm-accent">{emptyCta.targetLabel}</span>
           </button>
-        </WipHeroShell>
+        </section>
       )
     }
 
     if (suggestedCard) {
       return (
         <>
-          <WipHeroShell accent>
-            <HeroLabel>Одно дело в единицу времени</HeroLabel>
+          <section>
+            <SectionLabel>Одно дело в единицу времени</SectionLabel>
             <button
               type="button"
               onClick={handleSuggestedPull}
-              className="mt-4 w-full text-left transition-opacity hover:opacity-90"
+              className="mt-3 w-full text-left transition-opacity hover:opacity-90"
             >
               <StructuredCard
                 card={suggestedCard}
@@ -149,7 +120,7 @@ export default function WipSlot({
             >
               Начать
             </button>
-          </WipHeroShell>
+          </section>
           {guardDialog}
         </>
       )
@@ -159,11 +130,11 @@ export default function WipSlot({
   }
 
   return (
-    <WipHeroShell accent>
-      <HeroLabel>Сейчас в работе</HeroLabel>
+    <section>
+      <SectionLabel>Сейчас в работе</SectionLabel>
 
-      <div className="relative mt-4">
-        <StructuredCard card={wipCard} className="px-5 py-5 text-base" />
+      <div className="relative mt-3">
+        <StructuredCard card={wipCard} className="px-5 py-4 pr-12" />
         <button
           type="button"
           onClick={() => setEditOpen(true)}
@@ -196,6 +167,6 @@ export default function WipSlot({
         open={editOpen}
         onClose={() => setEditOpen(false)}
       />
-    </WipHeroShell>
+    </section>
   )
 }

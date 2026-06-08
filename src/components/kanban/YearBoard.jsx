@@ -21,7 +21,7 @@ export default function YearBoard({ onBack }) {
             onClick={() => setSelectedMonth(null)}
             className="text-sm text-warm-muted hover:text-warm-text"
           >
-            ← Год
+            ← Музей побед
           </button>
           <h3 className="m-0 mt-2 font-serif text-xl font-medium text-warm-text">
             {monthData.label}
@@ -73,10 +73,12 @@ export default function YearBoard({ onBack }) {
             ← Канбан
           </button>
         )}
-        <h3 className="m-0 mt-2 font-serif text-xl font-medium text-warm-text">
-          Годовая доска
+        <h3 className="m-0 mt-2 text-xl font-semibold tracking-tight text-warm-text">
+          Музей побед
         </h3>
-        <p className="mt-1 text-sm text-warm-muted">Музей побед</p>
+        <p className="mt-1 text-sm text-warm-muted">
+          Что уже получилось — по месяцам
+        </p>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-y-auto px-4 py-4 sm:gap-3 sm:px-6 sm:py-6 md:grid-cols-3 md:px-8">

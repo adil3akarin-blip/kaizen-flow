@@ -16,34 +16,12 @@ import {
 import { selectStuckCards } from '../../lib/stuckDetector'
 import { shouldShowPauseScreen } from '../../lib/willpowerGuard'
 import TabPageHeader from '../ui/TabPageHeader'
-import EnergySnapshot from '../flow/EnergySnapshot'
+import PageContainer from '../ui/PageContainer'
 import EnergyHub from '../flow/EnergyHub'
+import FlowStatusPanel from '../flow/FlowStatusPanel'
 import PauseScreen from '../flow/PauseScreen'
 import WipSlot from '../flow/WipSlot'
 import PullQueue from '../flow/PullQueue'
-import StuckNudge from '../flow/StuckNudge'
-
-function FlowHint({ rawCount, onGoReview }) {
-  if (rawCount === 0) return null
-
-  const label =
-    rawCount === 1
-      ? '1 мысль ждёт разбора'
-      : rawCount < 5
-        ? `${rawCount} мысли ждут разбора`
-        : `${rawCount} мыслей ждут разбора`
-
-  return (
-    <button
-      type="button"
-      onClick={onGoReview}
-      className="text-left text-sm text-warm-muted transition-colors hover:text-warm-text"
-    >
-      {label} →{' '}
-      <span className="text-warm-accent">Разбор</span>
-    </button>
-  )
-}
 
 export default function FlowTab() {
   const [gateOpen, setGateOpen] = useState(false)
@@ -118,39 +96,40 @@ export default function FlowTab() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-cream-dark/60 bg-white/40 px-4 py-4 sm:px-6 sm:py-5 md:px-8">
-        <TabPageHeader title="Поток" />
-      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:overflow-hidden md:py-8">
+        <PageContainer className="md:flex md:h-full md:min-h-0 md:flex-col">
+          <TabPageHeader title="Поток" />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 md:grid md:grid-cols-2 md:gap-8 md:overflow-hidden md:px-8 md:py-6">
-        <div
-          className={clsx(
-            'order-1 flex min-h-0 flex-col gap-6 md:col-start-1 md:row-start-1 md:overflow-y-auto md:pr-2',
-            gateOpen && 'invisible',
-          )}
-        >
-          <WipSlot
-            suggestedCard={suggestedCard}
-            emptyCta={emptyCta}
-            onPullSuggested={handlePullSuggested}
-            onGuardOpenChange={(open) => setGateOpen(open)}
-          />
-          <PullQueue
-            excludeCardId={suggestedCard?.id}
-            onGateOpenChange={setGateOpen}
-          />
-        </div>
+          <div
+            className={clsx(
+              'mt-6 flex flex-col gap-6 md:min-h-0 md:flex-1 md:grid md:grid-cols-[1fr_minmax(200px,260px)] md:gap-8 md:overflow-hidden',
+              gateOpen && 'invisible',
+            )}
+          >
+            <div className="order-1 flex flex-col gap-6 md:col-start-1 md:min-h-0 md:overflow-y-auto md:pr-1">
+              <WipSlot
+                suggestedCard={suggestedCard}
+                emptyCta={emptyCta}
+                onPullSuggested={handlePullSuggested}
+                onGuardOpenChange={(open) => setGateOpen(open)}
+              />
+              <PullQueue
+                excludeCardId={suggestedCard?.id}
+                onGateOpenChange={setGateOpen}
+              />
+            </div>
 
-        <div className="order-2 flex min-h-0 flex-col gap-4 md:col-start-2 md:row-start-1 md:overflow-y-auto">
-          <EnergySnapshot onOpenHub={() => setShowEnergyHub(true)} />
-          {!isFlowEmpty && (
-            <FlowHint
-              rawCount={rawCards.length}
-              onGoReview={() => setTab(TABS.review)}
-            />
-          )}
-          <StuckNudge stuckCards={stuckCards} />
-        </div>
+            <div className="order-2 flex flex-col md:col-start-2 md:min-h-0 md:overflow-y-auto">
+              <FlowStatusPanel
+                onOpenHub={() => setShowEnergyHub(true)}
+                rawCount={rawCards.length}
+                onGoReview={() => setTab(TABS.review)}
+                stuckCards={stuckCards}
+                showHints={!isFlowEmpty}
+              />
+            </div>
+          </div>
+        </PageContainer>
       </div>
     </div>
   )

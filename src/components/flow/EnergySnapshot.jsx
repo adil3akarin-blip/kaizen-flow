@@ -9,11 +9,56 @@ const PRESET_ICONS = {
   depleted: BatteryLow,
 }
 
-export default function EnergySnapshot({ onOpenHub }) {
+export default function EnergySnapshot({ onOpenHub, embedded = false }) {
   const preset = useEnergyStore((s) => s.preset)
   const config = ENERGY_PRESETS[preset]
   const Icon = PRESET_ICONS[preset] || BatteryMedium
   const advice = getEnergyAdvice(preset)
+
+  const content = (
+    <>
+      <div
+        className={clsx(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+          preset === 'depleted' ? 'bg-warm-accent/15' : 'bg-cream',
+        )}
+      >
+        <Icon className="h-4 w-4 text-warm-accent" strokeWidth={1.5} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="m-0 text-xs text-warm-muted">Энергия</p>
+        <p className="mt-0.5 text-sm font-medium text-warm-text">{config.label}</p>
+        <p className="mt-0.5 truncate text-xs text-warm-muted">{advice}</p>
+      </div>
+    </>
+  )
+
+  if (embedded) {
+    return (
+      <button
+        type="button"
+        onClick={onOpenHub}
+        className={clsx(
+          'flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-cream/40',
+          preset === 'depleted' && 'bg-warm-accent/[0.03]',
+        )}
+      >
+        <div
+          className={clsx(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+            preset === 'depleted' ? 'bg-warm-accent/15' : 'bg-cream',
+          )}
+        >
+          <Icon className="h-4 w-4 text-warm-accent" strokeWidth={1.5} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-xs text-warm-muted">Энергия</p>
+          <p className="mt-0.5 text-sm font-medium text-warm-text">{config.label}</p>
+          <p className="mt-1 text-xs leading-snug text-warm-muted">{advice}</p>
+        </div>
+      </button>
+    )
+  }
 
   return (
     <button
@@ -24,25 +69,7 @@ export default function EnergySnapshot({ onOpenHub }) {
         preset === 'depleted' && 'border-warm-accent/20 bg-warm-accent/5',
       )}
     >
-      <div
-        className={clsx(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
-          preset === 'depleted' ? 'bg-warm-accent/15' : 'bg-cream',
-        )}
-      >
-        <Icon
-          className={clsx(
-            'h-5 w-5',
-            preset === 'depleted' ? 'text-warm-accent' : 'text-warm-accent',
-          )}
-          strokeWidth={1.5}
-        />
-      </div>
-      <div className="min-w-0">
-        <p className="m-0 text-xs text-warm-muted">Энергия</p>
-        <p className="mt-0.5 text-sm font-medium text-warm-text">{config.label}</p>
-        <p className="mt-0.5 truncate text-xs text-warm-muted">{advice}</p>
-      </div>
+      {content}
     </button>
   )
 }

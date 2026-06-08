@@ -28,6 +28,7 @@ import {
 } from '../../lib/kanbanUtils'
 import { useFinePointerDesktop } from '../../lib/useFinePointerDesktop'
 import { isCardStuck } from '../../lib/stuckDetector'
+import { getKanbanEmptyState } from '../../lib/kanbanEmptyState'
 import StructuredCard from '../cards/StructuredCard'
 import CardEditSheet from '../cards/CardEditSheet'
 import MoveCardSheet from './MoveCardSheet'
@@ -105,30 +106,54 @@ function resolveFinalOrder(snapshot, event, cardId, kanbanCards) {
   return { finalOrder: snapshot, final: initial, initial }
 }
 
-function KanbanColumn({ column, cards, dragEnabled, onMoveTap, onEditTap }) {
+function KanbanColumnEmpty({ copy }) {
+  if (!copy) return null
+
+  return (
+    <div className="m-auto px-3 py-6 text-center">
+      <p className="m-0 text-xs leading-snug text-warm-muted">{copy.primary}</p>
+      {copy.dragHint && (
+        <p className="m-0 mt-1.5 hidden text-[11px] leading-snug text-warm-muted/75 md:block">
+          {copy.dragHint}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function KanbanColumn({ column, cards, dragEnabled, onMoveTap, onEditTap, view }) {
   const { ref: dropRef, isDropTarget } = useDroppable({
     id: column.id,
     type: 'column',
   })
 
+  const isEmpty = cards.length === 0
+  const emptyCopy = isEmpty ? getKanbanEmptyState(column.id, view, dragEnabled) : null
+  const isAccentedEmpty = emptyCopy?.accented
+
   return (
-    <div className="flex w-[min(16rem,82vw)] shrink-0 snap-start flex-col sm:w-64">
-      <div className="mb-3 flex items-center justify-between px-1">
-        <h3 className="m-0 font-serif text-sm font-medium text-warm-text">
-          {column.label}
-        </h3>
-        <span className="text-xs text-warm-muted">{cards.length}</span>
+    <div className="flex w-[min(16rem,82vw)] shrink-0 snap-start flex-col md:w-full md:min-w-0 md:shrink">
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <h3 className="m-0 text-sm font-medium text-warm-text">{column.label}</h3>
+        <span className="rounded-full bg-cream px-2 py-0.5 text-xs tabular-nums text-warm-muted">
+          {cards.length}
+        </span>
       </div>
 
       <div
         ref={dropRef}
         className={clsx(
-          'flex min-h-[200px] flex-col gap-2 rounded-xl border border-cream-dark/40 bg-white/40 p-2 transition-colors',
+          'flex min-h-48 flex-1 flex-col gap-2 rounded-2xl border p-2 transition-colors md:min-h-64 md:p-2.5',
+          isAccentedEmpty
+            ? 'border-dashed border-warm-accent/25 bg-warm-accent/[0.04]'
+            : 'border-cream-dark/50 bg-white shadow-sm',
           isDropTarget &&
             dragEnabled &&
-            'border-warm-accent/50 bg-warm-accent/5',
+            'border-warm-accent/40 bg-warm-accent/5',
         )}
       >
+        {emptyCopy && <KanbanColumnEmpty copy={emptyCopy} />}
+
         {cards.map((card, index) => (
           <KanbanSortableCard
             key={card.id}
@@ -176,7 +201,7 @@ function KanbanSortableCard({
     >
       {dragEnabled ? (
         <div className="cursor-grab active:cursor-grabbing">
-          <StructuredCard card={card} compact />
+          <StructuredCard card={card} compact className="shadow-none" />
         </div>
       ) : (
         <button
@@ -184,7 +209,7 @@ function KanbanSortableCard({
           onClick={() => onMoveTap(card.id)}
           className="w-full text-left"
         >
-          <StructuredCard card={card} compact />
+          <StructuredCard card={card} compact className="shadow-none" />
         </button>
       )}
       <button
@@ -400,6 +425,7 @@ export default function KanbanBoard({ view }) {
         <div
           className={clsx(
             'flex w-max min-w-full snap-x snap-mandatory gap-3 pb-2 pr-4 sm:gap-4 md:w-full md:snap-none md:pr-0',
+            view === 'day' ? 'md:grid md:grid-cols-3' : 'md:grid md:grid-cols-4',
             gateOpen && 'invisible',
           )}
         >
@@ -407,6 +433,7 @@ export default function KanbanBoard({ view }) {
             <KanbanColumn
               key={column.id}
               column={column}
+              view={view}
               cards={selectOrderedCardsInColumn(
                 kanbanCards,
                 columnOrder,

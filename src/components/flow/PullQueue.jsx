@@ -10,10 +10,47 @@ import {
   isCardEnergyDimmed,
 } from '../../lib/energyUtils'
 import { shouldShowDepletedHeavyDialog } from '../../lib/willpowerGuard'
-import StructuredCard from '../cards/StructuredCard'
 import CardEditSheet from '../cards/CardEditSheet'
+import SectionLabel from '../ui/SectionLabel'
+import { PanelList, PanelRow } from '../ui/PanelList'
 import WipGateDialog from './WipGateDialog'
 import EnergyGuardDialog from './EnergyGuardDialog'
+
+const WANT_LABELS = {
+  want: 'Хочу',
+  must: 'Должен',
+  unknown: 'Не знаю',
+}
+
+const ENERGY_LABELS = {
+  light: 'Лёгкое',
+  medium: 'Среднее',
+  heavy: 'Тяжёлое',
+}
+
+function QueueChips({ card }) {
+  const chips = []
+  if (card.wantMust) chips.push(WANT_LABELS[card.wantMust])
+  if (card.energyCost && card.energyCost !== 'medium') {
+    chips.push(ENERGY_LABELS[card.energyCost])
+  }
+  if (card.timeInvestment) chips.push(card.timeInvestment)
+
+  if (chips.length === 0) return null
+
+  return (
+    <div className="mt-1 flex flex-wrap gap-1">
+      {chips.map((label) => (
+        <span
+          key={label}
+          className="rounded-full bg-cream px-2 py-0.5 text-xs text-warm-muted"
+        >
+          {label}
+        </span>
+      ))}
+    </div>
+  )
+}
 
 export default function PullQueue({ excludeCardId, onGateOpenChange }) {
   const cards = useCardsStore((s) => s.cards)
@@ -116,41 +153,42 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
 
   return (
     <section>
-      <h3 className="m-0 font-serif text-base font-medium text-warm-text">
-        Очередь
-        <span className="ml-2 text-sm font-normal text-warm-muted">
-          {visibleQueue.length}
-        </span>
-      </h3>
+      <SectionLabel suffix={visibleQueue.length}>Очередь</SectionLabel>
 
-      <ul className="mt-3 flex list-none flex-col gap-2 p-0">
-        {visibleQueue.map((card) => {
+      <PanelList className="mt-3">
+        {visibleQueue.map((card, index) => {
           const dimmed = isCardEnergyDimmed(card, energyPreset)
+          const isLast = index === visibleQueue.length - 1
 
           return (
-            <li key={card.id} className="relative">
-              <button
-                type="button"
+            <div key={card.id} className="relative">
+              <PanelRow
                 onClick={() => attemptPull(card)}
-                className={clsx(
-                  'w-full text-left transition-opacity',
-                  dimmed && 'opacity-45',
-                )}
+                isLast={isLast}
+                className={clsx('pr-10', dimmed && 'opacity-45')}
               >
-                <StructuredCard card={card} compact />
-              </button>
+                <div className="min-w-0 flex-1">
+                  <p className="m-0 break-words text-sm leading-snug text-warm-text">
+                    {card.text}
+                  </p>
+                  <QueueChips card={card} />
+                </div>
+              </PanelRow>
               <button
                 type="button"
-                onClick={() => setEditCardId(card.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setEditCardId(card.id)
+                }}
                 aria-label="Ещё"
-                className="absolute right-2 top-2 rounded-lg p-1.5 text-warm-muted hover:bg-cream-dark"
+                className="absolute right-3 top-3.5 rounded-lg p-1.5 text-warm-muted hover:bg-cream-dark"
               >
                 <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
               </button>
-            </li>
+            </div>
           )
         })}
-      </ul>
+      </PanelList>
 
       <CardEditSheet
         card={editCard}

@@ -262,11 +262,51 @@ title: font-serif text-base font-medium
 ### TabPageHeader
 
 **File:** `src/components/ui/TabPageHeader.jsx`  
-**Role:** Serif tab title + muted subtitle
+**Role:** Sans tab title + muted subtitle (Lora reserved for sidebar brand only)
 
 ```
-h2: font-serif text-2xl font-medium tracking-tight
+h2: text-xl sm:text-2xl font-semibold tracking-tight text-warm-text
 subtitle: text-sm text-warm-muted mt-1.5
+```
+
+---
+
+### PageContainer
+
+**File:** `src/components/ui/PageContainer.jsx`  
+**Role:** Centered content column — desktop layout constraint
+
+```
+wrapper: mx-auto w-full px-4 sm:px-6
+default: md:max-w-[800px] — Flow, Review
+kanban: md:max-w-5xl — Kanban tab
+```
+
+---
+
+### PanelList
+
+**File:** `src/components/ui/PanelList.jsx`  
+**Role:** Shared list panel — inbox rows, pull queue, flow status sidebar
+
+```
+PanelList: overflow-hidden rounded-2xl border border-cream-dark/50 bg-white shadow-sm
+PanelRow: flex items-center gap-3 px-4 py-3.5; hover:bg-cream/40 when interactive
+divider: mx-4 border-b border-cream-dark/60 (between rows)
+PanelSection: px-4 py-3.5 (static blocks, edit forms)
+PanelDivider: full-width border-b border-cream-dark/60
+```
+
+---
+
+### SectionLabel
+
+**File:** `src/components/ui/SectionLabel.jsx`  
+**Role:** In-tab section headings (WIP, queue, etc.)
+
+```
+text-sm font-medium text-warm-text
+optional suffix: ml-2 font-normal text-warm-muted (e.g. queue count)
 ```
 
 ---
@@ -300,14 +340,27 @@ header h2: font-serif
 ### FlowTab
 
 **File:** `src/components/tabs/FlowTab.jsx`  
-**Role:** Home dashboard — WIP + pull queue + energy + hints
+**Role:** Home dashboard — WIP + pull queue + status panel
 
 ```
-layout: mobile order WIP → Pull → Energy/nudges; md:grid-cols-2 — left: WipSlot + PullQueue; right: EnergySnapshot + FlowHint + StuckNudge
-header: title only «Поток» (no subtitle)
-empty: WipSlot shows «Поток свободен» + priority CTA (lib/flowEmptyState.js); FlowHint hidden
-FlowHint: text link row (warm-muted → accent «Разбор»); shown only when pull queue non-empty
+layout: PageContainer md:max-w-[800px] mx-auto
+  header: TabPageHeader inside container (no full-bleed band)
+  md:grid-cols-[1fr_240px] — left: WipSlot + PullQueue; right: FlowStatusPanel
+mobile: single column stack
+empty: WipSlot shows «Поток свободен» + priority CTA; FlowStatusPanel hints hidden when flow empty
 PullQueue: excludeCardId = suggestedCard?.id (hero dedupe)
+```
+
+---
+
+### FlowStatusPanel
+
+**File:** `src/components/flow/FlowStatusPanel.jsx`  
+**Role:** Right sidebar on Flow — energy + hints in single PanelList
+
+```
+sections: EnergySnapshot (embedded) · optional FlowHint · optional StuckNudge
+dividers between sections when multiple present
 ```
 
 ---
@@ -315,14 +368,13 @@ PullQueue: excludeCardId = suggestedCard?.id (hero dedupe)
 ### WipSlot
 
 **File:** `src/components/flow/WipSlot.jsx`  
-**Role:** Hero WIP zone — active card, recommendation, or empty CTA
+**Role:** WIP zone — active card, recommendation, or empty CTA (no hero shell)
 
 ```
-shell: WipHeroShell — rounded-2xl px-5 py-6; accent states: bg-warm-accent/5 ring-1 ring-warm-accent/15; empty: bg-white/50 only
-labels: font-serif base medium — «Сейчас в работе» (filled) · «Одно дело в единицу времени» (queue-ready) · «Поток свободен» (empty)
-queue-ready: StructuredCard ring-warm-accent/20 + tap + full-width «Начать» (both pull)
-filled: StructuredCard + «Сделано» / «Не актуально» + ⋯ → CardEditSheet
-flow-empty: centered label + CTA card (raw → Разбор · next_week → Канбан · else → Выгрузить)
+labels: SectionLabel — «Сейчас в работе» · «Одно дело в единицу времени» · «Поток свободен»
+queue-ready: StructuredCard ring-warm-accent/20 + full-width «Начать»
+filled: StructuredCard + grid «Сделано» / «Не актуально» + ⋯ → CardEditSheet
+flow-empty: centered label + CTA card
 ```
 
 ---
@@ -330,12 +382,12 @@ flow-empty: centered label + CTA card (raw → Разбор · next_week → К�
 ### PullQueue
 
 **File:** `src/components/flow/PullQueue.jsx`  
-**Role:** Secondary queue list — tap pull, ⋯ edit, WIP gate dialog
+**Role:** Queue list in PanelList — tap row to pull, ⋯ edit
 
 ```
+SectionLabel suffix = count
+PanelList rows: text-sm + QueueChips; dimmed opacity-45 for heavy when depleted
 excludeCardId: skip hero-promoted card; hide section when visible list empty
-no highlight ring — hero handles call-to-action
-dimmed: opacity-45 for heavy cards when energy depleted
 ```
 
 ---
@@ -357,12 +409,13 @@ dimmed: opacity-45 for heavy cards when energy depleted
 ### EnergySnapshot
 
 **File:** `src/components/flow/EnergySnapshot.jsx`  
-**Role:** Compact energy indicator on Flow tab — tap opens EnergyHub
+**Role:** Energy indicator — standalone card or embedded in FlowStatusPanel
 
 ```
-label: «Энергия» (xs muted) above preset name
-preset icons: BatteryFull (brisk) · BatteryMedium (medium) · BatteryLow (depleted)
-depleted: border-warm-accent/20 bg-warm-accent/5
+standalone: rounded-2xl border bg-white shadow-sm (tap opens EnergyHub)
+embedded: full-width row px-4 py-3.5 hover:bg-cream/40 (no outer card chrome)
+preset icons: BatteryFull · BatteryMedium · BatteryLow
+depleted: border-warm-accent/20 bg-warm-accent/5 (standalone) · bg-warm-accent/[0.03] (embedded)
 advice: from energyUtils.getEnergyAdvice
 ```
 
@@ -471,8 +524,9 @@ pre-prompt: bottom sheet on mobile, centered dialog on sm+
 **Role:** Kanban — day/week toggle, KanbanBoard, Elephants badge, Year drill-down
 
 ```
-toggle: inline-flex rounded-lg border p-1 — День · Неделя
-badge: «Слоны →» when elephantsPending
+layout: PageContainer size=kanban md:max-w-5xl mx-auto
+header row: День|Неделя → «Музей побед» (ghost) → «Итоги месяца» (accent pill, elephantsPending only)
+view toggle: segmented control — bg-cream/40 border; active tab bg-white shadow-sm
 ```
 
 ---
@@ -483,11 +537,14 @@ badge: «Слоны →» when elephantsPending
 **Role:** Horizontal sortable columns — touch: tap→MoveCardSheet; fine-pointer desktop: dnd-kit drag; ⋯→edit/move
 
 ```
-columns: day 3 / week 4 (queue, progress, done, next_week)
-order: columnOrder in useCardsStore
+layout: mobile horizontal scroll; md:grid — 3 cols (day) / 4 cols (week)
+column header: text-sm font-medium sans + count pill (rounded-full bg-cream)
+column body: rounded-2xl border bg-white shadow-sm
+empty states: per-column copy (lib/kanbanEmptyState.js); progress accented dashed + warm-accent tint
+empty drag hint: secondary line md+ for queue + progress when drag enabled
+cards: StructuredCard compact shadow-none inside column
 stuck: ring-2 ring-amber-400/60
-WIP gate + drag suspend on progress conflict
-overlay: scale + shadow + accent ring (no rotation)
+drop target: border-warm-accent/40 bg-warm-accent/5
 ```
 
 ---
@@ -504,12 +561,22 @@ overlay: scale + shadow + accent ring (no rotation)
 **File:** `src/components/kanban/ElephantsFlow.jsx`  
 **Role:** 3-step monthly retrospective — done / carry / elephant
 
+```
+title: «Итоги месяца»; step 3 keeps «Слон месяца» metaphor
+link to year board: «Открыть музей побед»
+```
+
 ---
 
 ### YearBoard
 
 **File:** `src/components/kanban/YearBoard.jsx`  
 **Role:** Read-only 12-month «музей побед» with month drill-down
+
+```
+title: «Музей побед» · subtitle «Что уже получилось — по месяцам»
+month drill-down back: «← Музей побед»
+```
 
 ---
 
@@ -543,12 +610,13 @@ title: font-serif «Неделя тишины» + secondary button bg-white shad
 ### ReviewInbox
 
 **File:** `src/components/review/ReviewInbox.jsx`  
-**Role:** Chronological list of `raw` cards — tap inline edit, «Разобрать», ⋯ delete
+**Role:** Chronological raw cards in PanelList — tap edit, pill «Разобрать», ⋯ delete
 
 ```
-card: rounded-xl border border-cream-dark/50 bg-white shadow-sm p-4
-edit: ring-2 ring-warm-accent/20
-«Разобрать»: rounded-lg bg-warm-accent text-xs font-medium
+layout: PageContainer md:max-w-[800px]; TabPageHeader + PanelList mt-6
+row: PanelRow — text flex-1 + rounded-full pill «Разобрать» + ⋯ menu
+edit: PanelSection inline textarea + save/cancel
+no per-item card boxes — single panel with dividers
 ```
 
 ---

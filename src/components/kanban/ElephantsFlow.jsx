@@ -62,8 +62,8 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
         >
           Позже
         </button>
-        <h2 className="m-0 mt-2 font-serif text-xl font-medium text-warm-text">
-          Ретроспектива «Слонов»
+        <h2 className="m-0 mt-2 text-xl font-semibold tracking-tight text-warm-text">
+          Итоги месяца
         </h2>
         <p className="mt-1 text-sm text-warm-muted">
           Шаг {stepIndex + 1} из {STEPS.length}
@@ -142,7 +142,7 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
               Слон месяца
             </p>
             <p className="mt-1 text-sm text-warm-muted">
-              Одно главное достижение — для годовой доски
+              Одно главное достижение — попадёт в музей побед
             </p>
             <textarea
               value={elephantChoice}
@@ -156,7 +156,7 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
               onClick={onOpenYear}
               className="mt-3 text-sm text-warm-accent hover:underline"
             >
-              Открыть годовую доску
+              Открыть музей побед
             </button>
           </>
         )}
