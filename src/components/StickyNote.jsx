@@ -68,8 +68,8 @@ export default function StickyNote({
     dragStart.current = {
       pointerX: e.clientX,
       pointerY: e.clientY,
-      cardX: card.x,
-      cardY: card.y,
+      cardX: card.x ?? 0,
+      cardY: card.y ?? 0,
     }
   }
 
@@ -120,8 +120,8 @@ export default function StickyNote({
     }
   }
 
-  const x = card.x + offset.x
-  const y = card.y + offset.y
+  const x = (card.x ?? 0) + offset.x
+  const y = (card.y ?? 0) + offset.y
   const isRaised = isDragging || isEditing
 
   return (

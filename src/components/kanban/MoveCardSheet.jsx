@@ -1,7 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import clsx from 'clsx'
+import { resolveKanbanColumn } from '../../lib/kanbanUtils'
 
 export default function MoveCardSheet({ card, columns, open, onClose, onMove }) {
   if (!card) return null
+
+  const currentColumnId = resolveKanbanColumn(card)
 
   return (
     <AnimatePresence>
@@ -34,16 +38,30 @@ export default function MoveCardSheet({ card, columns, open, onClose, onMove }) 
             </p>
 
             <div className="mt-4 flex flex-col gap-2">
-              {columns.map((col) => (
-                <button
-                  key={col.id}
-                  type="button"
-                  onClick={() => onMove(col.id)}
-                  className="rounded-lg border border-cream-dark px-4 py-3 text-left text-sm text-warm-text transition-colors hover:bg-cream-dark"
-                >
-                  {col.label}
-                </button>
-              ))}
+              {columns.map((col) => {
+                const isCurrent = col.id === currentColumnId
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    disabled={isCurrent}
+                    onClick={() => onMove(col.id)}
+                    className={clsx(
+                      'rounded-lg border px-4 py-3 text-left text-sm transition-colors',
+                      isCurrent
+                        ? 'cursor-default border-cream-dark/60 bg-cream/40 text-warm-muted'
+                        : 'border-cream-dark text-warm-text hover:bg-cream-dark',
+                    )}
+                  >
+                    {col.label}
+                    {isCurrent && (
+                      <span className="ml-2 text-xs text-warm-muted">
+                        (сейчас)
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
           </motion.div>
         </motion.div>

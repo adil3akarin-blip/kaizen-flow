@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { mockCards } from '../data/mockCards'
-import { createCard } from '../lib/cardUtils'
+import { createCard, generatePosition } from '../lib/cardUtils'
 import { sanitizeCardsOnLoad } from '../lib/cardSanitize'
 import { selectWipCard } from '../lib/cardSelectors'
 import { hapticTap } from '../lib/haptics'
@@ -281,10 +281,17 @@ export const useCardsStore = create((set, get) => ({
   moveKanbanCard: (id, columnId, options = {}) => {
     const cards = get().cards
     const card = cards.find((c) => c.id === id)
-    if (!card) return { ok: false }
+    if (!card) return { ok: false, reason: 'not-found' }
+    if (!['filtered', 'wip', 'done'].includes(card.status)) {
+      return { ok: false, reason: 'invalid-status' }
+    }
 
     const fromColumn = resolveKanbanColumn(card)
     const { via = 'sheet', index } = options
+
+    if (fromColumn === columnId && via !== 'drag') {
+      return { ok: true, noop: true }
+    }
 
     if (columnId === IN_PROGRESS_COLUMN) {
       const wip = selectWipCard(cards)
@@ -328,25 +335,35 @@ export const useCardsStore = create((set, get) => ({
   },
 
   returnCardToInbox: (id) => {
-    set((state) => ({
-      columnOrder: removeIdFromColumnOrder(state.columnOrder, id),
-      cards: state.cards.map((c) => {
-        if (c.id !== id) return c
-        const next = {
-          ...c,
-          status: 'raw',
-          wantMust: null,
-          missionCriteriaResults: [],
-          timeInvestment: null,
-          energyCost: null,
-          resultEffort: null,
-          rotation: 0,
-        }
-        delete next.x
-        delete next.y
-        return next
-      }),
-    }))
+    set((state) => {
+      const existingRaw = state.cards.filter(
+        (c) =>
+          c.status === 'raw' &&
+          c.id !== id &&
+          typeof c.x === 'number' &&
+          typeof c.y === 'number',
+      )
+      const position = generatePosition(existingRaw)
+
+      return {
+        columnOrder: removeIdFromColumnOrder(state.columnOrder, id),
+        cards: state.cards.map((c) => {
+          if (c.id !== id) return c
+          return {
+            ...c,
+            status: 'raw',
+            wantMust: null,
+            missionCriteriaResults: [],
+            timeInvestment: null,
+            energyCost: null,
+            resultEffort: null,
+            rotation: 0,
+            x: position.x,
+            y: position.y,
+          }
+        }),
+      }
+    })
   },
 }))
 

@@ -244,7 +244,7 @@ export default function KanbanBoard({ view }) {
   const dragEnabled = useFinePointerDesktop()
   const snapshotRef = useRef(null)
   const isDraggingRef = useRef(false)
-  const dragSuspendRef = useRef(null)
+  const [dndEpoch, setDndEpoch] = useState(0)
   const [moveCardId, setMoveCardId] = useState(null)
   const [editCardId, setEditCardId] = useState(null)
   const [gateOpen, setGateOpen] = useState(false)
@@ -261,20 +261,32 @@ export default function KanbanBoard({ view }) {
     () => selectOrderedPullQueue(cards, columnOrder),
     [cards, columnOrder],
   )
+
+  const liveMoveCard = moveCardId
+    ? kanbanCards.find((c) => c.id === moveCardId) ?? null
+    : null
+  const liveEditCard = editCardId
+    ? kanbanCards.find((c) => c.id === editCardId) ?? null
+    : null
+  const liveGuardCard = guardCard
+    ? kanbanCards.find((c) => c.id === guardCard.id) ?? null
+    : null
+  const wipCard = useMemo(() => selectWipCard(cards), [cards])
+  const gateActive = gateOpen && Boolean(wipCard) && Boolean(liveMoveCard)
+  const guardActive = energyGuardOpen && Boolean(liveGuardCard)
+  const overlayOpen = gateActive || guardActive
+
   const guardAlternatives = useMemo(
-    () => (guardCard ? findLightAlternatives(pullQueue, guardCard.id) : []),
-    [guardCard, pullQueue],
+    () =>
+      liveGuardCard
+        ? findLightAlternatives(pullQueue, liveGuardCard.id)
+        : [],
+    [liveGuardCard, pullQueue],
   )
 
-  const moveCard = moveCardId ? cards.find((c) => c.id === moveCardId) : null
-  const editCard = editCardId ? cards.find((c) => c.id === editCardId) : null
-
-  useEffect(
-    () => () => {
-      dragSuspendRef.current?.abort()
-    },
-    [],
-  )
+  const resetDnd = () => {
+    setDndEpoch((epoch) => epoch + 1)
+  }
 
   useEffect(() => {
     if (isDraggingRef.current) return
@@ -307,10 +319,19 @@ export default function KanbanBoard({ view }) {
   }
 
   const executePendingMoveAfterGuard = (move) => {
+    const card = useCardsStore
+      .getState()
+      .cards.find((item) => item.id === move.cardId)
+    if (!card || !['filtered', 'wip', 'done'].includes(card.status)) {
+      closeEnergyGuard()
+      revertColumnOrderPreview()
+      resetDnd()
+      return
+    }
+
     moveKanbanCard(move.cardId, move.columnId, move.options)
-    dragSuspendRef.current?.resume()
-    dragSuspendRef.current = null
     snapshotRef.current = null
+    resetDnd()
   }
 
   const maybeShowEnergyGuard = (cardId, columnId, options) => {
@@ -328,7 +349,17 @@ export default function KanbanBoard({ view }) {
   }
 
   const attemptMove = (cardId, columnId, options = { via: 'sheet' }) => {
+    const card = useCardsStore.getState().cards.find((item) => item.id === cardId)
+    if (!card || !['filtered', 'wip', 'done'].includes(card.status)) {
+      clearPendingMove()
+      return { ok: false, reason: 'not-found' }
+    }
+
     const result = moveKanbanCard(cardId, columnId, options)
+    if (result.noop) {
+      clearPendingMove()
+      return result
+    }
     if (!result.ok && result.reason === 'wip-full') {
       setMoveCardId(cardId)
       setPendingColumn(columnId)
@@ -344,6 +375,16 @@ export default function KanbanBoard({ view }) {
   const finishPendingMove = () => {
     if (!moveCardId || pendingColumn == null) return
 
+    const card = useCardsStore
+      .getState()
+      .cards.find((item) => item.id === moveCardId)
+    if (!card || !['filtered', 'wip', 'done'].includes(card.status)) {
+      clearPendingMove()
+      revertColumnOrderPreview()
+      resetDnd()
+      return
+    }
+
     const options = {
       via: pendingVia,
       ...(typeof pendingIndex === 'number' ? { index: pendingIndex } : {}),
@@ -358,9 +399,8 @@ export default function KanbanBoard({ view }) {
     }
 
     moveKanbanCard(cardId, columnId, options)
-    dragSuspendRef.current?.resume()
-    dragSuspendRef.current = null
     snapshotRef.current = null
+    resetDnd()
   }
 
   const handleGateComplete = () => {
@@ -382,9 +422,8 @@ export default function KanbanBoard({ view }) {
   const handleGateCancel = () => {
     setGateOpen(false)
     revertColumnOrderPreview()
-    dragSuspendRef.current?.abort()
-    dragSuspendRef.current = null
     clearPendingMove()
+    resetDnd()
   }
 
   const handleDragStart = () => {
@@ -448,13 +487,12 @@ export default function KanbanBoard({ view }) {
       const wip = cards.find((c) => c.status === 'wip')
       if (wip && wip.id !== cardId) {
         setColumnOrder(snapshot)
-        const suspended = event.suspend()
-        dragSuspendRef.current = suspended
         setMoveCardId(cardId)
         setPendingColumn(final.columnId)
         setPendingIndex(final.index)
         setPendingVia('drag')
         setGateOpen(true)
+        snapshotRef.current = null
         return
       }
 
@@ -488,6 +526,7 @@ export default function KanbanBoard({ view }) {
   return (
     <>
       <DragDropProvider
+        key={dndEpoch}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
@@ -496,7 +535,6 @@ export default function KanbanBoard({ view }) {
           className={clsx(
             'flex w-max min-w-full snap-x snap-mandatory gap-3 pb-2 pr-4 sm:gap-4 md:w-full md:snap-none md:pr-0',
             view === 'day' ? 'md:grid md:grid-cols-3' : 'md:grid md:grid-cols-4',
-            (gateOpen || energyGuardOpen) && 'invisible',
           )}
         >
           {columns.map((column) => (
@@ -516,7 +554,7 @@ export default function KanbanBoard({ view }) {
           ))}
         </div>
 
-        <DragOverlay disabled={!dragEnabled || gateOpen}>
+        <DragOverlay disabled={!dragEnabled || overlayOpen}>
           {(source) => {
             const card = kanbanCards.find((c) => c.id === source.id)
             if (!card) return null
@@ -532,33 +570,32 @@ export default function KanbanBoard({ view }) {
       </DragDropProvider>
 
       <MoveCardSheet
-        card={moveCard}
+        card={liveMoveCard}
         columns={columns}
-        open={Boolean(moveCard) && !gateOpen && !energyGuardOpen}
+        open={Boolean(liveMoveCard) && !overlayOpen}
         onClose={clearPendingMove}
         onMove={(columnId) => {
-          if (!moveCard) return
+          if (!liveMoveCard) return
 
           if (
             columnId === IN_PROGRESS_COLUMN &&
-            maybeShowEnergyGuard(moveCard.id, columnId, { via: 'sheet' })
+            maybeShowEnergyGuard(liveMoveCard.id, columnId, { via: 'sheet' })
           ) {
             return
           }
 
-          attemptMove(moveCard.id, columnId, { via: 'sheet' })
+          attemptMove(liveMoveCard.id, columnId, { via: 'sheet' })
         }}
       />
 
       <CardEditSheet
-        card={editCard}
-        open={Boolean(editCard)}
+        card={liveEditCard}
+        open={Boolean(liveEditCard)}
         onClose={() => setEditCardId(null)}
         onMove={
-          editCard &&
-          ['filtered', 'wip', 'done'].includes(editCard.status)
+          liveEditCard
             ? () => {
-                setMoveCardId(editCard.id)
+                setMoveCardId(liveEditCard.id)
                 setEditCardId(null)
               }
             : undefined
@@ -566,15 +603,15 @@ export default function KanbanBoard({ view }) {
       />
 
       <WipGateDialog
-        open={gateOpen}
+        open={gateActive}
         onComplete={handleGateComplete}
         onRelease={handleGateRelease}
         onCancel={handleGateCancel}
       />
 
       <EnergyGuardDialog
-        open={energyGuardOpen}
-        card={guardCard}
+        open={guardActive}
+        card={liveGuardCard}
         alternatives={guardAlternatives}
         onPullAlternative={(id) => {
           closeEnergyGuard()
@@ -591,8 +628,7 @@ export default function KanbanBoard({ view }) {
             setColumnOrder(snapshotRef.current)
             snapshotRef.current = null
           }
-          dragSuspendRef.current?.abort()
-          dragSuspendRef.current = null
+          resetDnd()
         }}
       />
     </>

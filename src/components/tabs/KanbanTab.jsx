@@ -4,6 +4,7 @@ import { Kanban } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useAppStore } from '../../store/useAppStore'
 import { selectKanbanCards } from '../../lib/cardSelectors'
+import { selectNextWeekCount } from '../../lib/flowEmptyState'
 import TabPageHeader from '../ui/TabPageHeader'
 import PageContainer from '../ui/PageContainer'
 import EmptyState from '../ui/EmptyState'
@@ -25,6 +26,7 @@ export default function KanbanTab() {
   const [showYear, setShowYear] = useState(false)
 
   const kanbanCards = useMemo(() => selectKanbanCards(cards), [cards])
+  const nextWeekCount = useMemo(() => selectNextWeekCount(cards), [cards])
 
   if (showYear) {
     return <YearBoard onBack={() => setShowYear(false)} />
@@ -96,6 +98,22 @@ export default function KanbanTab() {
               )}
             </div>
           </div>
+
+          {view === 'day' && nextWeekCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setView('week')}
+              className="mt-4 w-full rounded-xl border border-dashed border-warm-accent/30 bg-warm-accent/[0.04] px-4 py-3 text-left text-sm text-warm-muted transition-colors hover:bg-warm-accent/[0.08]"
+            >
+              {nextWeekCount === 1
+                ? '1 дело отложено на след. неделю'
+                : nextWeekCount < 5
+                  ? `${nextWeekCount} дела отложено на след. неделю`
+                  : `${nextWeekCount} дел отложено на след. неделю`}
+              {' — '}
+              <span className="text-warm-accent">смотреть в виде «Неделя»</span>
+            </button>
+          )}
 
           <div className="mt-6 min-h-0 flex-1 overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch] md:overflow-x-visible">
             {kanbanCards.length > 0 ? (

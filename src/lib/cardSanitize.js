@@ -3,8 +3,15 @@ import {
   pickRandomColor,
   randomRotation,
 } from './cardUtils'
+import { DONE_COLUMN, IN_PROGRESS_COLUMN } from './kanbanUtils'
 
 const VALID_STATUSES = new Set(['raw', 'filtered', 'wip', 'done'])
+const VALID_KANBAN_COLUMNS = new Set([
+  'queue',
+  IN_PROGRESS_COLUMN,
+  DONE_COLUMN,
+  'next_week',
+])
 
 function hasCanvasPosition(card) {
   return (
@@ -39,10 +46,22 @@ export function sanitizeCardsOnLoad(cards) {
         }
       } else {
         wipKept = true
-        if (!next.kanbanColumn) {
-          next.kanbanColumn = 'progress'
-        }
+        next.kanbanColumn = IN_PROGRESS_COLUMN
       }
+    }
+
+    if (next.status === 'filtered') {
+      if (
+        !next.kanbanColumn ||
+        !VALID_KANBAN_COLUMNS.has(next.kanbanColumn) ||
+        next.kanbanColumn === IN_PROGRESS_COLUMN
+      ) {
+        next.kanbanColumn = 'queue'
+      }
+    }
+
+    if (next.status === 'done') {
+      next.kanbanColumn = DONE_COLUMN
     }
 
     return next
