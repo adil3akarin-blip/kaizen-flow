@@ -174,7 +174,6 @@ export const useCardsStore = create((set, get) => ({
  ...c,
  status: 'filtered',
  rotation: 0,
- energyCost: c.energyCost || 'medium',
  kanbanColumn: 'queue',
  stuckSince: Date.now(),
  }
@@ -197,8 +196,6 @@ export const useCardsStore = create((set, get) => ({
  wantMust: null,
  missionCriteriaResults: [],
  timeInvestment: null,
- energyCost: null,
- resultEffort: null,
  }
  }),
  }))
@@ -359,8 +356,6 @@ export const useCardsStore = create((set, get) => ({
  wantMust: null,
  missionCriteriaResults: [],
  timeInvestment: null,
- energyCost: null,
- resultEffort: null,
  rotation: 0,
  x: position.x,
  y: position.y,

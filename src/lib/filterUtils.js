@@ -12,7 +12,7 @@ const FILTER_HINT_KEY = 'kaizenflow-filter-count'
 export function buildFilterCriteria(personalMission, customCriteria = []) {
  const primary = personalMission?.trim()
  ? { id: 'mission', label: `Это про «${personalMission.trim()}»?` }
- : { id: 'energy-fallback', label: 'Стоит ли это моей энергии?' }
+ : { id: 'value-fallback', label: 'Это приближает меня к цели?' }
 
  return [primary, ...customCriteria.slice(0, 5)]
 }
@@ -42,8 +42,6 @@ export function buildFilterDraft(card, criteria) {
  wantMust: card.wantMust ?? null,
  missionCriteriaResults,
  timeInvestment: card.timeInvestment ?? null,
- energyCost: card.energyCost ?? null,
- resultEffort: card.resultEffort ?? null,
  }
 }
 

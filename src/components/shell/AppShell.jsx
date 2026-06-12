@@ -4,14 +4,16 @@ import Sidebar from './Sidebar'
 import DumpOverlay from './DumpOverlay'
 import ManifestScreen from '../onboarding/ManifestScreen'
 import SettingsScreen from '../settings/SettingsScreen'
-import FlowTab from '../tabs/FlowTab'
+import TodayTab from '../tabs/TodayTab'
 import ReviewTab from '../tabs/ReviewTab'
 import KanbanTab from '../tabs/KanbanTab'
+import ProgressTab from '../tabs/ProgressTab'
 
 const TAB_CONTENT = {
- [TABS.flow]: FlowTab,
+ [TABS.today]: TodayTab,
  [TABS.review]: ReviewTab,
  [TABS.kanban]: KanbanTab,
+ [TABS.progress]: ProgressTab,
  [TABS.settings]: SettingsScreen,
 }
 

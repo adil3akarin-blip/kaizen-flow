@@ -6,14 +6,15 @@ import {
 } from '../lib/reviewUtils'
 
 export const TABS = {
- flow: 'flow',
+ today: 'today',
  review: 'review',
  kanban: 'kanban',
+ progress: 'progress',
  settings: 'settings',
 }
 
 export const useAppStore = create((set) => ({
- activeTab: TABS.flow,
+ activeTab: TABS.today,
  dumpOpen: false,
  onboardingComplete: localStorage.getItem('kaizenflow-onboarding') === '1',
  silenceWeek: localStorage.getItem('kaizenflow-silence-week') === '1',

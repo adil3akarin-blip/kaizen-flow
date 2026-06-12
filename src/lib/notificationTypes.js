@@ -27,13 +27,6 @@ export const NOTIFICATION_TYPES = [
  example: '«Как дела с потоком?»',
  defaultEnabled: false,
  },
- {
- id: 'energy',
- label: 'Проверка энергии',
- when: 'Когда ресурс давно не обновлялся',
- example: '«Как ресурс? Загляни в хаб энергии»',
- defaultEnabled: false,
- },
 ]
 
 export function buildDefaultNotificationPrefs() {

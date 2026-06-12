@@ -1,6 +1,5 @@
 const CARDS_KEY = 'kaizenflow-cards'
 const CARDS_BACKUP_KEY = 'kaizenflow-cards-backup'
-const ENERGY_KEY = 'kaizenflow-energy'
 
 let quotaToastShown = false
 
@@ -41,9 +40,11 @@ export function saveCardsPersisted(cards, columnOrder) {
   }
 }
 
-export function loadEnergyPersisted() {
+// Generic JSON persistence for non-critical local stores (timer, habits).
+// Reads degrade to null; writes degrade silently (quota / private mode).
+export function loadJsonPersisted(key) {
   try {
-    const raw = localStorage.getItem(ENERGY_KEY)
+    const raw = localStorage.getItem(key)
     if (!raw) return null
 
     const data = JSON.parse(raw)
@@ -55,11 +56,11 @@ export function loadEnergyPersisted() {
   }
 }
 
-export function saveEnergyPersisted(data) {
+export function saveJsonPersisted(key, data) {
   try {
-    localStorage.setItem(ENERGY_KEY, JSON.stringify(data))
+    localStorage.setItem(key, JSON.stringify(data))
   } catch {
-    // quota or private mode — energy is non-critical, degrade silently
+    // non-critical store — degrade silently
   }
 }
 

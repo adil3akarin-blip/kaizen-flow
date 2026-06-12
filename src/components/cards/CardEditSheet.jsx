@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCardsStore } from '../../store/useCardsStore'
 import StructuredCard from './StructuredCard'
-import { ResultEffortSummary } from '../flow/ResultEffortCalculator'
 
 export default function CardEditSheet({ card, open, onClose, onMove }) {
  const updateCardText = useCardsStore((s) => s.updateCardText)
@@ -89,13 +88,6 @@ function CardEditSheetContent({
  <div className="mt-4">
  <StructuredCard card={card} compact />
  </div>
-
- {card.resultEffort && (
- <ResultEffortSummary
- resultEffort={card.resultEffort}
- className="mt-4"
- />
- )}
 
  <textarea
  value={text}

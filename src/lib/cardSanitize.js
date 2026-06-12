@@ -28,6 +28,10 @@ export function sanitizeCardsOnLoad(cards) {
  const normalized = cards.map((card) => {
  let next = { ...card }
 
+ // Soft migration: drop removed Power Management fields from older data.
+ delete next.energyCost
+ delete next.resultEffort
+
  if (!VALID_STATUSES.has(next.status)) {
  next.status = 'raw'
  }

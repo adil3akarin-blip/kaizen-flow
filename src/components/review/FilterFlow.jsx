@@ -14,15 +14,8 @@ import {
   shouldShowSwipeHint,
 } from '../../lib/filterUtils'
 import StructuredCard from '../cards/StructuredCard'
-import ResultEffortCalculator from '../flow/ResultEffortCalculator'
 
 const SWIPE_THRESHOLD = 72
-
-const ENERGY_OPTIONS = [
-  { id: 'light', label: 'Лёгкое' },
-  { id: 'medium', label: 'Среднее' },
-  { id: 'heavy', label: 'Тяжёлое' },
-]
 
 function SwipeCard({ children, onSwipeLeft, onSwipeRight, hint }) {
   return (
@@ -84,7 +77,6 @@ export default function FilterFlow({ cardId, onClose }) {
 
   const [step, setStep] = useState(() => (card ? resolveFilterStep(card, criteria) : 0))
   const [draft, setDraft] = useState(() => initialDraft ?? buildFilterDraft({}, criteria))
-  const [showCalculator, setShowCalculator] = useState(false)
   const showHint = shouldShowSwipeHint()
 
   if (!card || card.status !== 'raw' || !initialDraft) return null
@@ -129,7 +121,7 @@ export default function FilterFlow({ cardId, onClose }) {
   }
 
   const handleCommit = () => {
-    updateCardFilterFields(cardId, { ...draft, energyCost: draft.energyCost || 'medium' })
+    updateCardFilterFields(cardId, { ...draft })
     const result = commitCardToPull(cardId)
     if (!result.ok) return
     hapticTap()
@@ -240,7 +232,7 @@ export default function FilterFlow({ cardId, onClose }) {
 
         {showFinalStep && (
           <div className="mx-auto flex w-full max-w-md flex-col gap-6">
-            <StructuredCard card={{ ...card, ...draft, energyCost: draft.energyCost || 'medium' }} />
+            <StructuredCard card={{ ...card, ...draft }} />
 
             <div>
               <p className="m-0 text-xs font-semibold uppercase tracking-wider text-ink-faint">
@@ -263,49 +255,6 @@ export default function FilterFlow({ cardId, onClose }) {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div>
-              <p className="m-0 text-xs font-semibold uppercase tracking-wider text-ink-faint">
-                Энергозатратность
-              </p>
-              <div className="mt-2 flex rounded-xl bg-sunken p-1">
-                {ENERGY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => patchDraft({ energyCost: draft.energyCost === opt.id ? null : opt.id })}
-                    className={clsx(
-                      'flex-1 rounded-lg py-1.5 text-xs font-medium transition',
-                      (draft.energyCost || 'medium') === opt.id
-                        ? 'bg-surface text-ink shadow-sm'
-                        : 'text-ink-muted hover:text-ink',
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              {draft.energyCost === 'heavy' && (
-                <button
-                  type="button"
-                  onClick={() => setShowCalculator((v) => !v)}
-                  className="mt-2 text-xs text-accent hover:underline"
-                >
-                  Оценить результат / затраты
-                </button>
-              )}
-              {showCalculator && (
-                <ResultEffortCalculator
-                  value={draft.resultEffort}
-                  onSave={(resultEffort) => patchDraft({ resultEffort })}
-                  onClose={() => setShowCalculator(false)}
-                  showSuggestions
-                  onSuggestUnclear={handleUnclear}
-                  onSuggestRelease={handleRelease}
-                  className="mt-4"
-                />
-              )}
             </div>
 
             <div className="flex flex-col gap-2">

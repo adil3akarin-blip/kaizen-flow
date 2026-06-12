@@ -6,12 +6,6 @@ const WANT_LABELS = {
  unknown: 'Не знаю',
 }
 
-const ENERGY_LABELS = {
- light: 'Лёгкое',
- medium: 'Среднее',
- heavy: 'Тяжёлое',
-}
-
 const TONE_CLASS = {
  indigo: 'border-indigo/20 bg-indigo/10 text-indigo',
  orange: 'border-accent/20 bg-accent-soft text-accent',
@@ -24,9 +18,6 @@ export default function StructuredCard({ card, className, compact = false }) {
 
  if (card.wantMust) {
  chips.push({ key: 'want', label: WANT_LABELS[card.wantMust], tone: 'indigo' })
- }
- if (card.energyCost && card.energyCost !== 'medium') {
- chips.push({ key: 'energy', label: ENERGY_LABELS[card.energyCost], tone: 'orange' })
  }
  if (card.timeInvestment) {
  chips.push({ key: 'invest', label: card.timeInvestment, tone: 'teal' })

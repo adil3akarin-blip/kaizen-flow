@@ -1,13 +1,14 @@
 import { useEffect, useMemo } from 'react'
 import clsx from 'clsx'
-import { Kanban, Inbox, Plus, Settings, Workflow } from 'lucide-react'
+import { BarChart3, Kanban, Inbox, Plus, Settings, Target, Workflow } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
 import { useCardsStore } from '../../store/useCardsStore'
 
 const NAV_ITEMS = [
-  { id: TABS.flow, label: 'Поток', icon: Workflow },
-  { id: TABS.review, label: 'Разбор', icon: Inbox },
+  { id: TABS.today, label: 'Сегодня', icon: Target },
   { id: TABS.kanban, label: 'Канбан', icon: Kanban },
+  { id: TABS.review, label: 'Разбор', icon: Inbox },
+  { id: TABS.progress, label: 'Прогресс', icon: BarChart3 },
 ]
 
 export default function Sidebar() {

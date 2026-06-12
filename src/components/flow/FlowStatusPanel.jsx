@@ -1,4 +1,3 @@
-import EnergySnapshot from './EnergySnapshot'
 import StuckNudge from './StuckNudge'
 
 function FlowHint({ rawCount, onGoReview }) {
@@ -23,14 +22,12 @@ function FlowHint({ rawCount, onGoReview }) {
   )
 }
 
-export default function FlowStatusPanel({ onOpenHub, rawCount, onGoReview, stuckCards, showHints }) {
+export default function FlowStatusPanel({ rawCount, onGoReview, stuckCards, showHints }) {
   const hasHint = showHints && rawCount > 0
   const hasStuck = stuckCards.length > 0
 
   return (
     <div className="flex flex-col gap-3">
-      <EnergySnapshot onOpenHub={onOpenHub} />
-
       {hasStuck && (
         <div className="flex items-center gap-2 rounded-xl bg-warn-soft px-4 py-3">
           <StuckNudge stuckCards={stuckCards} />

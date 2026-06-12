@@ -1,12 +1,12 @@
 import clsx from 'clsx'
-import { Inbox, Kanban, Plus, Settings, Workflow } from 'lucide-react'
+import { BarChart3, Inbox, Kanban, Plus, Target } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
 
 const NAV_ITEMS = [
-  { id: TABS.flow, label: 'Поток', icon: Workflow },
-  { id: TABS.review, label: 'Разбор', icon: Inbox },
+  { id: TABS.today, label: 'Сегодня', icon: Target },
   { id: TABS.kanban, label: 'Канбан', icon: Kanban },
-  { id: TABS.settings, label: 'Ещё', icon: Settings },
+  { id: TABS.review, label: 'Разбор', icon: Inbox },
+  { id: TABS.progress, label: 'Прогресс', icon: BarChart3 },
 ]
 
 export default function TabBar() {
@@ -31,17 +31,14 @@ export default function TabBar() {
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id
-          const isSilenced =
-            silenceWeek &&
-            item.id !== TABS.review &&
-            item.id !== TABS.settings
+          const isSilenced = silenceWeek && item.id !== TABS.review
 
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => setTab(item.id)}
-              aria-label={item.id === TABS.settings ? 'Настройки' : item.label}
+              aria-label={item.label}
               className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 pt-1 text-[11px] transition-colors"
             >
               {isActive && (
