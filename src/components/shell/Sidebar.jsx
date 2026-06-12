@@ -66,25 +66,21 @@ export default function Sidebar() {
  type="button"
  onClick={() => setTab(item.id)}
  className={clsx(
- 'flex items-center gap-2.5 rounded-lg border-l-2 px-3 py-2.5 text-left text-sm transition-colors',
+ 'flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
  isActive
- ? 'border-accent bg-white font-medium text-ink shadow-sm'
+ ? 'bg-accent-soft font-medium text-accent'
  : clsx(
- 'border-transparent hover:bg-white/60 hover:text-ink',
- isSilenced ? 'text-ink/55' : 'text-ink/80',
+ 'hover:bg-sunken hover:text-ink',
+ isSilenced ? 'text-ink-faint/60' : 'text-ink-muted',
  ),
  )}
  >
  <Icon
  className={clsx(
  'h-4 w-4 shrink-0',
- isActive
- ? 'text-accent'
- : isSilenced
- ? 'text-ink/50'
- : 'text-ink/65',
+ isActive ? 'text-accent' : 'text-ink-faint',
  )}
- strokeWidth={1.75}
+ strokeWidth={isActive ? 2 : 1.75}
  />
  {item.label}
  {item.id === TABS.review && rawCount > 0 && (
@@ -111,10 +107,10 @@ export default function Sidebar() {
  type="button"
  onClick={() => setTab(TABS.settings)}
  className={clsx(
- 'mt-auto flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+ 'mt-auto flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
  activeTab === TABS.settings
- ? 'bg-white font-medium text-ink shadow-sm'
- : 'text-ink/80 hover:bg-white/60 hover:text-ink',
+ ? 'bg-accent-soft font-medium text-accent'
+ : 'text-ink-muted hover:bg-sunken hover:text-ink',
  )}
  >
  <Settings className="h-4 w-4 shrink-0" strokeWidth={1.75} />
