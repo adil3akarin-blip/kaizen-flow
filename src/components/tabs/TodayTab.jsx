@@ -15,6 +15,7 @@ import PageContainer from '../ui/PageContainer'
 import FlowStatusPanel from '../flow/FlowStatusPanel'
 import WipSlot from '../flow/WipSlot'
 import PullQueue from '../flow/PullQueue'
+import TodayHabits from '../today/TodayHabits'
 
 export default function TodayTab() {
  const [queueOverlayOpen, setQueueOverlayOpen] = useState(false)
@@ -90,6 +91,7 @@ export default function TodayTab() {
  excludeCardId={suggestedCard?.id}
  onGateOpenChange={setQueueOverlayOpen}
  />
+ <TodayHabits />
  </div>
 
  <div className="order-2 flex flex-col md:col-start-2 md:min-h-0 md:overflow-y-auto">
