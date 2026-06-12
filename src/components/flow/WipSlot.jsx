@@ -5,6 +5,7 @@ import { selectWipCard } from '../../lib/cardSelectors'
 import StructuredCard from '../cards/StructuredCard'
 import CardEditSheet from '../cards/CardEditSheet'
 import SectionLabel from '../ui/SectionLabel'
+import FocusTimer from '../today/FocusTimer'
 
 export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
   const cards = useCardsStore((s) => s.cards)
@@ -83,6 +84,10 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
         >
           <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
         </button>
+      </div>
+
+      <div className="mt-4">
+        <FocusTimer cardId={wipCard.id} />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">

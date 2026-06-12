@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useTimerStore } from './useTimerStore'
 import { createCard, generatePosition } from '../lib/cardUtils'
 import { sanitizeCardsOnLoad } from '../lib/cardSanitize'
 import { selectWipCard } from '../lib/cardSelectors'
@@ -71,6 +72,8 @@ export const useCardsStore = create((set, get) => ({
  removeCard: (id) => {
  const card = get().cards.find((c) => c.id === id)
  if (!card) return
+
+ useTimerStore.getState().finalizeForCard(id)
 
  set((state) => ({
  cards: state.cards.filter((c) => c.id !== id),
@@ -234,6 +237,8 @@ export const useCardsStore = create((set, get) => ({
  const wip = selectWipCard(get().cards)
  if (!wip) return
 
+ useTimerStore.getState().finalizeForCard(wip.id)
+
  set((state) => ({
  columnOrder: moveInColumnOrder(state.columnOrder, wip.id, DONE_COLUMN, {
  via: 'sheet',
@@ -261,6 +266,8 @@ export const useCardsStore = create((set, get) => ({
  releaseWip: () => {
  const wip = selectWipCard(get().cards)
  if (!wip) return
+
+ useTimerStore.getState().finalizeForCard(wip.id)
 
  set((state) => ({
  columnOrder: moveInColumnOrder(state.columnOrder, wip.id, 'queue', {
@@ -303,6 +310,10 @@ export const useCardsStore = create((set, get) => ({
  const stuckSince = shouldResetStuckSince(columnId)
  ? Date.now()
  : card.stuckSince || Date.now()
+
+ if (card.status === 'wip' && columnId !== IN_PROGRESS_COLUMN) {
+ useTimerStore.getState().finalizeForCard(id)
+ }
 
  set((state) => ({
  columnOrder: moveInColumnOrder(state.columnOrder, id, columnId, {

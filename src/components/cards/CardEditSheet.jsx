@@ -1,7 +1,50 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCardsStore } from '../../store/useCardsStore'
+import { useTimerStore } from '../../store/useTimerStore'
+import { cardTotalMs, formatClock, formatDuration, localDateKey, sessionsForCard } from '../../lib/timerUtils'
 import StructuredCard from './StructuredCard'
+
+function formatSessionDate(ts) {
+  const d = new Date(ts)
+  const today = localDateKey(Date.now())
+  if (localDateKey(ts) === today) {
+    return `Сегодня ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+}
+
+function TimerHistory({ cardId }) {
+  const sessions = useTimerStore((s) => s.sessions)
+  const cardSessions = sessionsForCard(sessions, cardId)
+  if (cardSessions.length === 0) return null
+
+  const total = cardTotalMs(sessions, cardId)
+
+  return (
+    <div className="mt-4 rounded-xl border border-line/60 bg-canvas/40 px-4 py-3">
+      <div className="flex items-center justify-between">
+        <p className="m-0 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+          Время на задаче
+        </p>
+        <p className="m-0 text-sm font-semibold tabular-nums text-ink">
+          {formatDuration(total)}
+        </p>
+      </div>
+      <ul className="mt-2 flex list-none flex-col gap-1 p-0">
+        {cardSessions.slice(0, 6).map((s) => (
+          <li key={s.id} className="flex items-center justify-between text-xs text-ink-muted">
+            <span>
+              {formatSessionDate(s.startedAt)}
+              {s.pomodorosCompleted > 0 && ` · 🍅 ${s.pomodorosCompleted}`}
+            </span>
+            <span className="tabular-nums">{formatClock(s.durationMs)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 export default function CardEditSheet({ card, open, onClose, onMove }) {
  const updateCardText = useCardsStore((s) => s.updateCardText)
@@ -88,6 +131,8 @@ function CardEditSheetContent({
  <div className="mt-4">
  <StructuredCard card={card} compact />
  </div>
+
+ <TimerHistory cardId={card.id} />
 
  <textarea
  value={text}
