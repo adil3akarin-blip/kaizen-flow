@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { mockCards } from '../data/mockCards'
 import { createCard, generatePosition } from '../lib/cardUtils'
 import { sanitizeCardsOnLoad } from '../lib/cardSanitize'
 import { selectWipCard } from '../lib/cardSelectors'
@@ -36,14 +35,9 @@ function getInitialCardsState() {
  return { cards, columnOrder }
  }
 
- const onboardingDone = localStorage.getItem('kaizenflow-onboarding') === '1'
- const cards = onboardingDone
- ? mockCards.map((c) => ({ status: 'raw', ...c }))
- : []
-
  return {
- cards,
- columnOrder: buildColumnOrderFromCards(cards),
+ cards: [],
+ columnOrder: buildColumnOrderFromCards([]),
  }
 }
 
@@ -99,20 +93,30 @@ export const useCardsStore = create((set, get) => ({
  if (!pendingDelete) return
 
  const { card } = pendingDelete
- const isKanban = ['filtered', 'wip', 'done'].includes(card.status)
- const columnId = isKanban ? resolveKanbanColumn(card) : null
+ const currentWip = selectWipCard(get().cards)
+
+ // C1: if the restored card was WIP and WIP slot is now occupied, restore it to queue
+ let restoredCard = card
+ let targetColumn = ['filtered', 'wip', 'done'].includes(card.status)
+ ? resolveKanbanColumn(card)
+ : null
+
+ if (card.status === 'wip' && currentWip) {
+ restoredCard = { ...card, status: 'filtered', kanbanColumn: 'queue' }
+ targetColumn = 'queue'
+ }
 
  useToastStore.getState().clearToast()
  set((state) => {
  let columnOrder = state.columnOrder
- if (columnId) {
- columnOrder = moveInColumnOrder(columnOrder, card.id, columnId, {
+ if (targetColumn) {
+ columnOrder = moveInColumnOrder(columnOrder, restoredCard.id, targetColumn, {
  via: 'sheet',
  })
  }
 
  return {
- cards: [...state.cards, card],
+ cards: [...state.cards, restoredCard],
  columnOrder,
  pendingDelete: null,
  }

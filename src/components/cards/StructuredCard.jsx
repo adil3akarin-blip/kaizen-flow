@@ -36,7 +36,7 @@ export default function StructuredCard({ card, className, compact = false }) {
  <p
  className={clsx(
  'm-0 break-words leading-snug text-ink',
- compact ? 'text-sm' : 'text-[15px]',
+ compact ? 'text-sm line-clamp-2' : 'text-[15px]',
  )}
  >
  {card.text}

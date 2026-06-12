@@ -7,7 +7,7 @@ export function isCardStuck(card) {
  const column = resolveKanbanColumn(card)
  if (STUCK_EXEMPT.has(column)) return false
  if (!card.stuckSince) return false
- return Date.now() - card.stuckSince >= STUCK_THRESHOLD_MS
+ return Math.max(0, Date.now() - card.stuckSince) >= STUCK_THRESHOLD_MS
 }
 
 export function selectStuckCards(cards) {

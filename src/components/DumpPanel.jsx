@@ -118,6 +118,7 @@ export default function DumpPanel() {
  }
 
  const handleKeyDown = (e) => {
+ if (e.isComposing) return
  if (e.key === 'Enter' && !e.shiftKey) {
  e.preventDefault()
  handleSave()

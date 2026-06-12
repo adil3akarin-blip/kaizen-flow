@@ -52,6 +52,64 @@ function CollapseDialog({ onSave, onDiscard, onCancel }) {
   )
 }
 
+function SplitDialog({ count, onSplit, onKeepOne, onCancel }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-10 flex items-center justify-center bg-ink/10 px-6 backdrop-blur-[2px]"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="w-full rounded-2xl border border-line bg-surface p-5 shadow-(--shadow-float)"
+      >
+        <p className="m-0 text-sm font-medium text-ink">
+          Разбить на {count} мыслей?
+        </p>
+        <p className="mt-1 text-xs text-ink-muted leading-relaxed">
+          Каждый абзац станет отдельной карточкой.
+        </p>
+        <div className="mt-4 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onSplit}
+            className="rounded-xl bg-accent py-2 text-sm font-medium text-white hover:bg-accent-hover active:scale-[0.98] transition"
+          >
+            Разбить
+          </button>
+          <button
+            type="button"
+            onClick={onKeepOne}
+            className="rounded-xl border border-line py-2 text-sm text-ink-muted hover:bg-sunken transition"
+          >
+            Оставить одной
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="py-1 text-xs text-ink-muted hover:text-ink transition"
+          >
+            Продолжить писать
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function getChunks(text) {
+  if (text.includes('\n\n')) {
+    const parts = text.split(/\n\n+/).map((s) => s.trim()).filter(Boolean)
+    if (parts.length >= 2) return parts
+  }
+  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean)
+  if (lines.length >= 3) return lines
+  return null
+}
+
 export default function DumpOverlay() {
   const open = useAppStore((s) => s.dumpOpen)
   const onClose = useAppStore((s) => s.closeDump)
@@ -61,6 +119,7 @@ export default function DumpOverlay() {
   const [text, setText] = useState('')
   const [sessionCount, setSessionCount] = useState(0)
   const [showCollapseDialog, setShowCollapseDialog] = useState(false)
+  const [splitChunks, setSplitChunks] = useState([])
   const [counterFlash, setCounterFlash] = useState(false)
   const inputRef = useRef(null)
   const addCard = useCardsStore((s) => s.addCard)
@@ -79,6 +138,7 @@ export default function DumpOverlay() {
       setText('')
       setSessionCount(0)
       setShowCollapseDialog(false)
+      setSplitChunks([])
       requestAnimationFrame(() => inputRef.current?.focus())
     }
   }, [open])
@@ -90,6 +150,11 @@ export default function DumpOverlay() {
     setText('')
     setTimeout(() => setLastAddedId(null), 800)
     return true
+  }
+
+  const flashCounter = () => {
+    setCounterFlash(true)
+    setTimeout(() => setCounterFlash(false), 600)
   }
 
   const showSavedToast = (count) => {
@@ -112,16 +177,42 @@ export default function DumpOverlay() {
 
   const handleSave = () => {
     if (!text.trim()) return
-    if (!saveCard()) return
 
+    const chunks = getChunks(text.trim())
+    if (chunks) {
+      setSplitChunks(chunks)
+      return
+    }
+
+    if (!saveCard()) return
     const count = sessionCount + 1
     setSessionCount(count)
     showSavedToast(count)
     hapticTap()
+    flashCounter()
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
-    setCounterFlash(true)
-    setTimeout(() => setCounterFlash(false), 600)
+  const handleSplitConfirm = () => {
+    splitChunks.forEach((chunk) => addCard(chunk))
+    setSplitChunks([])
+    setText('')
+    const newCount = sessionCount + splitChunks.length
+    setSessionCount(newCount)
+    showSavedToast(newCount)
+    hapticTap()
+    flashCounter()
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
+  const handleSplitKeepOne = () => {
+    setSplitChunks([])
+    if (!saveCard()) return
+    const count = sessionCount + 1
+    setSessionCount(count)
+    showSavedToast(count)
+    hapticTap()
+    flashCounter()
     requestAnimationFrame(() => inputRef.current?.focus())
   }
 
@@ -129,6 +220,7 @@ export default function DumpOverlay() {
     setText('')
     setSessionCount(0)
     setShowCollapseDialog(false)
+    setSplitChunks([])
     onClose()
   }
 
@@ -148,7 +240,9 @@ export default function DumpOverlay() {
       return
     }
     if (e.key === 'Escape') {
-      if (showCollapseDialog) {
+      if (splitChunks.length > 0) {
+        setSplitChunks([])
+      } else if (showCollapseDialog) {
         setShowCollapseDialog(false)
       } else {
         requestClose()
@@ -252,6 +346,14 @@ export default function DumpOverlay() {
                   }}
                   onDiscard={closeOverlay}
                   onCancel={() => setShowCollapseDialog(false)}
+                />
+              )}
+              {splitChunks.length > 0 && (
+                <SplitDialog
+                  count={splitChunks.length}
+                  onSplit={handleSplitConfirm}
+                  onKeepOne={handleSplitKeepOne}
+                  onCancel={() => setSplitChunks([])}
                 />
               )}
             </AnimatePresence>

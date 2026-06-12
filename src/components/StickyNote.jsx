@@ -110,6 +110,7 @@ export default function StickyNote({
  }
 
  const handleEditKeyDown = (e) => {
+ if (e.isComposing) return
  if (e.key === 'Enter' && !e.shiftKey) {
  e.preventDefault()
  saveEdit()

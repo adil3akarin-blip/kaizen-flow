@@ -123,6 +123,7 @@ export default function FilterSettings() {
  setCriterionError('')
  }}
  onKeyDown={(e) => {
+ if (e.isComposing) return
  if (e.key === 'Enter') {
  e.preventDefault()
  handleAddCriterion()
