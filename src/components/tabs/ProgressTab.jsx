@@ -19,17 +19,23 @@ export default function ProgressTab() {
         <PageContainer>
           <TabPageHeader eyebrow="Динамика" title="Прогресс" />
 
-          <div className="mt-6 flex rounded-xl bg-sunken p-1">
+          <div
+            className="mt-6 flex gap-1 rounded-2xl border border-line bg-glass-strong p-1 shadow-(--shadow-card)"
+            role="tablist"
+            aria-label="Раздел прогресса"
+          >
             {SEGMENTS.map((s) => (
               <button
                 key={s.id}
                 type="button"
+                role="tab"
+                aria-selected={segment === s.id}
                 onClick={() => setSegment(s.id)}
                 className={clsx(
-                  'flex-1 rounded-lg py-1.5 text-sm font-medium transition',
+                  'flex-1 rounded-xl py-2 text-sm font-semibold transition',
                   segment === s.id
-                    ? 'bg-surface text-ink shadow-sm'
-                    : 'text-ink-muted hover:text-ink',
+                    ? 'hm-grad text-white shadow-(--shadow-glow)'
+                    : 'text-ink-muted hover:bg-sunken/60 hover:text-ink',
                 )}
               >
                 {s.label}

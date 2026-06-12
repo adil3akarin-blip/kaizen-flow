@@ -66,6 +66,13 @@ export function sanitizeCardsOnLoad(cards) {
 
  if (next.status === 'done') {
  next.kanbanColumn = DONE_COLUMN
+ // Backfill completion time for older data so the year board can
+ // bucket achievements by month (fallback: creation time, then now).
+ if (typeof next.completedAt !== 'number') {
+ next.completedAt = next.createdAt ?? Date.now()
+ }
+ } else {
+ delete next.completedAt
  }
 
  return next

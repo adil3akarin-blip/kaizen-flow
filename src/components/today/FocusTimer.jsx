@@ -17,7 +17,7 @@ const MODES = [
   { id: 'pomodoro', label: 'Помодоро' },
 ]
 
-export default function FocusTimer({ cardId }) {
+export default function FocusTimer({ cardId, embedded = false }) {
   const activeTimer = useTimerStore((s) => s.activeTimer)
   const sessions = useTimerStore((s) => s.sessions)
   const startTimer = useTimerStore((s) => s.startTimer)
@@ -70,7 +70,13 @@ export default function FocusTimer({ cardId }) {
   }
 
   return (
-    <div className="rounded-2xl border border-line/60 bg-surface px-4 py-4 shadow-(--shadow-card)">
+    <div
+      className={clsx(
+        embedded
+          ? ''
+          : 'rounded-2xl border border-line/60 bg-surface px-4 py-4 shadow-(--shadow-card)',
+      )}
+    >
       <div className="flex rounded-xl bg-sunken p-1">
         {MODES.map((m) => (
           <button

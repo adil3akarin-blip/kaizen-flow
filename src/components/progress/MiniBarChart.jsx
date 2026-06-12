@@ -1,51 +1,36 @@
-// Lightweight SVG bar chart — no external chart library.
-export default function MiniBarChart({ data, formatValue, height = 120 }) {
+// Lightweight CSS bar chart — crisp rounded bars over faint baseline tracks.
+export default function MiniBarChart({ data, formatValue, height = 140 }) {
   const max = Math.max(1, ...data.map((d) => d.value))
-  const barGap = 6
-  const count = data.length || 1
-  const viewW = 320
-  const viewH = height
-  const labelH = 18
-  const chartH = viewH - labelH
-  const barW = (viewW - barGap * (count - 1)) / count
 
   return (
-    <svg
-      viewBox={`0 0 ${viewW} ${viewH}`}
-      className="w-full"
-      role="img"
-      preserveAspectRatio="none"
-    >
+    <div className="flex items-stretch gap-1.5" style={{ height }}>
       {data.map((d, i) => {
-        const h = d.value > 0 ? Math.max(3, (d.value / max) * (chartH - 6)) : 0
-        const x = i * (barW + barGap)
-        const y = chartH - h
+        const pct = d.value > 0 ? Math.max(6, (d.value / max) * 100) : 0
         return (
-          <g key={d.key ?? i}>
-            {h > 0 && (
-              <rect
-                x={x}
-                y={y}
-                width={barW}
-                height={h}
-                rx={3}
-                fill={d.highlight ? 'var(--color-accent)' : 'var(--color-accent-soft)'}
-              >
-                <title>{formatValue ? formatValue(d.value) : d.value}</title>
-              </rect>
-            )}
-            <text
-              x={x + barW / 2}
-              y={viewH - 5}
-              textAnchor="middle"
-              className="fill-ink-faint"
-              style={{ fontSize: '9px' }}
-            >
+          <div
+            key={d.key ?? i}
+            className="group flex min-w-0 flex-1 flex-col items-center gap-1.5"
+          >
+            <div className="relative flex w-full flex-1 items-end justify-center rounded-t-md rounded-b-sm bg-line/25">
+              {pct > 0 && (
+                <div
+                  className={
+                    'w-full rounded-t-md rounded-b-sm transition-all ' +
+                    (d.highlight
+                      ? 'bg-gradient-to-t from-accent to-[#fb923c] shadow-(--shadow-glow)'
+                      : 'bg-accent/35 group-hover:bg-accent/55')
+                  }
+                  style={{ height: `${pct}%` }}
+                  title={formatValue ? formatValue(d.value) : String(d.value)}
+                />
+              )}
+            </div>
+            <span className="text-[10px] font-medium tabular-nums text-ink-faint">
               {d.label}
-            </text>
-          </g>
+            </span>
+          </div>
         )
       })}
-    </svg>
+    </div>
   )
 }

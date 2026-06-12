@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { Check, MoreHorizontal } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { selectWipCard } from '../../lib/cardSelectors'
 import StructuredCard from '../cards/StructuredCard'
@@ -74,37 +74,53 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
     <section>
       <SectionLabel>В работе</SectionLabel>
 
-      <div className="hm-glass hm-accent-line relative mt-3 overflow-hidden rounded-2xl">
-        <StructuredCard card={wipCard} className="px-5 py-4 pr-12 shadow-none border-none rounded-2xl" />
-        <button
-          type="button"
-          onClick={() => setEditOpen(true)}
-          aria-label="Ещё"
-          className="absolute right-3 top-3 rounded-xl p-1.5 text-ink-faint hover:bg-sunken transition"
-        >
-          <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
-        </button>
-      </div>
+      <div className="hm-glass hm-accent-line relative mt-3 overflow-hidden rounded-3xl">
+        {/* Task header */}
+        <div className="relative px-5 pt-5 pb-4">
+          <div className="flex items-start gap-3 pr-9">
+            <span className="hm-tick mt-1" />
+            <StructuredCard
+              card={wipCard}
+              className="flex-1 border-none bg-transparent p-0 shadow-none"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setEditOpen(true)}
+            aria-label="Ещё"
+            className="absolute right-3 top-4 rounded-xl p-1.5 text-ink-faint transition hover:bg-sunken hover:text-ink"
+          >
+            <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
+          </button>
+        </div>
 
-      <div className="mt-4">
-        <FocusTimer cardId={wipCard.id} />
-      </div>
+        <div className="h-px bg-line/70" />
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={completeWip}
-          className="rounded-xl bg-success py-3 text-sm font-medium text-white transition hover:bg-success/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40"
-        >
-          Сделано
-        </button>
-        <button
-          type="button"
-          onClick={discardWip}
-          className="rounded-xl border border-line py-3 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
-        >
-          Отпустить
-        </button>
+        {/* Embedded focus timer */}
+        <div className="px-5 py-5">
+          <FocusTimer cardId={wipCard.id} embedded />
+        </div>
+
+        <div className="h-px bg-line/70" />
+
+        {/* Commit / release */}
+        <div className="grid grid-cols-2 gap-3 px-5 py-4">
+          <button
+            type="button"
+            onClick={completeWip}
+            className="flex items-center justify-center gap-2 rounded-xl bg-success py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-success/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40"
+          >
+            <Check className="h-4 w-4" strokeWidth={2.6} />
+            Сделано
+          </button>
+          <button
+            type="button"
+            onClick={discardWip}
+            className="rounded-xl border border-line py-3 text-sm font-medium text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
+          >
+            Отпустить
+          </button>
+        </div>
       </div>
 
       <CardEditSheet card={wipCard} open={editOpen} onClose={() => setEditOpen(false)} />

@@ -139,3 +139,44 @@ export function recentDays(habit, log, count = 35, now = Date.now()) {
   }
   return out
 }
+
+// Week-aligned grid for the heatmap: `weeks` columns, each Mon→Sun (7 rows).
+// The final column ends on the week containing today; days after today are
+// flagged `future` so the calendar reads correctly.
+export function recentWeeks(habit, log, weeks = 12, now = Date.now()) {
+  const done = doneSet(log, habit.id)
+  const today = new Date(now)
+  const todayKey = localDateKey(now)
+  const start = shiftDays(mondayOf(today), -(weeks - 1) * 7)
+
+  const cols = []
+  for (let w = 0; w < weeks; w++) {
+    const days = []
+    for (let d = 0; d < 7; d++) {
+      const date = shiftDays(start, w * 7 + d)
+      const key = localDateKey(date.getTime())
+      days.push({
+        key,
+        done: done.has(key),
+        scheduled: isScheduledOn(habit, date),
+        future: key > todayKey,
+      })
+    }
+    cols.push(days)
+  }
+  return cols
+}
+
+// Completion stats over the trailing window: how many scheduled days were done.
+export function completionStats(habit, log, days = 30, now = Date.now()) {
+  const cells = recentDays(habit, log, days, now)
+  let scheduled = 0
+  let done = 0
+  for (const c of cells) {
+    if (c.scheduled) {
+      scheduled++
+      if (c.done) done++
+    }
+  }
+  return { scheduled, done }
+}

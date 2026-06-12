@@ -250,6 +250,7 @@ export const useCardsStore = create((set, get) => ({
  status: 'done',
  kanbanColumn: DONE_COLUMN,
  stuckSince: Date.now(),
+ completedAt: Date.now(),
  }
  : c,
  ),
@@ -315,6 +316,10 @@ export const useCardsStore = create((set, get) => ({
  useTimerStore.getState().finalizeForCard(id)
  }
 
+ // Stamp/clear completion time as the card enters or leaves the Done column.
+ const completedAt =
+ columnId === DONE_COLUMN ? card.completedAt ?? Date.now() : undefined
+
  set((state) => ({
  columnOrder: moveInColumnOrder(state.columnOrder, id, columnId, {
  via,
@@ -322,7 +327,7 @@ export const useCardsStore = create((set, get) => ({
  }),
  cards: state.cards.map((c) =>
  c.id === id
- ? { ...c, status, kanbanColumn: columnId, stuckSince }
+ ? { ...c, status, kanbanColumn: columnId, stuckSince, completedAt }
  : c,
  ),
  }))

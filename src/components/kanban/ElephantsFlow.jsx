@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useAppStore } from '../../store/useAppStore'
+import { useAchievementsStore } from '../../store/useAchievementsStore'
+import { monthKey } from '../../lib/achievementsUtils'
 import StructuredCard from '../cards/StructuredCard'
 
 const STEPS = ['done', 'carry', 'elephant']
@@ -10,15 +12,22 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
  const removeCard = useCardsStore((s) => s.removeCard)
  const moveKanbanCard = useCardsStore((s) => s.moveKanbanCard)
  const setElephantsPending = useAppStore((s) => s.setElephantsPending)
+ const setElephant = useAchievementsStore((s) => s.setElephant)
 
  const [stepIndex, setStepIndex] = useState(0)
  const [selectedCarry, setSelectedCarry] = useState(() => new Set())
  const [elephantChoice, setElephantChoice] = useState('')
 
- const doneCards = useMemo(
- () => cards.filter((c) => c.status === 'done'),
- [cards],
- )
+ const doneCards = useMemo(() => {
+ const now = new Date()
+ return cards.filter((c) => {
+ if (c.status !== 'done') return false
+ const ts = c.completedAt ?? c.createdAt
+ if (ts == null) return true
+ const d = new Date(ts)
+ return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+ })
+ }, [cards])
 
  const carryCards = useMemo(
  () =>
@@ -48,6 +57,9 @@ export default function ElephantsFlow({ onClose, onOpenYear }) {
  moveKanbanCard(card.id, 'next_week')
  }
  })
+ // Save the month's "elephant" so it shows up in the Музей побед.
+ const now = new Date()
+ setElephant(monthKey(now.getFullYear(), now.getMonth() + 1), elephantChoice)
  setElephantsPending(false)
  onClose()
  }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Coffee } from 'lucide-react'
+import { Clock, Coffee } from 'lucide-react'
 import { useTimerStore } from '../../store/useTimerStore'
 import {
   PAUSE_NUDGE_MS,
@@ -41,15 +41,37 @@ export default function DailySummary() {
   if (todayMs < 1000 && !activeTimer) return null
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between rounded-2xl border border-line/60 bg-surface px-4 py-3 shadow-(--shadow-card)">
-        <span className="text-sm text-ink-muted">Фокус сегодня</span>
-        <span className="text-sm font-semibold text-ink">
-          {formatDuration(todayMs)}
-          {todayPomodoros > 0 && (
-            <span className="ml-2 text-ink-muted">🍅 {todayPomodoros}</span>
-          )}
-        </span>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex flex-wrap gap-2.5">
+        <div className="hm-glass flex items-center gap-3 rounded-2xl px-4 py-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent">
+            <Clock className="h-[18px] w-[18px]" strokeWidth={2} />
+          </span>
+          <div className="leading-tight">
+            <p className="m-0 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+              Фокус сегодня
+            </p>
+            <p className="m-0 text-lg font-bold tabular-nums text-ink">
+              {formatDuration(todayMs)}
+            </p>
+          </div>
+        </div>
+
+        {todayPomodoros > 0 && (
+          <div className="hm-glass flex items-center gap-3 rounded-2xl px-4 py-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warn-soft text-base">
+              🍅
+            </span>
+            <div className="leading-tight">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+                Помидоры
+              </p>
+              <p className="m-0 text-lg font-bold tabular-nums text-ink">
+                {todayPomodoros}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {showNudge && (
