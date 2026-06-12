@@ -148,7 +148,7 @@ export default function StickyNote({
  onPointerUp={(e) => finishDrag(e.clientX, e.clientY)}
  onPointerCancel={(e) => finishDrag(e.clientX, e.clientY)}
  className={clsx(
- 'relative rounded-sm px-4 py-3 shadow-md transition-shadow duration-200',
+ 'relative rounded-lg px-4 py-3 transition-shadow duration-200',
  isEditing ? 'select-text ring-2 ring-accent/40' : 'touch-none select-none',
  isDragging ? 'cursor-grabbing shadow-xl' : 'cursor-grab group-hover:shadow-lg',
  !isDragging && !isEditing && 'group',
@@ -183,7 +183,7 @@ export default function StickyNote({
  <p
  onDoubleClick={handleTextDoubleClick}
  title="Дважды кликни, чтобы редактировать"
- className="m-0 cursor-text text-[14px] leading-snug text-ink"
+ className="m-0 cursor-text text-[14px] leading-snug text-ink line-clamp-5"
  >
  {card.text}
  </p>

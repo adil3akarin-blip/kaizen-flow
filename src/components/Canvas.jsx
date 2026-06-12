@@ -31,7 +31,7 @@ export default function Canvas() {
  className="relative min-h-full min-w-[720px]"
  style={{
  backgroundImage:
- 'radial-gradient(circle, #e8e0d4 1px, transparent 1px)',
+ 'radial-gradient(circle, #dcdce2 1px, transparent 1px)',
  backgroundSize: '24px 24px',
  }}
  >

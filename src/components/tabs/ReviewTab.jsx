@@ -56,12 +56,10 @@ export default function ReviewTab() {
  <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
  <header className="flex shrink-0 flex-col gap-3 border-b border-line bg-white/40 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 md:px-8">
  <div className="min-w-0 flex-1">
- <h2 className="m-0 text-lg font-medium tracking-tight text-ink sm:text-xl">
- Неделя тишины
- </h2>
- <p className="mt-1 text-sm text-ink-muted">
- Просто выгружай — планирование подождёт
- </p>
+ <TabPageHeader
+ title="Неделя тишины"
+ subtitle="Просто выгружай — планирование подождёт"
+ />
  </div>
  <div className="flex shrink-0 items-center gap-2 sm:gap-3">
  <ReviewViewToggle
@@ -71,7 +69,7 @@ export default function ReviewTab() {
  <button
  type="button"
  onClick={handleReadyToReview}
- className="w-full shrink-0 rounded-lg border border-line bg-white px-4 py-2 text-sm text-ink-muted shadow-sm transition-colors hover:bg-sunken hover:text-ink sm:w-auto"
+ className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
  >
  {formatSilenceExitLabel(rawCount)}
  </button>

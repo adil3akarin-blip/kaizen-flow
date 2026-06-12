@@ -40,14 +40,14 @@ export default function MissionScreen({ onComplete }) {
  <button
  type="button"
  onClick={handleSubmit}
- className="rounded-lg bg-accent py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+ className="rounded-xl bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
  >
  {mission.trim() ? 'Сохранить и разбирать' : 'Продолжить'}
  </button>
  <button
  type="button"
  onClick={onComplete}
- className="rounded-lg border border-line py-2.5 text-sm text-ink-muted transition-colors hover:bg-sunken"
+ className="rounded-xl border border-line py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
  >
  Пропустить
  </button>

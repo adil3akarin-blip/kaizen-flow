@@ -1,41 +1,60 @@
 import { motion } from 'framer-motion'
+import { Waves, BrainCircuit, Layers, Zap } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
 
+const MANIFEST = [
+  { icon: BrainCircuit, text: 'Освободи голову — выгрузи всё, что крутится.' },
+  { icon: Layers, text: 'Сначала тишина, потом разбор. Без давления.' },
+  { icon: Zap, text: 'Один фокус в работе — никаких бесконечных списков.' },
+]
+
 export default function ManifestScreen() {
- const completeOnboarding = useAppStore((s) => s.completeOnboarding)
+  const completeOnboarding = useAppStore((s) => s.completeOnboarding)
 
- return (
- <div className="flex min-h-screen flex-col items-center justify-center overflow-y-auto bg-canvas px-4 py-8 sm:px-8">
- <motion.div
- initial={{ opacity: 0, y: 16 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ type: 'spring', stiffness: 300, damping: 28 }}
- className="flex w-full max-w-md flex-col items-center rounded-2xl border border-line/50 bg-white px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10"
- >
- <h1 className="m-0 text-xl font-medium tracking-tight text-ink sm:text-2xl">
- KaizenFlow
- </h1>
- <p className="mt-1 text-sm text-ink-muted">Power & Focus</p>
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-6 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+        className="flex w-full max-w-sm flex-col items-center text-center"
+      >
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-accent-soft">
+          <Waves className="h-8 w-8 text-accent" strokeWidth={1.75} />
+        </div>
 
- <div className="mt-8 space-y-4 text-[15px] leading-relaxed text-ink/90">
- <p className="m-0">
- Освободи голову — выгрузи всё, что крутится. Планирование подождёт.
- </p>
- <p className="m-0">
- Сначала тишина, потом разбор. Без давления и бесконечных списков.
- </p>
- </div>
+        <h1 className="m-0 text-3xl font-semibold tracking-tight text-ink">
+          KaizenFlow
+        </h1>
+        <p className="mt-2 text-sm text-ink-muted">Осознанная работа с потоком мыслей</p>
 
- <motion.button
- type="button"
- whileHover={{ scale: 1.02 }}
- whileTap={{ scale: 0.98 }}
- onClick={completeOnboarding}
- className="mt-10 rounded-xl bg-accent px-10 py-3 text-base font-medium text-white shadow-lg shadow-accent/25 transition-colors hover:bg-accent-hover"
- >
- Начать
- </motion.button>
- </motion.div>
- </div>
- )
+        <ul className="mt-10 w-full space-y-4 text-left">
+          {MANIFEST.map(({ icon: Icon, text }, i) => (
+            <motion.li
+              key={i}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 + i * 0.08, type: 'spring', stiffness: 300, damping: 28 }}
+              className="flex items-start gap-3"
+            >
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunken">
+                <Icon className="h-4 w-4 text-ink-muted" strokeWidth={1.75} />
+              </span>
+              <p className="m-0 text-[15px] leading-relaxed text-ink">{text}</p>
+            </motion.li>
+          ))}
+        </ul>
+
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={completeOnboarding}
+          className="mt-10 w-full rounded-xl bg-accent py-3 text-sm font-medium text-white shadow-lg shadow-accent/25 transition hover:bg-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+        >
+          Начать
+        </motion.button>
+      </motion.div>
+    </div>
+  )
 }
