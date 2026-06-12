@@ -16,6 +16,7 @@ import FlowStatusPanel from '../flow/FlowStatusPanel'
 import WipSlot from '../flow/WipSlot'
 import PullQueue from '../flow/PullQueue'
 import TodayHabits from '../today/TodayHabits'
+import DailySummary from '../today/DailySummary'
 
 export default function TodayTab() {
  const [queueOverlayOpen, setQueueOverlayOpen] = useState(false)
@@ -75,9 +76,13 @@ export default function TodayTab() {
  <PageContainer className="md:flex md:h-full md:min-h-0 md:flex-col">
  <TabPageHeader eyebrow="Фокус сейчас" title="Сегодня" />
 
+ <div className="mt-5">
+ <DailySummary />
+ </div>
+
  <div
  className={clsx(
- 'mt-6 flex flex-col gap-6 md:min-h-0 md:flex-1 md:grid md:grid-cols-[1fr_minmax(200px,260px)] md:gap-8 md:overflow-hidden',
+ 'mt-5 flex flex-col gap-6 md:min-h-0 md:flex-1 md:grid md:grid-cols-[1fr_minmax(200px,260px)] md:gap-8 md:overflow-hidden',
  queueOverlayOpen && 'invisible',
  )}
  >

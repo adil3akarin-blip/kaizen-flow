@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import TabPageHeader from '../ui/TabPageHeader'
 import PageContainer from '../ui/PageContainer'
 import HabitsView from '../progress/HabitsView'
+import TimeStatsView from '../progress/TimeStatsView'
 
 const SEGMENTS = [
   { id: 'habits', label: 'Привычки' },
@@ -36,13 +37,7 @@ export default function ProgressTab() {
             ))}
           </div>
 
-          {segment === 'habits' ? (
-            <HabitsView />
-          ) : (
-            <div className="mt-8 text-center text-sm text-ink-faint">
-              Скоро здесь появятся графы фокус-времени.
-            </div>
-          )}
+          {segment === 'habits' ? <HabitsView /> : <TimeStatsView />}
         </PageContainer>
       </div>
     </div>
