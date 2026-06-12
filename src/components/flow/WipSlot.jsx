@@ -12,166 +12,155 @@ import SectionLabel from '../ui/SectionLabel'
 import EnergyGuardDialog from './EnergyGuardDialog'
 
 export default function WipSlot({
- suggestedCard,
- emptyCta,
- onPullSuggested,
- onGuardOpenChange,
+  suggestedCard,
+  emptyCta,
+  onPullSuggested,
+  onGuardOpenChange,
 }) {
- const cards = useCardsStore((s) => s.cards)
- const columnOrder = useCardsStore((s) => s.columnOrder)
- const completeWip = useCardsStore((s) => s.completeWip)
- const discardWip = useCardsStore((s) => s.discardWip)
- const recordHeavyCompletion = useEnergyStore((s) => s.recordHeavyCompletion)
- const energyPreset = useEnergyStore((s) => s.preset)
+  const cards = useCardsStore((s) => s.cards)
+  const columnOrder = useCardsStore((s) => s.columnOrder)
+  const completeWip = useCardsStore((s) => s.completeWip)
+  const discardWip = useCardsStore((s) => s.discardWip)
+  const recordHeavyCompletion = useEnergyStore((s) => s.recordHeavyCompletion)
+  const energyPreset = useEnergyStore((s) => s.preset)
 
- const [editOpen, setEditOpen] = useState(false)
- const [guardOpen, setGuardOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [guardOpen, setGuardOpen] = useState(false)
 
- const pullQueue = useMemo(
- () => selectOrderedPullQueue(cards, columnOrder),
- [cards, columnOrder],
- )
+  const pullQueue = useMemo(
+    () => selectOrderedPullQueue(cards, columnOrder),
+    [cards, columnOrder],
+  )
 
- const guardAlternatives = useMemo(
- () =>
- suggestedCard
- ? findLightAlternatives(pullQueue, suggestedCard.id)
- : [],
- [suggestedCard, pullQueue],
- )
+  const guardAlternatives = useMemo(
+    () => (suggestedCard ? findLightAlternatives(pullQueue, suggestedCard.id) : []),
+    [suggestedCard, pullQueue],
+  )
 
- const wipCard = selectWipCard(cards)
- const guardActive = guardOpen && Boolean(suggestedCard)
+  const wipCard = selectWipCard(cards)
+  const guardActive = guardOpen && Boolean(suggestedCard)
 
- useEffect(() => {
- onGuardOpenChange?.(guardActive)
- }, [guardActive, onGuardOpenChange])
+  useEffect(() => {
+    onGuardOpenChange?.(guardActive)
+  }, [guardActive, onGuardOpenChange])
 
- const handleComplete = () => {
- if (wipCard?.energyCost === 'heavy') {
- recordHeavyCompletion(wipCard.id)
- }
- completeWip()
- }
+  const handleComplete = () => {
+    if (wipCard?.energyCost === 'heavy') recordHeavyCompletion(wipCard.id)
+    completeWip()
+  }
 
- const handleSuggestedPull = () => {
- if (!suggestedCard) return
- if (shouldShowDepletedHeavyDialog(energyPreset, suggestedCard)) {
- setGuardOpen(true)
- onGuardOpenChange?.(true)
- return
- }
- onPullSuggested(suggestedCard.id)
- }
+  const handleSuggestedPull = () => {
+    if (!suggestedCard) return
+    if (shouldShowDepletedHeavyDialog(energyPreset, suggestedCard)) {
+      setGuardOpen(true)
+      onGuardOpenChange?.(true)
+      return
+    }
+    onPullSuggested(suggestedCard.id)
+  }
 
- const closeGuard = () => {
- setGuardOpen(false)
- onGuardOpenChange?.(false)
- }
+  const closeGuard = () => {
+    setGuardOpen(false)
+    onGuardOpenChange?.(false)
+  }
 
- const guardDialog = (
- <EnergyGuardDialog
- open={guardActive}
- card={suggestedCard}
- alternatives={guardAlternatives}
- onPullAlternative={(id) => {
- closeGuard()
- onPullSuggested(id)
- }}
- onForcePull={() => {
- closeGuard()
- onPullSuggested(suggestedCard.id)
- }}
- onCancel={closeGuard}
- />
- )
+  const guardDialog = (
+    <EnergyGuardDialog
+      open={guardActive}
+      card={suggestedCard}
+      alternatives={guardAlternatives}
+      onPullAlternative={(id) => { closeGuard(); onPullSuggested(id) }}
+      onForcePull={() => { closeGuard(); onPullSuggested(suggestedCard.id) }}
+      onCancel={closeGuard}
+    />
+  )
 
- if (!wipCard) {
- if (emptyCta) {
- return (
- <section>
- <SectionLabel className="text-center">Поток свободен</SectionLabel>
- <button
- type="button"
- onClick={emptyCta.onAction}
- className="mt-4 w-full rounded-xl border border-line/50 bg-white px-4 py-3 text-left text-sm text-ink-muted shadow-sm transition-colors hover:bg-canvas/50"
- >
- {emptyCta.message} →{' '}
- <span className="text-accent">{emptyCta.targetLabel}</span>
- </button>
- </section>
- )
- }
+  if (!wipCard) {
+    if (emptyCta) {
+      return (
+        <section>
+          <SectionLabel className="text-center">Поток свободен</SectionLabel>
+          <button
+            type="button"
+            onClick={emptyCta.onAction}
+            className="mt-4 w-full rounded-2xl border-2 border-dashed border-line-strong px-4 py-5 text-left text-sm text-ink-muted transition hover:border-accent/40 hover:text-ink"
+          >
+            {emptyCta.message} →{' '}
+            <span className="text-accent">{emptyCta.targetLabel}</span>
+          </button>
+        </section>
+      )
+    }
 
- if (suggestedCard) {
- return (
- <>
- <section>
- <SectionLabel>Одно дело в единицу времени</SectionLabel>
- <button
- type="button"
- onClick={handleSuggestedPull}
- className="mt-3 w-full text-left transition-opacity hover:opacity-90"
- >
- <StructuredCard
- card={suggestedCard}
- className="ring-1 ring-accent/20"
- />
- </button>
- <button
- type="button"
- onClick={handleSuggestedPull}
- className="mt-4 w-full rounded-lg bg-accent py-3 text-sm font-medium text-white hover:bg-accent-hover"
- >
- Начать
- </button>
- </section>
- {guardDialog}
- </>
- )
- }
+    if (suggestedCard) {
+      return (
+        <>
+          <section>
+            <SectionLabel>Одно дело в единицу времени</SectionLabel>
+            <button
+              type="button"
+              onClick={handleSuggestedPull}
+              className="mt-3 w-full text-left transition-opacity hover:opacity-90"
+            >
+              <StructuredCard card={suggestedCard} className="ring-1 ring-accent/20" />
+            </button>
+            <button
+              type="button"
+              onClick={handleSuggestedPull}
+              className="mt-4 w-full rounded-xl bg-accent py-3 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
+              Начать
+            </button>
+          </section>
+          {guardDialog}
+        </>
+      )
+    }
 
- return null
- }
+    return (
+      <section>
+        <SectionLabel>В работе</SectionLabel>
+        <div className="mt-3 flex items-center justify-center rounded-2xl border-2 border-dashed border-line-strong px-4 py-8">
+          <p className="text-sm text-ink-faint">Вытяни одно дело из очереди</p>
+        </div>
+      </section>
+    )
+  }
 
- return (
- <section>
- <SectionLabel>Сейчас в работе</SectionLabel>
+  return (
+    <section>
+      <SectionLabel>В работе</SectionLabel>
 
- <div className="relative mt-3">
- <StructuredCard card={wipCard} className="px-5 py-4 pr-12" />
- <button
- type="button"
- onClick={() => setEditOpen(true)}
- aria-label="Ещё"
- className="absolute right-3 top-3 rounded-lg p-1.5 text-ink-muted hover:bg-sunken"
- >
- <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
- </button>
- </div>
+      <div className="relative mt-3 rounded-2xl border border-line/60 bg-surface shadow-(--shadow-card)">
+        <StructuredCard card={wipCard} className="px-5 py-4 pr-12 shadow-none border-none rounded-2xl" />
+        <button
+          type="button"
+          onClick={() => setEditOpen(true)}
+          aria-label="Ещё"
+          className="absolute right-3 top-3 rounded-xl p-1.5 text-ink-faint hover:bg-sunken transition"
+        >
+          <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
+        </button>
+      </div>
 
- <div className="mt-4 grid grid-cols-2 gap-3">
- <button
- type="button"
- onClick={handleComplete}
- className="rounded-lg bg-accent py-3 text-sm font-medium text-white hover:bg-accent-hover"
- >
- Сделано
- </button>
- <button
- type="button"
- onClick={discardWip}
- className="rounded-lg border border-line py-3 text-sm text-ink-muted hover:bg-sunken"
- >
- Не актуально
- </button>
- </div>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={handleComplete}
+          className="rounded-xl bg-success py-3 text-sm font-medium text-white transition hover:bg-success/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40"
+        >
+          Сделано
+        </button>
+        <button
+          type="button"
+          onClick={discardWip}
+          className="rounded-xl border border-line py-3 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
+        >
+          Отпустить
+        </button>
+      </div>
 
- <CardEditSheet
- card={wipCard}
- open={editOpen}
- onClose={() => setEditOpen(false)}
- />
- </section>
- )
+      <CardEditSheet card={wipCard} open={editOpen} onClose={() => setEditOpen(false)} />
+    </section>
+  )
 }

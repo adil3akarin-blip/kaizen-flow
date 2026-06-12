@@ -1,72 +1,47 @@
-import { PanelDivider, PanelList, PanelSection } from '../ui/PanelList'
 import EnergySnapshot from './EnergySnapshot'
 import StuckNudge from './StuckNudge'
 
 function FlowHint({ rawCount, onGoReview }) {
- if (rawCount === 0) return null
+  if (rawCount === 0) return null
 
- const label =
- rawCount === 1
- ? '1 мысль ждёт разбора'
- : rawCount < 5
- ? `${rawCount} мысли ждут разбора`
- : `${rawCount} мыслей ждут разбора`
+  const label =
+    rawCount === 1
+      ? '1 мысль ждёт разбора'
+      : rawCount < 5
+        ? `${rawCount} мысли ждут разбора`
+        : `${rawCount} мыслей ждут разбора`
 
- return (
- <button
- type="button"
- onClick={onGoReview}
- className="w-full text-left text-sm text-ink-muted transition-colors hover:text-ink"
- >
- {label} →{' '}
- <span className="text-accent">Разбор</span>
- </button>
- )
+  return (
+    <button
+      type="button"
+      onClick={onGoReview}
+      className="w-full text-left text-sm text-ink-muted transition-colors hover:text-ink"
+    >
+      {label} →{' '}
+      <span className="text-accent">Разбор</span>
+    </button>
+  )
 }
 
-export default function FlowStatusPanel({
- onOpenHub,
- rawCount,
- onGoReview,
- stuckCards,
- showHints,
-}) {
- const hasHint = showHints && rawCount > 0
- const hasStuck = stuckCards.length > 0
+export default function FlowStatusPanel({ onOpenHub, rawCount, onGoReview, stuckCards, showHints }) {
+  const hasHint = showHints && rawCount > 0
+  const hasStuck = stuckCards.length > 0
 
- if (!hasHint && !hasStuck) {
- return (
- <PanelList>
- <PanelSection className="p-0">
- <EnergySnapshot embedded onOpenHub={onOpenHub} />
- </PanelSection>
- </PanelList>
- )
- }
+  return (
+    <div className="flex flex-col gap-3">
+      <EnergySnapshot onOpenHub={onOpenHub} />
 
- return (
- <PanelList>
- <PanelSection className="p-0">
- <EnergySnapshot embedded onOpenHub={onOpenHub} />
- </PanelSection>
+      {hasStuck && (
+        <div className="flex items-center gap-2 rounded-xl bg-warn-soft px-4 py-3">
+          <StuckNudge stuckCards={stuckCards} />
+        </div>
+      )}
 
- {hasHint && (
- <>
- <PanelDivider />
- <PanelSection>
- <FlowHint rawCount={rawCount} onGoReview={onGoReview} />
- </PanelSection>
- </>
- )}
-
- {hasStuck && (
- <>
- <PanelDivider />
- <PanelSection>
- <StuckNudge stuckCards={stuckCards} />
- </PanelSection>
- </>
- )}
- </PanelList>
- )
+      {hasHint && (
+        <div className="rounded-xl border border-line/60 bg-surface px-4 py-3 shadow-(--shadow-card)">
+          <FlowHint rawCount={rawCount} onGoReview={onGoReview} />
+        </div>
+      )}
+    </div>
+  )
 }

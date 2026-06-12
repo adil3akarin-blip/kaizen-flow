@@ -28,23 +28,35 @@ const ENERGY_LABELS = {
  heavy: 'Тяжёлое',
 }
 
+const ENERGY_CHIP_COLORS = {
+ light: 'bg-success-soft text-success',
+ medium: 'bg-sunken text-ink-muted',
+ heavy: 'bg-warn-soft text-warn',
+}
+
+function EnergyChip({ energyCost }) {
+ if (!energyCost) return null
+ const label = ENERGY_LABELS[energyCost]
+ const colorClass = ENERGY_CHIP_COLORS[energyCost] ?? 'bg-sunken text-ink-muted'
+ return (
+ <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colorClass}`}>
+ ⚡ {label}
+ </span>
+ )
+}
+
 function QueueChips({ card }) {
  const chips = []
- if (card.wantMust) chips.push(WANT_LABELS[card.wantMust])
- if (card.energyCost && card.energyCost !== 'medium') {
- chips.push(ENERGY_LABELS[card.energyCost])
- }
- if (card.timeInvestment) chips.push(card.timeInvestment)
+ if (card.wantMust) chips.push({ key: 'want', label: WANT_LABELS[card.wantMust], color: 'bg-sunken text-ink-muted' })
+ if (card.timeInvestment) chips.push({ key: 'time', label: card.timeInvestment, color: 'bg-sunken text-ink-muted' })
 
- if (chips.length === 0) return null
+ if (chips.length === 0 && !card.energyCost) return null
 
  return (
- <div className="mt-1 flex flex-wrap gap-1">
- {chips.map((label) => (
- <span
- key={label}
- className="rounded-full bg-canvas px-2 py-0.5 text-xs text-ink-muted"
- >
+ <div className="mt-1.5 flex flex-wrap gap-1">
+ <EnergyChip energyCost={card.energyCost} />
+ {chips.map(({ key, label, color }) => (
+ <span key={key} className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
  {label}
  </span>
  ))}
@@ -196,40 +208,35 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
  <section>
  <SectionLabel suffix={visibleQueue.length}>Очередь</SectionLabel>
 
- <PanelList className="mt-3">
- {visibleQueue.map((card, index) => {
+ <div className="mt-3 flex flex-col gap-2">
+ {visibleQueue.map((card) => {
  const dimmed = isCardEnergyDimmed(card, energyPreset)
- const isLast = index === visibleQueue.length - 1
 
  return (
- <div key={card.id} className="relative">
- <PanelRow
- onClick={() => attemptPull(card)}
- isLast={isLast}
- className={clsx('pr-10', dimmed && 'opacity-45')}
+ <div
+ key={card.id}
+ className={clsx(
+ 'group relative flex items-start gap-3 rounded-2xl border border-line/60 bg-surface px-4 py-3.5 shadow-(--shadow-card) transition',
+ dimmed ? 'opacity-50' : 'hover:border-line-strong cursor-pointer',
+ )}
+ onClick={() => !dimmed && attemptPull(card)}
  >
  <div className="min-w-0 flex-1">
- <p className="m-0 break-words text-sm leading-snug text-ink">
- {card.text}
- </p>
+ <p className="m-0 text-sm leading-snug text-ink line-clamp-2">{card.text}</p>
  <QueueChips card={card} />
  </div>
- </PanelRow>
  <button
  type="button"
- onClick={(e) => {
- e.stopPropagation()
- setEditCardId(card.id)
- }}
+ onClick={(e) => { e.stopPropagation(); setEditCardId(card.id) }}
  aria-label="Ещё"
- className="absolute right-3 top-3.5 rounded-lg p-1.5 text-ink-muted hover:bg-sunken"
+ className="shrink-0 rounded-xl p-1.5 text-ink-faint hover:bg-sunken transition"
  >
  <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
  </button>
  </div>
  )
  })}
- </PanelList>
+ </div>
 
  <CardEditSheet
  card={editCard}
