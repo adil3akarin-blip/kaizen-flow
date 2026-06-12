@@ -8,9 +8,10 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** MVP закрыт ✅  
-**Last completed:** Редизайн «Modern Calm» (фазы 0–6) — все B/C-таски выполнены, build чистый  
-**Plan:** [2026-06-12-kaizenflow-redesign-mvp-closure.md](../docs/superpowers/plans/2026-06-12-kaizenflow-redesign-mvp-closure.md)
+**Phase:** Workflow v2 ✅ (таймеры + привычки, «Энергия» удалена)  
+**Last completed:** Workflow v2 (фазы 1–5) — Поток→Сегодня, таймер задач, трекер привычек, Прогресс/Время  
+**Spec:** [2026-06-13-kaizenflow-workflow-v2-timers-habits.md](../docs/superpowers/specs/2026-06-13-kaizenflow-workflow-v2-timers-habits.md)  
+**Предыдущее:** Редизайн «Modern Calm» → далее перешли на Hermes (светлая, оранжевый акцент + glass)
 
 ---
 
@@ -45,11 +46,11 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] 12 Stagnation Detector
 - [x] 13 Elephants Retrospective + Year Board
 
-### Phase 4 — «Хаб Power Management»
+### Phase 4 — «Хаб Power Management» — ❌ УДАЛЁН в Workflow v2
 
-- [x] 14 Energy Store + Hub UI
-- [x] 15 Willpower Guard
-- [x] 16 Result/Effort Calculator (full)
+- ~~14 Energy Store + Hub UI~~ — удалён (абстрактный self-report заменён данными таймера)
+- ~~15 Willpower Guard~~ — удалён (экран паузы, предохранитель воли)
+- ~~16 Result/Effort Calculator~~ — удалён
 
 ### Phase 5 — Push & Polish
 
@@ -69,6 +70,22 @@ Update this file after every completed feature. Any AI agent reading this should
 - [x] B9 — PWA manifest theme #f6f6f8, cleanupOutdatedCaches
 - [x] C1–C11 — Edge cases: undo WIP, no mockCards, cross-tab sync, quota toast, JSON backup,
        multiline split, IME guards, line-clamp, stuck delta guard, accessibility (focus trap, reduced-motion)
+
+### Workflow v2 — таймеры, привычки, удаление «Энергии» (2026-06-13)
+
+**Spec:** [2026-06-13-kaizenflow-workflow-v2-timers-habits.md](../docs/superpowers/specs/2026-06-13-kaizenflow-workflow-v2-timers-habits.md)
+
+- [x] Ф1 — Удаление Power Management (стор/хаб/предохранитель/пауза/калькулятор) + реструктуризация вкладок:
+      `Поток → Сегодня`, добавлена `Прогресс`; настройки → шестерёнка хедера (`TabPageHeader`)
+- [x] Ф2 — Таймер задач (`useTimerStore`, `timerUtils`): секундомер + Помодоро, один активный таймер (WIP),
+      сессии фокус-времени, `FocusTimer` в WIP-герое, история в `CardEditSheet`; финализация централизована в `useCardsStore`
+- [x] Ф3 — Трекер привычек (`useHabitsStore`, `habitUtils`): расписания daily/weekly/weekdays, стрики, хитмэп;
+      `TodayHabits` (чек-лист дня), `HabitsView` + `HabitEditor` в «Прогресс»
+- [x] Ф4 — «Прогресс → Время» (`TimeStatsView`, `MiniBarChart`): граф фокуса по дням 7/30, помидоры, сессии;
+      `DailySummary` на «Сегодня» (итог дня + nudge паузы ≥90 мин)
+- [x] Ф5 — Настройки Помодоро (длительности фокуса/перерыва), инициализация на старте; обновление документации
+
+**Новые сторы:** `useTimerStore`, `useHabitsStore`. **Новые ключи localStorage:** `kaizenflow-timer`, `kaizenflow-habits`, `kaizenflow-pomodoro`. **Миграция:** `cardSanitize` дропает legacy `energyCost`/`resultEffort`.
 
 ---
 

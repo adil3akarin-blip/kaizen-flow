@@ -7,6 +7,8 @@ import { initStorageSync, loadCardsPersisted } from './lib/persistStorage'
 import { sanitizeCardsOnLoad } from './lib/cardSanitize'
 import { buildColumnOrderFromCards, syncColumnOrderWithCards } from './lib/kanbanOrderUtils'
 import { useCardsStore } from './store/useCardsStore'
+// Initialize settings early so saved Pomodoro durations apply before any timer starts.
+import './store/useSettingsStore'
 
 if (import.meta.env.DEV && 'serviceWorker' in navigator) {
  navigator.serviceWorker.getRegistrations().then((regs) => {
