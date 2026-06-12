@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** MVP closure  
-**Last completed:** S1 Persistence (cards) + Mission & Criteria settings UI  
-**Next:** Редизайн «Modern Calm» + edge cases — план: [2026-06-12-kaizenflow-redesign-mvp-closure.md](../docs/superpowers/plans/2026-06-12-kaizenflow-redesign-mvp-closure.md)
+**Phase:** MVP закрыт ✅  
+**Last completed:** Редизайн «Modern Calm» (фазы 0–6) — все B/C-таски выполнены, build чистый  
+**Plan:** [2026-06-12-kaizenflow-redesign-mvp-closure.md](../docs/superpowers/plans/2026-06-12-kaizenflow-redesign-mvp-closure.md)
 
 ---
 
@@ -54,6 +54,21 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 5 — Push & Polish
 
 - [x] 17 Push Notification Settings
+
+### Редизайн «Modern Calm» (2026-06-12)
+
+- [x] A — Design tokens: canvas/surface/sunken/line/ink/accent/warn/success + Inter Variable font
+- [x] B1 — TabBar: backdrop-blur nav, accent-soft active pill, 56px FAB
+- [x] B2 — DumpOverlay: direct-open textarea, session counter, multiline paste split (C6)
+- [x] B3 — ManifestScreen: full-screen, Framer Motion stagger
+- [x] B4 — SilenceCanvas: dot-grid #dcdce2, ghost empty state
+- [x] B5 — ReviewInbox + FilterFlow: card rows, progress bar, BigChoiceButton
+- [x] B6 — EnergySnapshot: compact segmented preset control
+- [x] B7 — KanbanTab: Museum view in segmented control
+- [x] B8 — WipSlot, PullQueue, Dialogs, PauseScreen, SettingsScreen
+- [x] B9 — PWA manifest theme #f6f6f8, cleanupOutdatedCaches
+- [x] C1–C11 — Edge cases: undo WIP, no mockCards, cross-tab sync, quota toast, JSON backup,
+       multiline split, IME guards, line-clamp, stuck delta guard, accessibility (focus trap, reduced-motion)
 
 ---
 
