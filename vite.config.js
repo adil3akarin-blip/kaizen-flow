@@ -17,8 +17,8 @@ export default defineConfig({
         lang: 'ru',
         start_url: '/',
         display: 'standalone',
-        background_color: '#faf6f0',
-        theme_color: '#faf6f0',
+        background_color: '#f6f6f8',
+        theme_color: '#f6f6f8',
         icons: [
           {
             src: 'pwa-icon.svg',
@@ -37,6 +37,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
         navigateFallback: '/index.html',
+        cleanupOutdatedCaches: true,
       },
     }),
   ],

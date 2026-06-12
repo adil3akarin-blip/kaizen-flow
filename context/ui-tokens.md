@@ -1,52 +1,59 @@
-# UI Tokens
+# UI Tokens — Modern Calm
 
-Design tokens for KaizenFlow. All colors, typography, spacing, and component values for this project. Use these exact values throughout the codebase — never hardcode colors or use raw Tailwind palette classes when a project token exists.
-
-**Source of truth in code:** `src/index.css` (`@theme`) · sticky note colors in `src/lib/cardUtils.js`
+Design tokens for KaizenFlow. Source of truth: `src/index.css` (`@theme`) · sticky colors in `src/lib/cardUtils.js`.
 
 ---
 
 ## How to Use
 
-This project uses **Tailwind CSS v4**. All design tokens are defined using the `@theme` directive in `src/index.css`. No `tailwind.config.js` needed for colors.
-
-Tailwind v4 generates utility classes from `@theme` variables:
-
-- `--color-cream` → `bg-cream`, `text-cream`, `border-cream`
-- `--color-warm-accent` → `bg-warm-accent`, `text-warm-accent`, `ring-warm-accent`
+Tailwind CSS v4 — all tokens in `@theme` in `src/index.css`. No `tailwind.config.js` needed for colors.
 
 ```jsx
-// Correct — generated utilities
-className="bg-cream text-warm-text border-cream-dark"
+// Correct
+className="bg-canvas text-ink border-line"
+className="bg-accent text-white"
 
-// Correct — dynamic sticky color from data
+// Dynamic sticky color
 style={{ backgroundColor: card.color.bg }}
 
 // Never — raw Tailwind palette
 className="bg-gray-100 text-gray-800"
-
-// Never — hardcoded hex when token exists
-className="bg-[#faf6f0]"
 ```
 
 ---
 
-## index.css — Complete Token Definition
+## Token Reference
 
 ```css
-@import 'tailwindcss';
-@import '@fontsource/lora/500.css';
-@import '@fontsource/lora/600.css';
-
 @theme {
-  --color-cream: #faf6f0;
-  --color-cream-dark: #f0ebe3;
-  --color-warm-text: #3d3830;
-  --color-warm-muted: #8a8279;
-  --color-warm-accent: #c4956a;
-  --color-warm-accent-hover: #b08050;
-  --font-sans: 'Segoe UI', system-ui, sans-serif;
-  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+  /* surfaces */
+  --color-canvas: #f6f6f8;        /* app background */
+  --color-surface: #ffffff;       /* cards, panels, sheets */
+  --color-sunken: #efeff3;        /* segmented controls, chip backgrounds */
+  --color-line: #e7e7ec;          /* borders */
+  --color-line-strong: #d9d9e0;   /* borders at hover/focus */
+
+  /* text */
+  --color-ink: #1b1b22;
+  --color-ink-muted: #6e6e7a;
+  --color-ink-faint: #9c9ca8;
+
+  /* accent — calm indigo */
+  --color-accent: #5b5bd6;
+  --color-accent-hover: #4a4ac4;
+  --color-accent-soft: #ededfb;   /* chip backgrounds, active tab pill */
+
+  /* semantic */
+  --color-success: #2e9e6b;
+  --color-success-soft: #e5f5ec;
+  --color-warn: #d97a1a;          /* stuck detector — amber, not red */
+  --color-warn-soft: #fbf0df;
+  --color-danger: #d6455b;        /* delete only */
+
+  --font-sans: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(27 27 34 / 0.05), 0 4px 12px rgb(27 27 34 / 0.06);
+  --shadow-float: 0 4px 8px rgb(27 27 34 / 0.08), 0 12px 32px rgb(27 27 34 / 0.12);
 }
 ```
 
@@ -54,214 +61,146 @@ className="bg-[#faf6f0]"
 
 ## Color Usage Guide
 
-### Page & Surfaces
-
-| Element | Token / class |
-|---|---|
-| App background | `bg-cream` |
-| Panel / sidebar background | `bg-cream` |
-| Card / input surface | `bg-white` |
-| Default border | `border-cream-dark` |
-| Overlay backdrop | `bg-cream/80 backdrop-blur-[2px]` |
-
-### Typography
-
-| Element | Token |
-|---|---|
-| Primary text | `text-warm-text` |
-| Secondary / hints | `text-warm-muted` |
-| Accent emphasis in copy | `text-warm-accent` |
-| Placeholder | `placeholder:text-warm-muted/60` |
-| Toast on dark bar | `text-white` |
-
-### Accent (Warm Terracotta)
-
-Used for: primary buttons, active counts, focus rings, dump button
+### Surfaces
 
 | Element | Class |
 |---|---|
-| Primary button bg | `bg-warm-accent` |
-| Primary button hover | `hover:bg-warm-accent-hover` |
-| Focus ring | `focus:ring-warm-accent/30` or `ring-warm-accent/40` |
-| Accent shadow | `shadow-warm-accent/30` |
+| App background | `bg-canvas` |
+| Card / panel / sheet | `bg-surface` |
+| Segmented control bg, chip bg | `bg-sunken` |
+| Default border | `border-line` |
+| Hover/focus border | `border-line-strong` |
+| Overlay backdrop | `bg-ink/30 backdrop-blur-sm` |
 
-### Semantic (planned — add to `@theme` when implementing)
+### Typography
 
-| Purpose | Suggested value | Usage |
-|---|---|---|
-| Stuck card outline | amber (`ring-amber-400/60`) | Detektor zatorov — not red alarm |
-| Success / done | keep warm accent or soft green | «Сделано» feedback |
-| Muted / disabled | `opacity-40` + `disabled:cursor-not-allowed` | Disabled buttons |
-| Energy mismatch | reduced opacity on card | Pull queue when energy too low |
+| Element | Class |
+|---|---|
+| Primary text | `text-ink` |
+| Secondary / hints | `text-ink-muted` |
+| Placeholder / faint | `text-ink-faint` |
+| Accent emphasis | `text-accent` |
 
-Add these to `@theme` only when the feature ships — until then use Tailwind amber utilities for stuck state as specified in UI shell spec.
+### Accent (Calm Indigo)
+
+| Element | Class |
+|---|---|
+| Primary button bg | `bg-accent` |
+| Primary button hover | `hover:bg-accent-hover` |
+| Active tab / chip bg | `bg-accent-soft text-accent` |
+| Focus ring | `focus-visible:ring-2 ring-accent/40` |
 
 ---
 
 ## Sticky Note Colors
 
-Not theme tokens — defined in `STICKY_COLORS` (`src/lib/cardUtils.js`):
+Defined in `STICKY_COLORS` (`src/lib/cardUtils.js`):
 
 | Index | Background | Shadow |
 |---|---|---|
-| 0 | `#FFF9C4` | `#F0E68C` |
-| 1 | `#FFCDD2` | `#EF9A9A` |
-| 2 | `#B3E5FC` | `#81D4FA` |
-| 3 | `#C8E6C9` | `#A5D6A7` |
-| 4 | `#E1BEE7` | `#CE93D8` |
-| 5 | `#FFE0B2` | `#FFCC80` |
-
-Shadow applied inline in `StickyNote.jsx` — do not move to CSS variables.
+| 0 | `#FBF3D5` | `#E8DCAA` |
+| 1 | `#FBE4E7` | `#EFC3CA` |
+| 2 | `#DFEBFA` | `#BCD4F0` |
+| 3 | `#E2F2E5` | `#BFDFC7` |
+| 4 | `#EFE6F7` | `#D8C4EA` |
+| 5 | `#FCE9DC` | `#F0CDB4` |
 
 ---
 
 ## Canvas Dot Grid
 
-Not a token — inline style on canvas container:
+Inline style on canvas container. Only on «Неделя тишины»:
 
 ```
-radial-gradient(circle, #e8e0d4 1px, transparent 1px)
+radial-gradient(circle, #dcdce2 1px, transparent 1px)
 background-size: 24px 24px
 ```
-
-Use **only** in «Неделя тишины» / raw sticky canvas — never on Flow, Kanban, or filter screens.
 
 ---
 
 ## Typography
 
-| Element | Size | Weight | Color |
-|---|---|---|---|
-| App title / tab h2 | `font-serif text-2xl` | `font-medium` | `text-warm-text` |
-| Section heading (Review silence week) | `font-serif text-xl` | `font-medium` | `text-warm-text` |
-| Body / card text | `text-sm`–`text-[15px]` | normal | `text-warm-text` |
-| Hints / subtitles | `text-xs`–`text-sm` | normal | `text-warm-muted` |
-| Primary button label | `text-sm` | `font-medium` | `text-white` |
-| Sticky note text | `text-[14px]` | normal | `text-warm-text` |
+| Element | Classes |
+|---|---|
+| Tab / page title | `text-[22px] font-semibold tracking-tight text-ink` |
+| Section heading | `text-xs font-semibold uppercase tracking-wider text-ink-faint` |
+| Body / card text | `text-[15px] text-ink leading-relaxed` |
+| Subtitle | `text-sm text-ink-muted` |
+| Primary button | `text-sm font-medium text-white` |
+| Sticky note | `text-[14px] text-ink` |
 
-Font family: **Segoe UI, system-ui, sans-serif** via `--font-sans` for body. **Lora** via `@fontsource/lora` and `--font-serif` for headings (`font-serif`).
-
----
-
-## Spacing
-
-| Token | Value | Usage |
-|---|---|---|
-| `gap-2` | 8px | Button groups, form gaps |
-| `gap-3` | 12px | Flow mode dump spacing |
-| `gap-4` | 16px | Idle dump layout |
-| `px-6` | 24px | Panel horizontal padding |
-| `py-5` | 20px | Panel header/content vertical |
-| `p-5` | 20px | Dialog padding |
-| `rounded-lg` | 8px | Buttons, inputs |
-| `rounded-xl` | 12px | Textareas, toasts, dialogs |
-| `rounded-full` | pill | Dump button (128×128 circle) |
+Font: **Inter Variable** via `@fontsource-variable/inter`. One font, no serif.
 
 ---
 
-## Component Tokens
+## Component Recipes
 
 ### Primary Button
-
 ```
-bg-warm-accent text-white text-sm font-medium
-rounded-lg py-2.5 (or py-2)
-hover:bg-warm-accent-hover
-disabled:opacity-40 disabled:cursor-not-allowed
+bg-accent text-white text-sm font-medium rounded-xl px-4 py-2.5
+hover:bg-accent-hover active:scale-[0.98] transition
+disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 ring-accent/40
 ```
 
-### Secondary / Ghost Button
-
+### Secondary Button
 ```
-border border-cream-dark text-warm-muted
-rounded-lg py-2.5
-hover:bg-cream-dark hover:text-warm-text
+bg-surface border border-line text-ink rounded-xl px-4 py-2.5
+hover:border-line-strong hover:bg-sunken/60 transition
 ```
 
-### Dump Circle Button (idle)
-
+### Ghost / Danger Text
 ```
-h-32 w-32 rounded-full
-bg-warm-accent text-lg font-medium text-white
-shadow-lg shadow-warm-accent/30
-hover:bg-warm-accent-hover
-whileHover scale 1.03 · whileTap scale 0.97
+ghost: text-ink-muted hover:text-ink
+danger: text-danger hover:text-danger/70
 ```
 
-### Textarea (dump input)
-
+### Card
 ```
-w-full resize-none rounded-xl
-border border-cream-dark bg-white
-px-4 py-3 text-[15px] leading-relaxed text-warm-text
-placeholder:text-warm-muted/60
-focus:shadow-md focus:ring-2 focus:ring-warm-accent/30
+bg-surface rounded-2xl border border-line/60 shadow-(--shadow-card)
 ```
 
-### Empty State Card
-
+### Sheet / Dialog
 ```
-flex max-w-sm flex-col items-center rounded-2xl
-border border-cream-dark/50 bg-white px-8 py-10 shadow-sm
-icon: Lucide h-8 w-8 text-warm-accent/45 strokeWidth 1.5
-title: font-serif text-base font-medium text-warm-text
-description: text-sm text-warm-muted
+mobile: rounded-t-3xl  desktop: rounded-2xl
+bg-surface border border-line/60 shadow-(--shadow-float)
+backdrop: bg-ink/30 backdrop-blur-sm
 ```
 
-### Dialog / Sheet Surface
-
+### Segmented Control
 ```
-rounded-2xl border border-cream-dark/60 bg-white shadow-xl
-overlay backdrop: bg-warm-text/25 backdrop-blur-sm
-```
-
-### Undo Toast
-
-```
-fixed bottom-8 left-1/2 -translate-x-1/2 z-50
-rounded-xl bg-warm-text px-5 py-3 text-sm text-white shadow-xl
-Undo link: text-[#FFE0B2] hover:underline
+container: bg-sunken rounded-xl p-1
+active segment: bg-surface rounded-lg shadow-sm font-medium text-ink
+inactive: text-ink-muted hover:text-ink
 ```
 
-### Sticky Note
-
+### Chip
 ```
-width: 180px (w-[180px])
-padding: px-4 py-3
-border-radius: rounded-sm (slight paper feel)
-text: text-[14px] leading-snug
-shadow: dynamic from card.color.shadow (inline)
-rotation: from card.rotation (inline, raw only)
-edit ring: ring-2 ring-warm-accent/40
+default: bg-sunken text-ink-muted rounded-full px-3 py-1 text-xs font-medium
+selected: bg-accent-soft text-accent
 ```
 
-### Flow Card (planned — post-filter)
-
+### Toast
 ```
-bg-white border border-cream-dark rounded-xl
-no rotation, no dot-grid context
-padding px-4 py-3, text-sm
+bg-ink text-white rounded-xl shadow-(--shadow-float)
+undo link: text-accent-soft (approx #c7c7f5)
 ```
 
----
-
-## Two Visual Modes
-
-| Mode | Where | Texture |
-|---|---|---|
-| **Raw / silence week** | Canvas, StickyNote | Dot-grid, tilt, STICKY_COLORS |
-| **Flow / review / kanban** | All structured screens | Clean digital — cream/white, no grid |
-| **Year board** | Retrospective | Slightly warmer accent tone, read-only |
-
-Brand colors stay the same — only density and texture change.
+### Empty State
+```
+icon: h-12 w-12 rounded-full bg-sunken with icon h-6 w-6 text-ink-faint
+title: text-base font-semibold text-ink
+description: text-sm text-ink-muted
+action button: primary button recipe
+```
 
 ---
 
 ## Invariants
 
-- Never use hex in components when a `@theme` token exists
-- Sticky colors always from `STICKY_COLORS` — never random hex in components
+- Never hex in components when a `@theme` token exists
+- Sticky colors always from `STICKY_COLORS`
 - Dot-grid only on silence-week canvas
-- Stuck cards use amber outline — never red alarm styling
+- Stuck cards: left strip `bg-warn` + chip «N дней» — not whole card warn color
+- One font: Inter Variable — no serif ever
 - All user-facing copy in Russian
-- Animations via Framer Motion springs — see `StickyNote.jsx` for reference values
+- Animations via Framer Motion; `useReducedMotion()` on any looping animation
