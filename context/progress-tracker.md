@@ -10,7 +10,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** MVP closure  
 **Last completed:** S1 Persistence (cards) + Mission & Criteria settings UI  
-**Next:** Smoke QA по shell checklist
+**Next:** Редизайн «Modern Calm» + edge cases — план: [2026-06-12-kaizenflow-redesign-mvp-closure.md](../docs/superpowers/plans/2026-06-12-kaizenflow-redesign-mvp-closure.md)
 
 ---
 
