@@ -101,7 +101,7 @@ export default function FlowTab() {
  <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
  <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:overflow-hidden md:py-8">
  <PageContainer className="md:flex md:h-full md:min-h-0 md:flex-col">
- <TabPageHeader title="Поток" />
+ <TabPageHeader eyebrow="Фокус сейчас" title="Поток" />
 
  <div
  className={clsx(

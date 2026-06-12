@@ -107,7 +107,7 @@ export default function WipSlot({
             <button
               type="button"
               onClick={handleSuggestedPull}
-              className="mt-4 w-full rounded-xl bg-accent py-3 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              className="hm-grad mt-4 w-full rounded-xl py-3 text-sm font-bold text-white shadow-(--shadow-glow) transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               Начать
             </button>
@@ -131,7 +131,7 @@ export default function WipSlot({
     <section>
       <SectionLabel>В работе</SectionLabel>
 
-      <div className="relative mt-3 rounded-2xl border border-line/60 bg-surface shadow-(--shadow-card)">
+      <div className="hm-glass hm-accent-line relative mt-3 overflow-hidden rounded-2xl">
         <StructuredCard card={wipCard} className="px-5 py-4 pr-12 shadow-none border-none rounded-2xl" />
         <button
           type="button"

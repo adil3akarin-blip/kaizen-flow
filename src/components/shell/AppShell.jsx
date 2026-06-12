@@ -25,7 +25,7 @@ export default function AppShell() {
  }
 
  return (
- <div className="flex h-dvh min-h-0 overflow-hidden bg-canvas">
+ <div className="flex h-dvh min-h-0 overflow-hidden">
  <Sidebar />
  <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-0">
  <Content />

@@ -5,7 +5,7 @@ import { REVIEW_VIEWS } from '../../lib/reviewUtils'
 export default function ReviewViewToggle({ value, onChange }) {
   return (
     <div
-      className="flex shrink-0 rounded-xl bg-sunken p-1"
+      className="flex shrink-0 gap-1 rounded-xl border border-line bg-glass-strong p-1"
       role="group"
       aria-label="Вид разбора"
     >
@@ -15,9 +15,9 @@ export default function ReviewViewToggle({ value, onChange }) {
         aria-pressed={value === REVIEW_VIEWS.canvas}
         onClick={() => onChange(REVIEW_VIEWS.canvas)}
         className={clsx(
-          'rounded-lg p-2 transition-colors',
+          'rounded-lg p-2 transition',
           value === REVIEW_VIEWS.canvas
-            ? 'bg-surface text-ink shadow-sm'
+            ? 'hm-grad text-white shadow-(--shadow-glow)'
             : 'text-ink-muted hover:text-ink',
         )}
       >
@@ -29,9 +29,9 @@ export default function ReviewViewToggle({ value, onChange }) {
         aria-pressed={value === REVIEW_VIEWS.inbox}
         onClick={() => onChange(REVIEW_VIEWS.inbox)}
         className={clsx(
-          'rounded-lg p-2 transition-colors',
+          'rounded-lg p-2 transition',
           value === REVIEW_VIEWS.inbox
-            ? 'bg-surface text-ink shadow-sm'
+            ? 'hm-grad text-white shadow-(--shadow-glow)'
             : 'text-ink-muted hover:text-ink',
         )}
       >

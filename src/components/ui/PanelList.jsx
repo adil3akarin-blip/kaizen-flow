@@ -4,7 +4,7 @@ export function PanelList({ children, className, clip = true }) {
  return (
  <div
  className={clsx(
- 'rounded-2xl border border-line/50 bg-white shadow-sm',
+ 'hm-glass rounded-2xl',
  clip ? 'overflow-hidden' : 'overflow-visible',
  className,
  )}

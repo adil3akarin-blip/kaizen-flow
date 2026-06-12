@@ -148,6 +148,7 @@ export default function ReviewInbox({
   const header = showHeader && (
     <div className="flex items-start justify-between gap-4">
       <TabPageHeader
+        eyebrow="Входящие мысли"
         title="Разбор"
         subtitle={formatRawInboxSubtitle(rawCards.length)}
       />
@@ -163,6 +164,7 @@ export default function ReviewInbox({
         <PageContainer>
           {header ?? (
             <TabPageHeader
+              eyebrow="Входящие мысли"
               title="Разбор"
               subtitle={formatRawInboxSubtitle(0)}
             />

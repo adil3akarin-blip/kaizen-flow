@@ -22,12 +22,12 @@ export default function TabBar() {
         type="button"
         onClick={openDump}
         aria-label="Выгрузить мысль"
-        className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+12px)] left-1/2 z-30 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-accent text-white shadow-(--shadow-float) transition-transform active:scale-95 md:hidden"
+        className="hm-grad fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+12px)] left-1/2 z-30 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full text-white shadow-(--shadow-glow) transition-transform active:scale-95 md:hidden"
       >
         <Plus className="h-6 w-6" strokeWidth={2} />
       </button>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex h-16 border-t border-line bg-surface/90 backdrop-blur pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex h-16 border-t border-line bg-glass-strong backdrop-blur-xl pb-[env(safe-area-inset-bottom)] md:hidden">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id
@@ -45,7 +45,7 @@ export default function TabBar() {
               className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 pt-1 text-[11px] transition-colors"
             >
               {isActive && (
-                <span className="absolute top-1.5 h-1 w-8 rounded-full bg-accent-soft" />
+                <span className="absolute top-1.5 h-1 w-8 rounded-full bg-accent shadow-[0_0_10px_var(--color-accent)]" />
               )}
               <Icon
                 className={clsx(

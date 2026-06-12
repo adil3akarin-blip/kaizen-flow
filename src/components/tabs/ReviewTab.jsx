@@ -57,6 +57,7 @@ export default function ReviewTab() {
  <header className="flex shrink-0 flex-col gap-3 border-b border-line bg-white/40 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 md:px-8">
  <div className="min-w-0 flex-1">
  <TabPageHeader
+ eyebrow="Режим паузы"
  title="Неделя тишины"
  subtitle="Просто выгружай — планирование подождёт"
  />
@@ -104,6 +105,7 @@ export default function ReviewTab() {
  <PageContainer>
  <div className="flex items-start justify-between gap-4">
  <TabPageHeader
+ eyebrow="Входящие мысли"
  title="Разбор"
  subtitle={formatRawInboxSubtitle(rawCount)}
  />

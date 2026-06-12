@@ -38,7 +38,7 @@ export default function FlowStatusPanel({ onOpenHub, rawCount, onGoReview, stuck
       )}
 
       {hasHint && (
-        <div className="rounded-xl border border-line/60 bg-surface px-4 py-3 shadow-(--shadow-card)">
+        <div className="hm-glass rounded-xl px-4 py-3">
           <FlowHint rawCount={rawCount} onGoReview={onGoReview} />
         </div>
       )}

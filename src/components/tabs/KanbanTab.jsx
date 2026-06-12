@@ -48,13 +48,14 @@ export default function KanbanTab() {
         <PageContainer size="kanban" className="flex min-h-0 flex-1 flex-col">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <TabPageHeader
+              eyebrow="Карта года"
               title="Канбан"
               subtitle="Сам вытягиваешь следующее дело"
             />
 
             <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
               <div
-                className="inline-flex rounded-xl bg-sunken p-1"
+                className="inline-flex gap-1 rounded-xl border border-line bg-glass-strong p-1"
                 role="tablist"
                 aria-label="Вид канбана"
               >
@@ -66,9 +67,9 @@ export default function KanbanTab() {
                     aria-selected={view === option.id}
                     onClick={() => setView(option.id)}
                     className={clsx(
-                      'rounded-lg px-3 py-1.5 text-sm transition-colors',
+                      'rounded-lg px-3 py-1.5 text-sm font-semibold transition',
                       view === option.id
-                        ? 'bg-surface font-medium text-ink shadow-sm'
+                        ? 'hm-grad text-white shadow-(--shadow-glow)'
                         : 'text-ink-muted hover:text-ink',
                     )}
                   >

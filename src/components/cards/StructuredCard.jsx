@@ -12,23 +12,30 @@ const ENERGY_LABELS = {
  heavy: 'Тяжёлое',
 }
 
+const TONE_CLASS = {
+ indigo: 'border-indigo/20 bg-indigo/10 text-indigo',
+ orange: 'border-accent/20 bg-accent-soft text-accent',
+ teal: 'border-teal/20 bg-teal/10 text-teal',
+ neutral: 'border-line bg-glass text-ink-muted',
+}
+
 export default function StructuredCard({ card, className, compact = false }) {
  const chips = []
 
  if (card.wantMust) {
- chips.push({ key: 'want', label: WANT_LABELS[card.wantMust] })
+ chips.push({ key: 'want', label: WANT_LABELS[card.wantMust], tone: 'indigo' })
  }
  if (card.energyCost && card.energyCost !== 'medium') {
- chips.push({ key: 'energy', label: ENERGY_LABELS[card.energyCost] })
+ chips.push({ key: 'energy', label: ENERGY_LABELS[card.energyCost], tone: 'orange' })
  }
  if (card.timeInvestment) {
- chips.push({ key: 'invest', label: card.timeInvestment })
+ chips.push({ key: 'invest', label: card.timeInvestment, tone: 'teal' })
  }
 
  return (
  <div
  className={clsx(
- 'rounded-xl border border-line/50 bg-white shadow-sm',
+ 'rounded-xl border border-line bg-glass-strong shadow-sm',
  compact ? 'px-3 py-2.5' : 'px-4 py-3',
  className,
  )}
@@ -47,7 +54,10 @@ export default function StructuredCard({ card, className, compact = false }) {
  {chips.map((chip) => (
  <span
  key={chip.key}
- className="rounded-full bg-canvas px-2 py-0.5 text-xs text-ink-muted"
+ className={clsx(
+ 'rounded-full border px-2 py-0.5 text-xs font-semibold',
+ TONE_CLASS[chip.tone] ?? TONE_CLASS.neutral,
+ )}
  >
  {chip.label}
  </span>
