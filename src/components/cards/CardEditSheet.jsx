@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useTimerStore } from '../../store/useTimerStore'
 import { cardTotalMs, formatClock, formatDuration, localDateKey, sessionsForCard } from '../../lib/timerUtils'
+import Sheet from '../ui/Sheet'
 import StructuredCard from './StructuredCard'
 
 function formatSessionDate(ts) {
@@ -101,36 +101,8 @@ function CardEditSheetContent({
  }
 
  return (
- <AnimatePresence>
- {open && (
- <motion.div
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- exit={{ opacity: 0 }}
- className="fixed inset-0 z-40 flex items-end justify-center md:items-center md:p-6"
- >
- <button
- type="button"
- aria-label="Закрыть"
- onClick={onClose}
- className="absolute inset-0 bg-ink/25 backdrop-blur-sm"
- />
-
- <motion.div
- initial={{ opacity: 0, y: 40 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, y: 40 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
- className="relative z-10 w-full max-w-md rounded-t-2xl border border-line/60 bg-white p-6 shadow-xl md:rounded-2xl"
- onClick={(e) => e.stopPropagation()}
- >
- <h3 className="m-0 text-lg font-medium text-ink">
- Редактировать
- </h3>
-
- <div className="mt-4">
+ <Sheet open={open} onClose={onClose} title="Редактировать">
  <StructuredCard card={card} compact />
- </div>
 
  <TimerHistory cardId={card.id} />
 
@@ -138,7 +110,7 @@ function CardEditSheetContent({
  value={text}
  onChange={(e) => setText(e.target.value)}
  rows={3}
- className="mt-4 w-full resize-none rounded-xl border border-line bg-canvas/30 px-4 py-3 text-[15px] leading-relaxed text-ink outline-none focus:ring-2 focus:ring-accent/30"
+ className="mt-4 w-full resize-none rounded-xl border border-line bg-sunken/30 px-4 py-3 text-[15px] leading-relaxed text-ink outline-none focus:ring-2 focus:ring-accent/30"
  />
 
  <div className="mt-4 flex flex-col gap-2">
@@ -146,7 +118,7 @@ function CardEditSheetContent({
  type="button"
  onClick={handleSave}
  disabled={!text.trim()}
- className="rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-40"
+ className="rounded-xl bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] disabled:opacity-40"
  >
  Сохранить
  </button>
@@ -155,7 +127,7 @@ function CardEditSheetContent({
  <button
  type="button"
  onClick={onMove}
- className="rounded-lg border border-line py-2.5 text-sm text-ink hover:bg-sunken"
+ className="rounded-xl border border-line py-2.5 text-sm text-ink transition hover:border-line-strong hover:bg-sunken/60"
  >
  Переместить в…
  </button>
@@ -165,7 +137,7 @@ function CardEditSheetContent({
  <button
  type="button"
  onClick={handleReleaseWip}
- className="rounded-lg border border-line py-2.5 text-sm text-ink-muted hover:bg-sunken"
+ className="rounded-xl border border-line py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
  >
  Вернуть в очередь
  </button>
@@ -175,7 +147,7 @@ function CardEditSheetContent({
  <button
  type="button"
  onClick={handleRefilter}
- className="rounded-lg border border-line py-2.5 text-sm text-ink-muted hover:bg-sunken"
+ className="rounded-xl border border-line py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
  >
  Разобрать заново
  </button>
@@ -184,14 +156,11 @@ function CardEditSheetContent({
  <button
  type="button"
  onClick={handleDelete}
- className="py-2 text-sm text-ink-muted hover:text-ink"
+ className="py-2 text-sm text-ink-muted transition hover:text-ink"
  >
  Удалить
  </button>
  </div>
- </motion.div>
- </motion.div>
- )}
- </AnimatePresence>
+ </Sheet>
  )
 }

@@ -3,6 +3,32 @@ const CARDS_BACKUP_KEY = 'kaizenflow-cards-backup'
 
 let quotaToastShown = false
 
+// Raw localStorage access can throw (storage disabled, private mode) —
+// these helpers degrade to null / no-op so module init never crashes the app.
+export function safeGetItem(key) {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+export function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // quota / private mode — degrade silently
+  }
+}
+
+export function safeRemoveItem(key) {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // ignore
+  }
+}
+
 export function loadCardsPersisted() {
   try {
     const raw = localStorage.getItem(CARDS_KEY)

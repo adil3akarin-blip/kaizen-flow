@@ -1,3 +1,5 @@
+import { generateId } from './id'
+
 export const STICKY_COLORS = [
  { bg: '#FBF3D5', shadow: '#E8DCAA' },
  { bg: '#FBE4E7', shadow: '#EFC3CA' },
@@ -41,7 +43,7 @@ export function generatePosition(existingCards) {
 export function createCard(text, existingCards) {
  const color = pickRandomColor()
  return {
- id: crypto.randomUUID(),
+ id: generateId(),
  text: text.trim(),
  color,
  rotation: randomRotation(),

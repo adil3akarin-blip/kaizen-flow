@@ -5,32 +5,27 @@ import {
   saveJsonPersisted,
 } from '../lib/persistStorage'
 import { HABIT_COLORS, HABIT_ICONS, SCHEDULE_TYPES } from '../lib/habitUtils'
+import { generateId } from '../lib/id'
 import { localDateKey } from '../lib/timerUtils'
 
 const HABITS_KEY = 'kaizenflow-habits'
-
-function loadInitial() {
-  const persisted = loadJsonPersisted(HABITS_KEY)
-  const habits = Array.isArray(persisted?.habits) ? persisted.habits : []
-  const log =
-    persisted?.log && typeof persisted.log === 'object' ? persisted.log : {}
-  return { habits, log }
-}
-
-const initial = loadInitial()
+const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}$/
 
 function normalizeSchedule(schedule) {
   if (!schedule || !schedule.type) {
     return { type: SCHEDULE_TYPES.daily }
   }
   if (schedule.type === SCHEDULE_TYPES.weekly) {
+    const n = Math.round(Number(schedule.timesPerWeek))
     return {
       type: SCHEDULE_TYPES.weekly,
-      timesPerWeek: Math.min(7, Math.max(1, schedule.timesPerWeek ?? 3)),
+      timesPerWeek: Number.isFinite(n) ? Math.min(7, Math.max(1, n)) : 3,
     }
   }
   if (schedule.type === SCHEDULE_TYPES.weekdays) {
-    const weekdays = Array.isArray(schedule.weekdays) ? schedule.weekdays : []
+    const weekdays = Array.isArray(schedule.weekdays)
+      ? [...new Set(schedule.weekdays.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))]
+      : []
     return {
       type: SCHEDULE_TYPES.weekdays,
       weekdays: weekdays.length ? weekdays : [0, 1, 2, 3, 4],
@@ -38,6 +33,47 @@ function normalizeSchedule(schedule) {
   }
   return { type: SCHEDULE_TYPES.daily }
 }
+
+function sanitizeHabits(habits) {
+  return habits
+    .filter(
+      (h) =>
+        h && typeof h === 'object' && typeof h.title === 'string' && h.title.trim(),
+    )
+    .map((h) => ({
+      id: typeof h.id === 'string' && h.id ? h.id : generateId(),
+      title: h.title.trim(),
+      icon: typeof h.icon === 'string' && h.icon ? h.icon : HABIT_ICONS[0],
+      color: typeof h.color === 'string' && h.color ? h.color : HABIT_COLORS[0],
+      schedule: normalizeSchedule(h.schedule),
+      createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now(),
+      archived: Boolean(h.archived),
+    }))
+}
+
+function sanitizeLog(log) {
+  const out = {}
+  for (const [habitId, dates] of Object.entries(log)) {
+    if (!Array.isArray(dates)) continue
+    out[habitId] = [
+      ...new Set(dates.filter((d) => typeof d === 'string' && DATE_KEY_RE.test(d))),
+    ]
+  }
+  return out
+}
+
+function loadInitial() {
+  const persisted = loadJsonPersisted(HABITS_KEY)
+  const habits = sanitizeHabits(
+    Array.isArray(persisted?.habits) ? persisted.habits : [],
+  )
+  const log = sanitizeLog(
+    persisted?.log && typeof persisted.log === 'object' ? persisted.log : {},
+  )
+  return { habits, log }
+}
+
+const initial = loadInitial()
 
 export const useHabitsStore = create((set, get) => ({
   habits: initial.habits,
@@ -48,7 +84,7 @@ export const useHabitsStore = create((set, get) => ({
     if (!trimmed) return null
 
     const habit = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       title: trimmed,
       icon: icon || HABIT_ICONS[0],
       color: color || HABIT_COLORS[0],
@@ -88,6 +124,7 @@ export const useHabitsStore = create((set, get) => ({
     })
   },
 
+  // Returns whether the habit is now marked done for that date.
   toggleHabitDone: (id, dateKey = localDateKey(Date.now())) => {
     set((state) => {
       const current = state.log[id] ?? []
@@ -97,7 +134,7 @@ export const useHabitsStore = create((set, get) => ({
         : [...current, dateKey]
       return { log: { ...state.log, [id]: nextDates } }
     })
-    return !get().log[id]?.includes(dateKey)
+    return get().log[id]?.includes(dateKey) ?? false
   },
 }))
 

@@ -2,8 +2,10 @@ import { useState } from 'react'
 import clsx from 'clsx'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Bell } from 'lucide-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import { NOTIFICATION_TYPES } from '../../lib/notificationTypes'
+import SettingsSection from './SettingsSection'
 
 function ToggleSwitch({ enabled }) {
  return (
@@ -121,28 +123,25 @@ export default function NotificationSettings() {
  const enabledCount = Object.values(notificationPrefs).filter(Boolean).length
 
  return (
- <section className="rounded-2xl border border-line/50 bg-white p-4 shadow-sm sm:p-5">
- <p className="m-0 text-base font-medium text-ink">
- Что можем напомнить
- </p>
- <p className="mt-2 text-sm leading-relaxed text-ink-muted">
- Мягкие приглашения открыть нужный экран. Без списков задач и дедлайнов.
- </p>
-
+ <SettingsSection
+ icon={Bell}
+ title="Что можем напомнить"
+ description="Мягкие приглашения открыть нужный экран. Без списков задач и дедлайнов."
+ >
  {enabledCount > 0 && (
- <p className="mt-3 rounded-lg bg-canvas/80 px-3 py-2 text-xs leading-relaxed text-ink-muted">
+ <p className="rounded-lg bg-sunken/60 px-3 py-2 text-xs leading-relaxed text-ink-muted">
  Включено: {enabledCount} из {NOTIFICATION_TYPES.length}
  </p>
  )}
 
  {permission === 'denied' && (
- <p className="mt-3 rounded-lg border border-line/60 bg-canvas/80 px-3 py-2.5 text-xs leading-relaxed text-ink-muted">
+ <p className="mt-3 rounded-lg border border-line/60 bg-sunken/60 px-3 py-2.5 text-xs leading-relaxed text-ink-muted">
  Push заблокирован в браузере. Подсказки внутри приложения всё равно
  работают.
  </p>
  )}
 
- <ul className="mt-4 flex list-none flex-col gap-2 p-0 sm:gap-3">
+ <ul className="mt-3 flex list-none flex-col gap-2 p-0">
  {NOTIFICATION_TYPES.map((type) => {
  const enabled = notificationPrefs[type.id]
 
@@ -153,7 +152,7 @@ export default function NotificationSettings() {
  role="switch"
  aria-checked={enabled}
  onClick={() => applyToggle(type.id, !enabled)}
- className="flex w-full items-start justify-between gap-4 rounded-xl border border-line/40 px-4 py-3.5 text-left transition-colors active:bg-canvas/60"
+ className="flex w-full items-start justify-between gap-4 rounded-xl border border-line/50 bg-surface px-4 py-3.5 text-left transition-colors hover:border-line-strong active:bg-sunken/40"
  >
  <span className="min-w-0 flex-1">
  <span className="block text-sm font-medium text-ink">
@@ -162,7 +161,7 @@ export default function NotificationSettings() {
  <span className="mt-1 block text-xs leading-relaxed text-ink-muted">
  {type.when}
  </span>
- <span className="mt-2 block text-xs text-ink-muted/80">
+ <span className="mt-2 block text-xs text-ink-faint">
  Пример: {type.example}
  </span>
  </span>
@@ -173,7 +172,7 @@ export default function NotificationSettings() {
  })}
  </ul>
 
- <div className="mt-4 space-y-1 text-xs leading-relaxed text-ink-muted">
+ <div className="mt-4 space-y-1 text-xs leading-relaxed text-ink-faint">
  <p className="m-0">Подсказки внутри приложения работают всегда.</p>
  <p className="m-0">Push-уведомления появятся в следующей версии.</p>
  </div>
@@ -183,6 +182,6 @@ export default function NotificationSettings() {
  onConfirm={handlePrePromptConfirm}
  onCancel={handlePrePromptCancel}
  />
- </section>
+ </SettingsSection>
  )
 }

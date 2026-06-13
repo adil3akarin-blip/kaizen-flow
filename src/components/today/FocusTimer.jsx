@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import clsx from 'clsx'
 import { Pause, Play, Square } from 'lucide-react'
 import { useTimerStore } from '../../store/useTimerStore'
@@ -11,6 +11,7 @@ import {
   phaseDurationMs,
   sessionFocusElapsedMs,
 } from '../../lib/timerUtils'
+import { useNow } from '../../lib/useNow'
 
 const MODES = [
   { id: 'stopwatch', label: 'Секундомер' },
@@ -26,35 +27,23 @@ export default function FocusTimer({ cardId, embedded = false }) {
   const setMode = useTimerStore((s) => s.setMode)
   const stopTimer = useTimerStore((s) => s.stopTimer)
 
-  const [now, setNow] = useState(() => Date.now())
   const [idleMode, setIdleMode] = useState('stopwatch')
 
   const isActive = isActiveTimerForCard(activeTimer, cardId)
   const running = isActive && Boolean(activeTimer.startedAt)
+  // Another session (free / habit / different task) is occupying the timer.
+  const busyElsewhere = Boolean(activeTimer) && !isActive
   const mode = isActive ? activeTimer.mode : idleMode
   const isPomodoro = mode === 'pomodoro'
   const phase = isActive && isPomodoro ? activeTimer.phase : 'focus'
 
-  // Tick while running; advance pomodoro phases at their boundary.
-  useEffect(() => {
-    if (!running) return
-    const id = setInterval(() => {
-      const t = useTimerStore.getState().activeTimer
-      if (!t || !t.startedAt) return
-      setNow(Date.now())
-      if (t.mode === 'pomodoro') {
-        if (currentPhaseElapsedMs(t, Date.now()) >= phaseDurationMs(t.phase)) {
-          useTimerStore.getState().advancePhase()
-        }
-      }
-    }, 250)
-    return () => clearInterval(id)
-  }, [running])
+  // Ticks the clock while running; also re-anchors "today" totals at midnight.
+  const now = useNow({ active: running, intervalMs: 250 })
 
   let clockMs
   if (isPomodoro) {
     const elapsed = isActive ? currentPhaseElapsedMs(activeTimer, now) : 0
-    clockMs = Math.max(0, phaseDurationMs(phase) - elapsed)
+    clockMs = Math.max(0, phaseDurationMs(phase, activeTimer) - elapsed)
   } else {
     clockMs = isActive ? sessionFocusElapsedMs(activeTimer, now) : 0
   }
@@ -67,6 +56,26 @@ export default function FocusTimer({ cardId, embedded = false }) {
   const handleMode = (m) => {
     if (isActive) setMode(m)
     else setIdleMode(m)
+  }
+
+  if (busyElsewhere) {
+    return (
+      <div
+        className={clsx(
+          embedded
+            ? ''
+            : 'rounded-2xl border border-line/60 bg-surface px-4 py-4 shadow-(--shadow-card)',
+          'text-center',
+        )}
+      >
+        <p className="m-0 text-sm font-medium text-ink-muted">
+          Идёт другая сессия таймера
+        </p>
+        <p className="m-0 mt-1 text-xs text-ink-faint">
+          Останови её, чтобы запустить здесь
+        </p>
+      </div>
+    )
   }
 
   return (

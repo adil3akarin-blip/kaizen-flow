@@ -17,6 +17,7 @@ import WipSlot from '../flow/WipSlot'
 import PullQueue from '../flow/PullQueue'
 import TodayHabits from '../today/TodayHabits'
 import DailySummary from '../today/DailySummary'
+import ActiveTimerWidget from '../today/ActiveTimerWidget'
 
 export default function TodayTab() {
   const [queueOverlayOpen, setQueueOverlayOpen] = useState(false)
@@ -72,21 +73,25 @@ export default function TodayTab() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:overflow-hidden md:py-8">
-        <PageContainer className="md:flex md:h-full md:min-h-0 md:flex-col">
-          <div className="mx-auto flex w-full max-w-[600px] flex-col md:min-h-0 md:flex-1">
-            <TabPageHeader eyebrow="Фокус сейчас" title="Сегодня" />
+      <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:py-8">
+        <PageContainer size="wide">
+          <TabPageHeader eyebrow="Фокус сейчас" title="Сегодня" />
 
-            <div className="mt-5">
-              <DailySummary />
-            </div>
+          <div className="mt-5">
+            <DailySummary />
+          </div>
 
-            <div
-              className={clsx(
-                'mt-5 flex flex-col gap-6 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-1',
-                queueOverlayOpen && 'invisible',
-              )}
-            >
+          <div className="mt-4">
+            <ActiveTimerWidget />
+          </div>
+
+          <div
+            className={clsx(
+              'mt-5 lg:grid lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start lg:gap-6',
+              queueOverlayOpen && 'invisible',
+            )}
+          >
+            <div className="flex flex-col gap-6">
               <FlowStatusPanel
                 rawCount={rawCards.length}
                 onGoReview={() => setTab(TABS.review)}
@@ -98,6 +103,9 @@ export default function TodayTab() {
                 emptyCta={emptyCta}
                 onPullSuggested={handlePullSuggested}
               />
+            </div>
+
+            <div className="mt-6 flex flex-col gap-6 lg:mt-0">
               <PullQueue
                 excludeCardId={suggestedCard?.id}
                 onGateOpenChange={setQueueOverlayOpen}

@@ -7,6 +7,8 @@ export const DEFAULT_INVESTMENT_TAGS = [
  'Обучение',
 ]
 
+import { safeGetItem, safeSetItem } from './persistStorage'
+
 const FILTER_HINT_KEY = 'kaizenflow-filter-count'
 
 export function buildFilterCriteria(personalMission, customCriteria = []) {
@@ -18,13 +20,13 @@ export function buildFilterCriteria(personalMission, customCriteria = []) {
 }
 
 export function shouldShowSwipeHint() {
- const count = Number.parseInt(localStorage.getItem(FILTER_HINT_KEY) || '0', 10)
+ const count = Number.parseInt(safeGetItem(FILTER_HINT_KEY) || '0', 10)
  return count < 3
 }
 
 export function incrementFilterHintCount() {
- const count = Number.parseInt(localStorage.getItem(FILTER_HINT_KEY) || '0', 10)
- localStorage.setItem(FILTER_HINT_KEY, String(count + 1))
+ const count = Number.parseInt(safeGetItem(FILTER_HINT_KEY) || '0', 10)
+ safeSetItem(FILTER_HINT_KEY, String(count + 1))
 }
 
 export function sanitizeCriteriaResults(results = [], criteria = []) {

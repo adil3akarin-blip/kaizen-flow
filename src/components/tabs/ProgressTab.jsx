@@ -16,31 +16,33 @@ export default function ProgressTab() {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:py-8">
-        <PageContainer>
-          <TabPageHeader eyebrow="Динамика" title="Прогресс" />
+        <PageContainer size="wide">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <TabPageHeader eyebrow="Динамика" title="Прогресс" />
 
-          <div
-            className="mt-6 flex gap-1 rounded-2xl border border-line bg-glass-strong p-1 shadow-(--shadow-card)"
-            role="tablist"
-            aria-label="Раздел прогресса"
-          >
-            {SEGMENTS.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                role="tab"
-                aria-selected={segment === s.id}
-                onClick={() => setSegment(s.id)}
-                className={clsx(
-                  'flex-1 rounded-xl py-2 text-sm font-semibold transition',
-                  segment === s.id
-                    ? 'hm-grad text-white shadow-(--shadow-glow)'
-                    : 'text-ink-muted hover:bg-sunken/60 hover:text-ink',
-                )}
-              >
-                {s.label}
-              </button>
-            ))}
+            <div
+              className="flex gap-1 rounded-2xl border border-line bg-glass-strong p-1 shadow-(--shadow-card) sm:shrink-0"
+              role="tablist"
+              aria-label="Раздел прогресса"
+            >
+              {SEGMENTS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={segment === s.id}
+                  onClick={() => setSegment(s.id)}
+                  className={clsx(
+                    'flex-1 rounded-xl px-5 py-2 text-sm font-semibold transition sm:flex-none',
+                    segment === s.id
+                      ? 'hm-grad text-white shadow-(--shadow-glow)'
+                      : 'text-ink-muted hover:bg-sunken/60 hover:text-ink',
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {segment === 'habits' ? <HabitsView /> : <TimeStatsView />}

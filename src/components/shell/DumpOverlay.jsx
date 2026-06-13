@@ -112,6 +112,14 @@ function getChunks(text) {
 
 export default function DumpOverlay() {
   const open = useAppStore((s) => s.dumpOpen)
+
+  // The sheet mounts only while open, so its draft state resets on every close.
+  return (
+    <AnimatePresence>{open && <DumpSheet />}</AnimatePresence>
+  )
+}
+
+function DumpSheet() {
   const onClose = useAppStore((s) => s.closeDump)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
   const setTab = useAppStore((s) => s.setTab)
@@ -134,14 +142,9 @@ export default function DumpOverlay() {
     : 'Мысли сохраняются во вкладке «Разбор»'
 
   useEffect(() => {
-    if (open) {
-      setText('')
-      setSessionCount(0)
-      setShowCollapseDialog(false)
-      setSplitChunks([])
-      requestAnimationFrame(() => inputRef.current?.focus())
-    }
-  }, [open])
+    const id = requestAnimationFrame(() => inputRef.current?.focus())
+    return () => cancelAnimationFrame(id)
+  }, [])
 
   const saveCard = () => {
     const card = addCard(text)
@@ -216,13 +219,8 @@ export default function DumpOverlay() {
     requestAnimationFrame(() => inputRef.current?.focus())
   }
 
-  const closeOverlay = () => {
-    setText('')
-    setSessionCount(0)
-    setShowCollapseDialog(false)
-    setSplitChunks([])
-    onClose()
-  }
+  // Unmounting on close resets the draft, so closing is just the store action.
+  const closeOverlay = onClose
 
   const requestClose = () => {
     if (text.trim()) {
@@ -251,115 +249,114 @@ export default function DumpOverlay() {
   }
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-30 flex items-end justify-center md:items-center md:p-6"
-        >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-30 flex items-end justify-center md:items-center md:p-6"
+    >
+      <button
+        type="button"
+        aria-label="Закрыть"
+        onClick={requestClose}
+        className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 40 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Выгрузить мысль"
+        className="relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col rounded-t-3xl border border-line/60 bg-surface shadow-(--shadow-float) md:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
+          <div className="flex items-center gap-2">
+            <h2 className="m-0 text-[17px] font-semibold text-ink">
+              Выгрузить мысль
+            </h2>
+            {sessionCount > 0 && (
+              <motion.span
+                animate={counterFlash ? { scale: [1, 1.15, 1] } : {}}
+                transition={{ duration: 0.3 }}
+                className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${counterFlash ? 'bg-success-soft text-success' : 'bg-accent-soft text-accent'}`}
+              >
+                {sessionCount} за сессию
+              </motion.span>
+            )}
+          </div>
           <button
             type="button"
             aria-label="Закрыть"
             onClick={requestClose}
-            className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
+            className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </header>
+
+        <div className="flex flex-col gap-4 px-6 py-5">
+          <textarea
+            ref={inputRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Что крутится в голове?"
+            rows={5}
+            className="w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-[15px] leading-relaxed text-ink placeholder:text-ink-faint outline-none transition focus:border-line-strong focus:ring-2 focus:ring-accent/30"
           />
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="relative z-10 flex w-full max-w-md flex-col rounded-t-3xl border border-line/60 bg-surface shadow-(--shadow-float) md:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
-              <div className="flex items-center gap-2">
-                <h2 className="m-0 text-[17px] font-semibold text-ink">
-                  Выгрузить мысль
-                </h2>
-                {sessionCount > 0 && (
-                  <motion.span
-                    animate={counterFlash ? { scale: [1, 1.15, 1] } : {}}
-                    transition={{ duration: 0.3 }}
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${counterFlash ? 'bg-success-soft text-success' : 'bg-accent-soft text-accent'}`}
-                  >
-                    {sessionCount} за сессию
-                  </motion.span>
-                )}
-              </div>
-              <button
-                type="button"
-                aria-label="Закрыть"
-                onClick={requestClose}
-                className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </header>
+          {isDesktop && (
+            <p className="text-center text-xs text-ink-faint">
+              Enter — сохранить · Shift+Enter — новая строка · Esc — закрыть
+            </p>
+          )}
 
-            <div className="flex flex-col gap-4 px-6 py-5">
-              <textarea
-                ref={inputRef}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Что крутится в голове?"
-                rows={5}
-                className="w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-[15px] leading-relaxed text-ink placeholder:text-ink-faint outline-none transition focus:border-line-strong focus:ring-2 focus:ring-accent/30"
-              />
+          <p className="text-center text-xs text-ink-muted">{destinationHint}</p>
 
-              {isDesktop && (
-                <p className="text-center text-xs text-ink-faint">
-                  Enter — сохранить · Shift+Enter — новая строка · Esc — закрыть
-                </p>
-              )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!text.trim()}
+              className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Сохранить
+            </button>
+            <button
+              type="button"
+              onClick={closeOverlay}
+              className="rounded-xl border border-line px-4 py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
+            >
+              Готово
+            </button>
+          </div>
+        </div>
 
-              <p className="text-center text-xs text-ink-muted">{destinationHint}</p>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={!text.trim()}
-                  className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Сохранить
-                </button>
-                <button
-                  type="button"
-                  onClick={closeOverlay}
-                  className="rounded-xl border border-line px-4 py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
-                >
-                  Готово
-                </button>
-              </div>
-            </div>
-
-            <AnimatePresence>
-              {showCollapseDialog && (
-                <CollapseDialog
-                  onSave={() => {
-                    handleSave()
-                    closeOverlay()
-                  }}
-                  onDiscard={closeOverlay}
-                  onCancel={() => setShowCollapseDialog(false)}
-                />
-              )}
-              {splitChunks.length > 0 && (
-                <SplitDialog
-                  count={splitChunks.length}
-                  onSplit={handleSplitConfirm}
-                  onKeepOne={handleSplitKeepOne}
-                  onCancel={() => setSplitChunks([])}
-                />
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        <AnimatePresence>
+          {showCollapseDialog && (
+            <CollapseDialog
+              onSave={() => {
+                handleSave()
+                closeOverlay()
+              }}
+              onDiscard={closeOverlay}
+              onCancel={() => setShowCollapseDialog(false)}
+            />
+          )}
+          {splitChunks.length > 0 && (
+            <SplitDialog
+              count={splitChunks.length}
+              onSplit={handleSplitConfirm}
+              onKeepOne={handleSplitKeepOne}
+              onCancel={() => setSplitChunks([])}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
   )
 }

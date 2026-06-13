@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Clock, Coffee } from 'lucide-react'
+import { Clock, Coffee, Flame } from 'lucide-react'
 import { useTimerStore } from '../../store/useTimerStore'
+import { selectActiveHabits, useHabitsStore } from '../../store/useHabitsStore'
+import { isDoneOn, isDueToday } from '../../lib/habitUtils'
 import {
   PAUSE_NUDGE_MS,
   focusMsByDay,
@@ -8,21 +9,33 @@ import {
   localDateKey,
   sessionFocusElapsedMs,
 } from '../../lib/timerUtils'
+import { useNow } from '../../lib/useNow'
+
+function StatTile({ icon, accentClass, value, label }) {
+  return (
+    <div className="hm-glass flex flex-col gap-2 rounded-2xl px-4 py-3.5">
+      <span
+        className={`flex h-8 w-8 items-center justify-center rounded-xl text-base ${accentClass}`}
+      >
+        {icon}
+      </span>
+      <p className="m-0 text-xl font-bold leading-none tabular-nums text-ink">{value}</p>
+      <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+        {label}
+      </p>
+    </div>
+  )
+}
 
 export default function DailySummary() {
   const sessions = useTimerStore((s) => s.sessions)
   const activeTimer = useTimerStore((s) => s.activeTimer)
-  const [now, setNow] = useState(() => Date.now())
+  const habits = useHabitsStore((s) => s.habits)
+  const log = useHabitsStore((s) => s.log)
 
   const running = Boolean(activeTimer?.startedAt)
-
-  // Refresh periodically only while a timer is running (for the pause nudge).
-  useEffect(() => {
-    if (!running) return
-    const id = setInterval(() => setNow(Date.now()), 30000)
-    return () => clearInterval(id)
-  }, [running])
-
+  // Tick while running (for the pause nudge); also re-anchors at midnight.
+  const now = useNow({ active: running, intervalMs: 30000 })
   const todayKey = localDateKey(now)
   const loggedToday = focusMsByDay(sessions, 1, now)[0]?.ms ?? 0
   const activeFocus = activeTimer ? sessionFocusElapsedMs(activeTimer, now) : 0
@@ -35,43 +48,33 @@ export default function DailySummary() {
       0,
     ) + (activeTimer?.pomodorosCompleted ?? 0)
 
+  const dueHabits = selectActiveHabits({ habits }).filter((h) => isDueToday(h, log))
+  const doneHabits = dueHabits.filter((h) => isDoneOn(log, h.id, todayKey)).length
+
   const continuousFocus = running ? sessionFocusElapsedMs(activeTimer, now) : 0
   const showNudge = continuousFocus >= PAUSE_NUDGE_MS
 
-  if (todayMs < 1000 && !activeTimer) return null
-
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex flex-wrap gap-2.5">
-        <div className="hm-glass flex items-center gap-3 rounded-2xl px-4 py-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent">
-            <Clock className="h-[18px] w-[18px]" strokeWidth={2} />
-          </span>
-          <div className="leading-tight">
-            <p className="m-0 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
-              Фокус сегодня
-            </p>
-            <p className="m-0 text-lg font-bold tabular-nums text-ink">
-              {formatDuration(todayMs)}
-            </p>
-          </div>
-        </div>
-
-        {todayPomodoros > 0 && (
-          <div className="hm-glass flex items-center gap-3 rounded-2xl px-4 py-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warn-soft text-base">
-              🍅
-            </span>
-            <div className="leading-tight">
-              <p className="m-0 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
-                Помидоры
-              </p>
-              <p className="m-0 text-lg font-bold tabular-nums text-ink">
-                {todayPomodoros}
-              </p>
-            </div>
-          </div>
-        )}
+      <div className="grid grid-cols-3 gap-2.5">
+        <StatTile
+          icon={<Clock className="h-[18px] w-[18px]" strokeWidth={2} />}
+          accentClass="bg-accent-soft text-accent"
+          value={formatDuration(todayMs)}
+          label="Фокус"
+        />
+        <StatTile
+          icon={<span className="text-[15px]">🍅</span>}
+          accentClass="bg-warn-soft"
+          value={todayPomodoros}
+          label="Помидоры"
+        />
+        <StatTile
+          icon={<Flame className="h-[18px] w-[18px]" strokeWidth={2} />}
+          accentClass="bg-success-soft text-success"
+          value={dueHabits.length > 0 ? `${doneHabits}/${dueHabits.length}` : '—'}
+          label="Привычки"
+        />
       </div>
 
       {showNudge && (

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { ListTodo, MoreHorizontal } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { selectWipCard } from '../../lib/cardSelectors'
 import { selectOrderedPullQueue } from '../../lib/kanbanOrderUtils'
 import CardEditSheet from '../cards/CardEditSheet'
-import SectionLabel from '../ui/SectionLabel'
+import WidgetCard from '../ui/WidgetCard'
 import WipGateDialog from './WipGateDialog'
 
 const WANT_LABELS = {
@@ -111,10 +111,8 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
  }
 
  return (
- <section>
- <SectionLabel suffix={visibleQueue.length}>Очередь</SectionLabel>
-
- <div className="mt-3 flex flex-col gap-2">
+ <WidgetCard icon={ListTodo} title="Очередь" meta={visibleQueue.length}>
+ <div className="flex flex-col gap-2">
  {visibleQueue.map((card) => (
  <div
  key={card.id}
@@ -152,6 +150,6 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
  setPendingPullId(null)
  }}
  />
- </section>
+ </WidgetCard>
  )
 }

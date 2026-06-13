@@ -1,15 +1,22 @@
+import { Timer } from 'lucide-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
+import SettingsSection from './SettingsSection'
 
 function Stepper({ label, value, suffix, min, max, step, onChange }) {
+  const atMin = value <= min
+  const atMax = value >= max
+  const btn =
+    'flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink transition hover:bg-sunken disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'
   return (
-    <div className="flex items-center justify-between rounded-xl border border-line/40 px-4 py-3">
+    <div className="flex items-center justify-between rounded-xl border border-line/50 bg-surface px-4 py-3">
       <span className="text-sm text-ink">{label}</span>
       <div className="flex items-center gap-3">
         <button
           type="button"
           aria-label={`Уменьшить ${label}`}
+          disabled={atMin}
           onClick={() => onChange(Math.max(min, value - step))}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line text-ink transition hover:bg-sunken"
+          className={btn}
         >
           −
         </button>
@@ -19,8 +26,9 @@ function Stepper({ label, value, suffix, min, max, step, onChange }) {
         <button
           type="button"
           aria-label={`Увеличить ${label}`}
+          disabled={atMax}
           onClick={() => onChange(Math.min(max, value + step))}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-line text-ink transition hover:bg-sunken"
+          className={btn}
         >
           +
         </button>
@@ -35,12 +43,12 @@ export default function PomodoroSettings() {
   const setPomodoro = useSettingsStore((s) => s.setPomodoro)
 
   return (
-    <section className="rounded-2xl border border-line/50 bg-white p-4 shadow-sm sm:p-5">
-      <p className="m-0 text-base font-medium text-ink">Помодоро</p>
-      <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-        Длительность фокуса и перерыва для таймера в «Сегодня».
-      </p>
-      <div className="mt-4 flex flex-col gap-2">
+    <SettingsSection
+      icon={Timer}
+      title="Помодоро"
+      description="Длительность фокуса и перерыва для таймера в «Сегодня»."
+    >
+      <div className="flex flex-col gap-2">
         <Stepper
           label="Фокус"
           value={focusMin}
@@ -60,6 +68,6 @@ export default function PomodoroSettings() {
           onChange={(v) => setPomodoro(focusMin, v)}
         />
       </div>
-    </section>
+    </SettingsSection>
   )
 }

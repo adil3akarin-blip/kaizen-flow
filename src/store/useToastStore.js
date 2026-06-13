@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { generateId } from '../lib/id'
 
 const DEFAULT_DURATION = {
  success: 4000,
@@ -22,7 +23,7 @@ export const useToastStore = create((set, get) => ({
  if (existing.timeoutId) clearTimeout(existing.timeoutId)
 
  const toast = {
- id: crypto.randomUUID(),
+ id: generateId(),
  variant,
  message,
  actionLabel,

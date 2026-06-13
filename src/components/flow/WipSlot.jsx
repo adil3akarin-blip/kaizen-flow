@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Check, MoreHorizontal } from 'lucide-react'
+import { Check, MoreHorizontal, Zap } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { selectWipCard } from '../../lib/cardSelectors'
 import StructuredCard from '../cards/StructuredCard'
 import CardEditSheet from '../cards/CardEditSheet'
-import SectionLabel from '../ui/SectionLabel'
+import WidgetCard from '../ui/WidgetCard'
 import FocusTimer from '../today/FocusTimer'
 
 export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
@@ -24,28 +24,26 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
   if (!wipCard) {
     if (emptyCta) {
       return (
-        <section>
-          <SectionLabel className="text-center">Поток свободен</SectionLabel>
+        <WidgetCard icon={Zap} title="Поток свободен">
           <button
             type="button"
             onClick={emptyCta.onAction}
-            className="mt-4 w-full rounded-2xl border-2 border-dashed border-line-strong px-4 py-5 text-left text-sm text-ink-muted transition hover:border-accent/40 hover:text-ink"
+            className="w-full rounded-2xl border-2 border-dashed border-line-strong px-4 py-5 text-left text-sm text-ink-muted transition hover:border-accent/40 hover:text-ink"
           >
             {emptyCta.message} →{' '}
             <span className="text-accent">{emptyCta.targetLabel}</span>
           </button>
-        </section>
+        </WidgetCard>
       )
     }
 
     if (suggestedCard) {
       return (
-        <section>
-          <SectionLabel>Одно дело в единицу времени</SectionLabel>
+        <WidgetCard icon={Zap} title="Следующее дело">
           <button
             type="button"
             onClick={handleSuggestedPull}
-            className="mt-3 w-full text-left transition-opacity hover:opacity-90"
+            className="w-full text-left transition-opacity hover:opacity-90"
           >
             <StructuredCard card={suggestedCard} className="ring-1 ring-accent/20" />
           </button>
@@ -56,55 +54,47 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
           >
             Начать
           </button>
-        </section>
+        </WidgetCard>
       )
     }
 
     return (
-      <section>
-        <SectionLabel>В работе</SectionLabel>
-        <div className="mt-3 flex items-center justify-center rounded-2xl border-2 border-dashed border-line-strong px-4 py-8">
-          <p className="text-sm text-ink-faint">Вытяни одно дело из очереди</p>
+      <WidgetCard icon={Zap} title="В работе">
+        <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-line-strong px-4 py-8">
+          <p className="m-0 text-sm text-ink-faint">Вытяни одно дело из очереди</p>
         </div>
-      </section>
+      </WidgetCard>
     )
   }
 
   return (
-    <section>
-      <SectionLabel>В работе</SectionLabel>
-
-      <div className="hm-glass hm-accent-line relative mt-3 overflow-hidden rounded-3xl">
-        {/* Task header */}
-        <div className="relative px-5 pt-5 pb-4">
-          <div className="flex items-start gap-3 pr-9">
-            <span className="hm-tick mt-1" />
-            <StructuredCard
-              card={wipCard}
-              className="flex-1 border-none bg-transparent p-0 shadow-none"
-            />
-          </div>
+    <WidgetCard
+      icon={Zap}
+      title="В работе"
+      className="hm-accent-line relative overflow-hidden"
+    >
+      <div className="flex flex-col gap-4">
+        <div className="relative flex items-start gap-3 pr-9">
+          <span className="hm-tick mt-1" />
+          <StructuredCard
+            card={wipCard}
+            className="flex-1 border-none bg-transparent p-0 shadow-none"
+          />
           <button
             type="button"
             onClick={() => setEditOpen(true)}
             aria-label="Ещё"
-            className="absolute right-3 top-4 rounded-xl p-1.5 text-ink-faint transition hover:bg-sunken hover:text-ink"
+            className="absolute right-0 top-0 rounded-xl p-1.5 text-ink-faint transition hover:bg-sunken hover:text-ink"
           >
             <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
 
-        <div className="h-px bg-line/70" />
-
-        {/* Embedded focus timer */}
-        <div className="px-5 py-5">
+        <div className="rounded-2xl bg-sunken/40 p-4">
           <FocusTimer cardId={wipCard.id} embedded />
         </div>
 
-        <div className="h-px bg-line/70" />
-
-        {/* Commit / release */}
-        <div className="grid grid-cols-2 gap-3 px-5 py-4">
+        <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={completeWip}
@@ -124,6 +114,6 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
       </div>
 
       <CardEditSheet card={wipCard} open={editOpen} onClose={() => setEditOpen(false)} />
-    </section>
+    </WidgetCard>
   )
 }

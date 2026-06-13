@@ -1,3 +1,5 @@
+import { safeGetItem, safeSetItem } from './persistStorage'
+
 export const REVIEW_VIEWS = {
  canvas: 'canvas',
  inbox: 'inbox',
@@ -6,12 +8,12 @@ export const REVIEW_VIEWS = {
 const REVIEW_VIEW_KEY = 'kaizenflow-review-view'
 
 export function loadReviewView() {
- const stored = localStorage.getItem(REVIEW_VIEW_KEY)
+ const stored = safeGetItem(REVIEW_VIEW_KEY)
  return stored === REVIEW_VIEWS.inbox ? REVIEW_VIEWS.inbox : REVIEW_VIEWS.canvas
 }
 
 export function saveReviewView(view) {
- localStorage.setItem(REVIEW_VIEW_KEY, view)
+ safeSetItem(REVIEW_VIEW_KEY, view)
 }
 
 export function formatRawInboxSubtitle(count) {

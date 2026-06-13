@@ -5,18 +5,90 @@ import {
   saveJsonPersisted,
 } from '../lib/persistStorage'
 import { hapticTap } from '../lib/haptics'
-import { phaseDurationMs, sessionFocusElapsedMs } from '../lib/timerUtils'
+import { generateId } from '../lib/id'
+import {
+  currentPhaseElapsedMs,
+  phaseDurationMs,
+  sessionFocusElapsedMs,
+} from '../lib/timerUtils'
 
 const TIMER_KEY = 'kaizenflow-timer'
 const MIN_SAVED_MS = 1000 // ignore sub-second sessions
+const RESUME_GRACE_MS = 2 * 60 * 1000
+const HEARTBEAT_INTERVAL_MS = 30 * 1000
+const TICK_MS = 1000
+
+const TIMER_MODES = new Set(['stopwatch', 'pomodoro'])
+const LINK_TYPES = new Set(['free', 'task', 'habit', 'tags'])
+
+function isFiniteNumber(value) {
+  return typeof value === 'number' && Number.isFinite(value)
+}
+
+// A session/timer link: free (no link), a task (card), a habit, or tags.
+function normalizeLink(link, cardId) {
+  if (link && typeof link === 'object' && LINK_TYPES.has(link.type)) return link
+  return cardId ? { type: 'task', cardId } : { type: 'free' }
+}
+
+function sanitizeSessions(sessions) {
+  return sessions.filter(
+    (s) =>
+      s &&
+      typeof s === 'object' &&
+      isFiniteNumber(s.durationMs) &&
+      s.durationMs > 0 &&
+      isFiniteNumber(s.startedAt) &&
+      isFiniteNumber(s.endedAt),
+  )
+}
+
+function sanitizeActiveTimer(timer) {
+  if (!timer || typeof timer !== 'object') return null
+  if (!TIMER_MODES.has(timer.mode)) return null
+  const num = (v) => (isFiniteNumber(v) ? Math.max(0, v) : 0)
+  return {
+    cardId: timer.cardId ?? timer.link?.cardId ?? null,
+    link: normalizeLink(timer.link, timer.cardId),
+    mode: timer.mode,
+    phase:
+      timer.mode === 'pomodoro'
+        ? timer.phase === 'break'
+          ? 'break'
+          : 'focus'
+        : null,
+    focusMs: isFiniteNumber(timer.focusMs) ? timer.focusMs : undefined,
+    breakMs: isFiniteNumber(timer.breakMs) ? timer.breakMs : undefined,
+    startedAt: isFiniteNumber(timer.startedAt) ? timer.startedAt : null,
+    sessionStartedAt: isFiniteNumber(timer.sessionStartedAt)
+      ? timer.sessionStartedAt
+      : Date.now(),
+    accumulatedMs: num(timer.accumulatedMs),
+    sessionFocusMs: num(timer.sessionFocusMs),
+    pomodorosCompleted: num(timer.pomodorosCompleted),
+    heartbeatAt: isFiniteNumber(timer.heartbeatAt) ? timer.heartbeatAt : null,
+  }
+}
+
+// A timer left "running" while the app was closed would otherwise count the
+// whole absence as focus time. If the last heartbeat is stale, pause at it.
+function recoverActiveTimer(timer, now = Date.now()) {
+  if (!timer || !timer.startedAt) return timer
+  const lastSeen = Math.max(timer.startedAt, timer.heartbeatAt ?? 0)
+  if (now - lastSeen <= RESUME_GRACE_MS) return timer
+  return {
+    ...timer,
+    accumulatedMs: timer.accumulatedMs + Math.max(0, lastSeen - timer.startedAt),
+    startedAt: null,
+  }
+}
 
 function loadInitial() {
   const persisted = loadJsonPersisted(TIMER_KEY)
-  const sessions = Array.isArray(persisted?.sessions) ? persisted.sessions : []
-  const activeTimer =
-    persisted?.activeTimer && typeof persisted.activeTimer === 'object'
-      ? persisted.activeTimer
-      : null
+  const sessions = sanitizeSessions(
+    Array.isArray(persisted?.sessions) ? persisted.sessions : [],
+  )
+  const activeTimer = recoverActiveTimer(sanitizeActiveTimer(persisted?.activeTimer))
   return { sessions, activeTimer }
 }
 
@@ -26,9 +98,11 @@ const initial = loadInitial()
 function buildSession(timer, now) {
   const durationMs = Math.round(sessionFocusElapsedMs(timer, now))
   if (durationMs < MIN_SAVED_MS) return null
+  const link = normalizeLink(timer.link, timer.cardId)
   return {
-    id: crypto.randomUUID(),
-    cardId: timer.cardId,
+    id: generateId(),
+    cardId: link.type === 'task' ? link.cardId : null,
+    link,
     mode: timer.mode,
     startedAt: timer.sessionStartedAt,
     endedAt: now,
@@ -41,8 +115,11 @@ export const useTimerStore = create((set, get) => ({
   activeTimer: initial.activeTimer,
   sessions: initial.sessions,
 
-  startTimer: (cardId, mode = 'stopwatch') => {
+  // startTimer(cardId, mode, { link, focusMs, breakMs })
+  // cardId stays the first arg for the task flow; the modal passes a richer link.
+  startTimer: (cardId, mode = 'stopwatch', opts = {}) => {
     const now = Date.now()
+    const link = normalizeLink(opts.link, cardId)
     set((state) => {
       // Finalize any orphaned timer first.
       const sessions = state.activeTimer
@@ -51,14 +128,18 @@ export const useTimerStore = create((set, get) => ({
       return {
         sessions,
         activeTimer: {
-          cardId,
+          cardId: link.type === 'task' ? link.cardId : null,
+          link,
           mode,
           phase: mode === 'pomodoro' ? 'focus' : null,
+          focusMs: isFiniteNumber(opts.focusMs) ? opts.focusMs : undefined,
+          breakMs: isFiniteNumber(opts.breakMs) ? opts.breakMs : undefined,
           startedAt: now,
           sessionStartedAt: now,
           accumulatedMs: 0,
           sessionFocusMs: 0,
           pomodorosCompleted: 0,
+          heartbeatAt: now,
         },
       }
     })
@@ -83,7 +164,8 @@ export const useTimerStore = create((set, get) => ({
     set((state) => {
       const t = state.activeTimer
       if (!t || t.startedAt) return state
-      return { activeTimer: { ...t, startedAt: Date.now() } }
+      const now = Date.now()
+      return { activeTimer: { ...t, startedAt: now, heartbeatAt: now } }
     })
   },
 
@@ -101,7 +183,7 @@ export const useTimerStore = create((set, get) => ({
     })
   },
 
-  // Called by the FocusTimer when a pomodoro phase reaches its duration.
+  // Advance a Pomodoro from focus→break (or back); driven by the global ticker.
   advancePhase: () => {
     set((state) => {
       const t = state.activeTimer
@@ -113,7 +195,7 @@ export const useTimerStore = create((set, get) => ({
           ...t,
           phase: wasFocus ? 'break' : 'focus',
           sessionFocusMs: wasFocus
-            ? t.sessionFocusMs + phaseDurationMs('focus')
+            ? t.sessionFocusMs + phaseDurationMs('focus', t)
             : t.sessionFocusMs,
           pomodorosCompleted: wasFocus
             ? t.pomodorosCompleted + 1
@@ -124,6 +206,14 @@ export const useTimerStore = create((set, get) => ({
       }
     })
     hapticTap()
+  },
+
+  touchHeartbeat: () => {
+    set((state) => {
+      const t = state.activeTimer
+      if (!t || !t.startedAt) return state
+      return { activeTimer: { ...t, heartbeatAt: Date.now() } }
+    })
   },
 
   // Finalize the active timer into a session (counts focus time spent).
@@ -144,6 +234,10 @@ export const useTimerStore = create((set, get) => ({
     const t = get().activeTimer
     if (t && t.cardId === cardId) get().stopTimer()
   },
+
+  removeSession: (id) => {
+    set((state) => ({ sessions: state.sessions.filter((s) => s.id !== id) }))
+  },
 }))
 
 const debouncedPersist = createDebouncedPersist((activeTimer, sessions) => {
@@ -155,3 +249,31 @@ useTimerStore.subscribe((state, prev) => {
     debouncedPersist(state.activeTimer, state.sessions)
   }
 })
+
+// A single global ticker while a timer runs: auto-advances Pomodoro phases at
+// their boundary (so free/habit timers advance without the WIP card mounted)
+// and keeps heartbeatAt fresh for crash recovery.
+let tickId = null
+function syncRunning(state) {
+  const running = Boolean(state.activeTimer?.startedAt)
+  if (running && tickId == null) {
+    tickId = setInterval(() => {
+      const t = useTimerStore.getState().activeTimer
+      if (!t || !t.startedAt) return
+      if (
+        t.mode === 'pomodoro' &&
+        currentPhaseElapsedMs(t, Date.now()) >= phaseDurationMs(t.phase, t)
+      ) {
+        useTimerStore.getState().advancePhase()
+      }
+      if (Date.now() - (t.heartbeatAt ?? 0) >= HEARTBEAT_INTERVAL_MS) {
+        useTimerStore.getState().touchHeartbeat()
+      }
+    }, TICK_MS)
+  } else if (!running && tickId != null) {
+    clearInterval(tickId)
+    tickId = null
+  }
+}
+useTimerStore.subscribe(syncRunning)
+syncRunning(useTimerStore.getState())

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { X } from 'lucide-react'
+import { SlidersHorizontal, Target, X } from 'lucide-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import { buildFilterCriteria } from '../../lib/filterUtils'
+import SettingsSection from './SettingsSection'
 
 export default function FilterSettings() {
  const personalMission = useSettingsStore((s) => s.personalMission)
@@ -39,22 +40,18 @@ export default function FilterSettings() {
  }
 
  return (
- <div className="flex flex-col gap-6">
- <section className="rounded-2xl border border-line/50 bg-white p-4 shadow-sm sm:p-5">
- <p className="m-0 text-base font-medium text-ink">
- Личная миссия
- </p>
- <p className="mt-2 text-sm leading-relaxed text-ink-muted">
- Первый критерий при разборе: «Это про твою миссию?». Без миссии
- спросим: «Стоит ли это моей энергии?»
- </p>
-
+ <>
+ <SettingsSection
+ icon={Target}
+ title="Личная миссия"
+ description="Первый критерий при разборе: «Это про твою миссию?». Без миссии спросим: «Стоит ли это моей энергии?»"
+ >
  <textarea
  value={missionDraft}
  onChange={(e) => setMissionDraft(e.target.value)}
  placeholder="Например: здоровье, творчество, семья…"
  rows={3}
- className="mt-4 w-full resize-none rounded-xl border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink placeholder:text-ink-muted/60 outline-none transition-shadow focus:shadow-md focus:ring-2 focus:ring-accent/30"
+ className="w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-[15px] leading-relaxed text-ink placeholder:text-ink-faint outline-none transition focus:border-line-strong focus:ring-2 focus:ring-accent/30"
  />
 
  <div className="mt-3 flex items-center gap-3">
@@ -63,40 +60,37 @@ export default function FilterSettings() {
  onClick={handleSaveMission}
  disabled={!missionDirty}
  className={clsx(
- 'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+ 'rounded-xl px-4 py-2 text-sm font-medium transition',
  missionDirty
- ? 'bg-accent text-white hover:bg-accent-hover'
+ ? 'bg-accent text-white hover:bg-accent-hover active:scale-[0.98]'
  : 'cursor-default bg-sunken text-ink-muted',
  )}
  >
  Сохранить
  </button>
  {missionSaved && (
- <span className="text-xs text-ink-muted">Сохранено</span>
+ <span className="text-xs text-success">Сохранено</span>
  )}
  </div>
- </section>
+ </SettingsSection>
 
- <section className="rounded-2xl border border-line/50 bg-white p-4 shadow-sm sm:p-5">
- <p className="m-0 text-base font-medium text-ink">
- Свои критерии
- </p>
- <p className="mt-2 text-sm leading-relaxed text-ink-muted">
- Дополнительные вопросы при разборе — по одному на экран. До 5 штук.
- </p>
-
+ <SettingsSection
+ icon={SlidersHorizontal}
+ title="Свои критерии"
+ description="Дополнительные вопросы при разборе — по одному на экран. До 5 штук."
+ >
  {previewCriteria.length > 0 && (
- <p className="mt-3 rounded-lg bg-canvas/80 px-3 py-2 text-xs leading-relaxed text-ink-muted">
+ <p className="rounded-lg bg-sunken/60 px-3 py-2 text-xs leading-relaxed text-ink-muted">
  Сейчас в фильтре: {previewCriteria.map((c) => c.label).join(' → ')}
  </p>
  )}
 
  {filterCriteria.length > 0 && (
- <ul className="mt-4 flex list-none flex-col gap-2 p-0">
+ <ul className="mt-3 flex list-none flex-col gap-2 p-0">
  {filterCriteria.map((criterion) => (
  <li
  key={criterion.id}
- className="flex items-center gap-2 rounded-xl border border-line/40 px-3 py-2.5"
+ className="flex items-center gap-2 rounded-xl border border-line/50 bg-surface px-3 py-2.5"
  >
  <span className="min-w-0 flex-1 text-sm text-ink">
  {criterion.label}
@@ -114,7 +108,7 @@ export default function FilterSettings() {
  </ul>
  )}
 
- <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-start">
+ <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
  <input
  type="text"
  value={newCriterion}
@@ -130,20 +124,18 @@ export default function FilterSettings() {
  }
  }}
  disabled={atCriterionLimit}
- placeholder={
- atCriterionLimit ? 'Достигнут лимит' : 'Новый критерий…'
- }
- className="min-w-0 flex-1 rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted/60 outline-none transition-shadow focus:shadow-md focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
+ placeholder={atCriterionLimit ? 'Достигнут лимит' : 'Новый критерий…'}
+ className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint outline-none transition focus:border-line-strong focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
  />
  <button
  type="button"
  onClick={handleAddCriterion}
  disabled={atCriterionLimit}
  className={clsx(
- 'shrink-0 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors sm:py-2.5',
+ 'shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium transition',
  atCriterionLimit
  ? 'cursor-not-allowed border-line text-ink-muted'
- : 'border-line text-ink hover:bg-sunken',
+ : 'border-line text-ink hover:border-line-strong hover:bg-sunken/60',
  )}
  >
  Добавить
@@ -154,10 +146,8 @@ export default function FilterSettings() {
  <p className="mt-2 text-xs text-accent">{criterionError}</p>
  )}
 
- <p className="mt-3 text-xs text-ink-muted">
- {filterCriteria.length} из 5
- </p>
- </section>
- </div>
+ <p className="mt-3 text-xs text-ink-muted">{filterCriteria.length} из 5</p>
+ </SettingsSection>
+ </>
  )
 }

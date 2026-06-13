@@ -80,6 +80,7 @@ export default function Sidebar() {
                 key={item.id}
                 type="button"
                 onClick={() => setTab(item.id)}
+                aria-current={isActive ? 'page' : undefined}
                 className={clsx(
                   'relative flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left text-sm transition-all',
                   isActive
@@ -124,6 +125,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={() => setTab(TABS.settings)}
+          aria-current={activeTab === TABS.settings ? 'page' : undefined}
           className={clsx(
             'relative mt-auto flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left text-sm transition-all',
             activeTab === TABS.settings

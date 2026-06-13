@@ -39,6 +39,7 @@ export default function TabBar() {
               type="button"
               onClick={() => setTab(item.id)}
               aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 pt-1 text-[11px] transition-colors"
             >
               {isActive && (

@@ -2,7 +2,8 @@ import clsx from 'clsx'
 
 const SIZE_CLASS = {
  default: 'md:max-w-[800px]',
- kanban: 'md:max-w-5xl',
+ wide: 'md:max-w-[1180px]',
+ kanban: 'md:max-w-[1320px]',
 }
 
 export default function PageContainer({ children, size = 'default', className }) {

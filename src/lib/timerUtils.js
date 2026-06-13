@@ -24,7 +24,16 @@ export function setPomodoroDurations({ focusMs, breakMs }) {
   }
 }
 
-export function phaseDurationMs(phase) {
+// Per-timer durations (set when a session is started with a custom length)
+// take precedence over the global Pomodoro setting.
+export function phaseDurationMs(phase, timer) {
+  if (
+    timer &&
+    typeof timer.focusMs === 'number' &&
+    typeof timer.breakMs === 'number'
+  ) {
+    return phase === 'break' ? timer.breakMs : timer.focusMs
+  }
   return phase === 'break'
     ? pomodoroDurations.breakMs
     : pomodoroDurations.focusMs
@@ -103,11 +112,14 @@ export function cardTodayMs(sessions, cardId, now = Date.now()) {
 }
 
 // Aggregate focus time per local day for the last `days` days (oldest first).
+// Days are stepped via Date math (not fixed 24h) so DST shifts don't skip
+// or duplicate a calendar day.
 export function focusMsByDay(sessions, days = 7, now = Date.now()) {
   const buckets = []
-  const dayMs = 24 * 60 * 60 * 1000
+  const base = new Date(now)
   for (let i = days - 1; i >= 0; i--) {
-    const ts = now - i * dayMs
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() - i)
+    const ts = d.getTime()
     buckets.push({ key: localDateKey(ts), ts, ms: 0 })
   }
   const index = new Map(buckets.map((b) => [b.key, b]))
