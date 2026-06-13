@@ -213,6 +213,127 @@ Wrap conditionally mounted UI (toasts, collapse dialog, mode switches):
 
 ---
 
+## @dnd-kit/react
+
+**Used for:** Kanban board drag-and-drop between columns (`KanbanBoard.jsx`)
+
+**Package:** `@dnd-kit/react` v0.4 — React adapter over `@dnd-kit/dom`. Do not use legacy `@dnd-kit/core` / `@dnd-kit/sortable` packages.
+
+### Kanban pattern
+
+```jsx
+import {
+  DragDropProvider,
+  DragOverlay,
+  useDroppable,
+} from '@dnd-kit/react'
+import { useSortable, isSortable } from '@dnd-kit/react/sortable'
+import { useFinePointerDesktop } from '../lib/useFinePointerDesktop'
+
+function Board() {
+  const snapshotRef = useRef(null)
+  const dragEnabled = useFinePointerDesktop()
+
+  return (
+    <DragDropProvider
+      onDragStart={() => {
+        snapshotRef.current = structuredClone(columnOrder)
+      }}
+      onDragOver={(event) => {
+        if (!snapshotRef.current || event.canceled) return
+        setColumnOrder(move(snapshotRef.current, event))
+      }}
+      onDragEnd={handleDragEnd}
+    >
+      {columns.map((column) => (
+        <KanbanColumn key={column.id} column={column} dragEnabled={dragEnabled} />
+      ))}
+      <DragOverlay disabled={!dragEnabled}>
+        {(source) => (
+          <StructuredCard
+            card={findCard(source.id)}
+            compact
+            className="scale-[1.02] shadow-lg ring-2 ring-warm-accent/30"
+          />
+        )}
+      </DragOverlay>
+    </DragDropProvider>
+  )
+}
+
+function KanbanColumn({ column, dragEnabled }) {
+  const { ref, isDropTarget } = useDroppable({
+    id: column.id,
+    type: 'column',
+    accept: SORTABLE_TYPE,
+  })
+  // cards from columnOrder + selectOrderedCardsInColumn
+}
+
+function KanbanSortableCard({ card, index, group, dragEnabled }) {
+  const { ref, isDragging } = useSortable({
+    id: card.id,
+    index,
+    group,
+    disabled: !dragEnabled,
+  })
+}
+```
+
+### Drag end handler
+
+```js
+const handleDragEnd = (event) => {
+  if (event.canceled) return
+  const { source } = event.operation
+  if (!source || !isSortable(source)) return
+
+  const { group, index, initialGroup, initialIndex } = source.sortable
+  if (group === initialGroup && index === initialIndex) return
+
+  if (group === initialGroup) {
+    reorderKanbanCard(source.id, group, initialIndex, index)
+    return
+  }
+
+  if (group === 'progress' && wipFull) {
+    dragSuspendRef.current = event.suspend()
+    openWipGate(/* pending move */)
+    return
+  }
+
+  moveKanbanCard(source.id, group, { via: 'drag', index })
+}
+```
+
+### Column order (store)
+
+```js
+columnOrder: {
+  queue: ['id-a', 'id-b'],
+  progress: ['id-c'],
+  done: ['id-d'],
+  next_week: [],
+}
+```
+
+Render order: `selectOrderedCardsInColumn(cards, columnOrder, columnId)`. Mutations go through store actions — never splice `columnOrder` in components.
+
+**Rules:**
+
+- **Fine-pointer desktop only** — `useFinePointerDesktop()` = `(min-width: 768px) and (hover: hover) and (pointer: fine)`; touch uses `MoveCardSheet`
+- **Multi-column state** — `move(snapshot, event)` from `@dnd-kit/helpers` on `onDragOver`; snapshot taken on `onDragStart`
+- **Disable OptimisticSortingPlugin** — React renders from `columnOrder`; DOM optimistic moves fight React reconciliation
+- **Sortable multi-column** — `useSortable` with `group` = column id; within-column reorder desktop only
+- **Cross-column insert** — drag: drop index; sheet: append queue/next_week, prepend done, slot progress
+- **WIP gate + suspend** — `event.suspend()` on blocked drag to progress; `resume()` after gate, `abort()` on cancel
+- **Haptics** — `hapticTap()` on move to «В работе» / «Сделано» (any path); guard degrades on desktop
+- **A11y** — `MoveCardSheet` via «⋯» → `CardEditSheet` «Переместить в…» on all platforms
+- **DragOverlay** — scale + shadow + accent ring; **no rotation** on kanban cards
+- **StickyNote canvas** — keep custom pointer drag; do not migrate canvas to dnd-kit
+
+---
+
 ## clsx
 
 **Used for:** conditional and merged class names
@@ -267,7 +388,7 @@ These are part of the product spec — use native APIs, no dependency:
 | `navigator.vibrate()` | S4 | Tactile feedback on dump success, move to done |
 | `localStorage` | S1 | First persistence layer for cards / onboarding flags |
 | `IndexedDB` | S1+ | Heavier local data if localStorage limits hit |
-| Service Worker | S3 | Offline shell via `vite-plugin-pwa` when installed |
+| Service Worker | S3 | Offline shell via `vite-plugin-pwa` (installed) |
 
 **Vibration pattern:**
 
@@ -287,5 +408,11 @@ Do not import these until the phase starts and `code-standards.md` dependencies 
 
 | Library | Phase | Notes |
 |---|---|---|
-| `vite-plugin-pwa` | S3 | Workbox caching; cards still from local storage |
 | Router (TBD) | S2 | Only if tab shell needs client routing — evaluate native approach first |
+
+**Installed:**
+
+| Library | Scope | Notes |
+|---|---|---|
+| `@dnd-kit/react` | Kanban only | Desktop column drag; mobile uses MoveCardSheet |
+| `vite-plugin-pwa` | PWA shell | Workbox precache; SW registered in prod via `main.jsx` |

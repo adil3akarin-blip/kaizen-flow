@@ -262,11 +262,51 @@ title: font-serif text-base font-medium
 ### TabPageHeader
 
 **File:** `src/components/ui/TabPageHeader.jsx`  
-**Role:** Serif tab title + muted subtitle
+**Role:** Sans tab title + muted subtitle (Lora reserved for sidebar brand only)
 
 ```
-h2: font-serif text-2xl font-medium tracking-tight
+h2: text-xl sm:text-2xl font-semibold tracking-tight text-warm-text
 subtitle: text-sm text-warm-muted mt-1.5
+```
+
+---
+
+### PageContainer
+
+**File:** `src/components/ui/PageContainer.jsx`  
+**Role:** Centered content column — desktop layout constraint
+
+```
+wrapper: mx-auto w-full px-4 sm:px-6
+default: md:max-w-[800px] — Flow, Review
+kanban: md:max-w-5xl — Kanban tab
+```
+
+---
+
+### PanelList
+
+**File:** `src/components/ui/PanelList.jsx`  
+**Role:** Shared list panel — inbox rows, pull queue, flow status sidebar
+
+```
+PanelList: overflow-hidden rounded-2xl border border-cream-dark/50 bg-white shadow-sm
+PanelRow: flex items-center gap-3 px-4 py-3.5; hover:bg-cream/40 when interactive
+divider: mx-4 border-b border-cream-dark/60 (between rows)
+PanelSection: px-4 py-3.5 (static blocks, edit forms)
+PanelDivider: full-width border-b border-cream-dark/60
+```
+
+---
+
+### SectionLabel
+
+**File:** `src/components/ui/SectionLabel.jsx`  
+**Role:** In-tab section headings (WIP, queue, etc.)
+
+```
+text-sm font-medium text-warm-text
+optional suffix: ml-2 font-normal text-warm-muted (e.g. queue count)
 ```
 
 ---
@@ -297,10 +337,271 @@ header h2: font-serif
 
 ---
 
-### FlowTab / KanbanTab
+### FlowTab
 
-**Files:** `src/components/tabs/FlowTab.jsx`, `KanbanTab.jsx`  
-**Role:** Tab placeholders — TabPageHeader + EmptyState with Lucide icon
+**File:** `src/components/tabs/FlowTab.jsx`  
+**Role:** Home dashboard — WIP + pull queue + status panel
+
+```
+layout: PageContainer md:max-w-[800px] mx-auto
+  header: TabPageHeader inside container (no full-bleed band)
+  md:grid-cols-[1fr_240px] — left: WipSlot + PullQueue; right: FlowStatusPanel
+mobile: single column stack
+empty: WipSlot shows «Поток свободен» + priority CTA; FlowStatusPanel hints hidden when flow empty
+PullQueue: excludeCardId = suggestedCard?.id (hero dedupe)
+```
+
+---
+
+### FlowStatusPanel
+
+**File:** `src/components/flow/FlowStatusPanel.jsx`  
+**Role:** Right sidebar on Flow — energy + hints in single PanelList
+
+```
+sections: EnergySnapshot (embedded) · optional FlowHint · optional StuckNudge
+dividers between sections when multiple present
+```
+
+---
+
+### WipSlot
+
+**File:** `src/components/flow/WipSlot.jsx`  
+**Role:** WIP zone — active card, recommendation, or empty CTA (no hero shell)
+
+```
+labels: SectionLabel — «Сейчас в работе» · «Одно дело в единицу времени» · «Поток свободен»
+queue-ready: StructuredCard ring-warm-accent/20 + full-width «Начать»
+filled: StructuredCard + grid «Сделано» / «Не актуально» + ⋯ → CardEditSheet
+flow-empty: centered label + CTA card
+```
+
+---
+
+### PullQueue
+
+**File:** `src/components/flow/PullQueue.jsx`  
+**Role:** Queue list in PanelList — tap row to pull, ⋯ edit
+
+```
+SectionLabel suffix = count
+PanelList rows: text-sm + QueueChips; dimmed opacity-45 for heavy when depleted
+excludeCardId: skip hero-promoted card; hide section when visible list empty
+```
+
+---
+
+### WipGateDialog
+
+**File:** `src/components/flow/WipGateDialog.jsx`  
+**Role:** WIP-full gate — завершить / отложить / отмена
+
+---
+
+### CardEditSheet
+
+**File:** `src/components/cards/CardEditSheet.jsx`  
+**Role:** Bottom sheet edit — text, вернуть в очередь, разобрать заново, удалить
+
+---
+
+### EnergySnapshot
+
+**File:** `src/components/flow/EnergySnapshot.jsx`  
+**Role:** Energy indicator — standalone card or embedded in FlowStatusPanel
+
+```
+standalone: rounded-2xl border bg-white shadow-sm (tap opens EnergyHub)
+embedded: full-width row px-4 py-3.5 hover:bg-cream/40 (no outer card chrome)
+preset icons: BatteryFull · BatteryMedium · BatteryLow
+depleted: border-warm-accent/20 bg-warm-accent/5 (standalone) · bg-warm-accent/[0.03] (embedded)
+advice: from energyUtils.getEnergyAdvice
+```
+
+---
+
+### EnergyHub
+
+**File:** `src/components/flow/EnergyHub.jsx`  
+**Role:** Drill-down from Flow — presets, fine-tune sliders, recovery
+
+```
+header: ← Поток · «Как ты сейчас?» · battery icon + preset label + getEnergyAdvice
+        depleted header: bg-warm-accent/5
+presets: 3-col grid — Бодрый · Средне · На нуле; hapticTap on tap; highlight syncs with axes
+fine-tune: 2 axes (workRest, tensionRelaxation); axes → derivePresetFromAxes (60/40 weighted)
+axis nuance: getAxisNuance inside «Точнее» block (deviation >20 from preset defaults)
+recovery: when depleted OR ≥2 heavy completions — RECOVERY_IDEAS list (warm-accent tint)
+standalone calculator: ResultEffortCalculator section; persists in useEnergyStore
+order: presets → fine-tune → recovery (if) → calculator
+```
+
+---
+
+### ResultEffortCalculator
+
+**File:** `src/components/flow/ResultEffortCalculator.jsx`  
+**Role:** Shared «Результат / Затраты» — filter (card-bound) + EnergyHub (standalone)
+
+```
+fields: «Что получу?» · «Что отдам?» · verdict yes/maybe/no
+filter mode: showSuggestions → maybe/no → «Пока не ясно» / «Отпустить» / «Оставить оценку»
+standalone: saves to useEnergyStore.standaloneResultEffort (localStorage)
+ResultEffortSummary: read-only block for CardEditSheet + hub
+```
+
+---
+
+### EnergyGuardDialog
+
+**File:** `src/components/flow/EnergyGuardDialog.jsx`  
+**Role:** Willpower guard — depleted + heavy pull → light alternatives + force continue
+
+```
+copy: «Похоже, ресурс на исходе»
+portal modal; bottom sheet on mobile
+always: «Всё равно взять это дело» override
+```
+
+---
+
+### PauseScreen
+
+**File:** `src/components/flow/PauseScreen.jsx`  
+**Role:** Full-screen pause after ≥3 heavy completions in ~2h
+
+```
+recovery ideas list (static)
+CTA: «Открыть хаб энергии» · «Всё равно продолжу»
+```
+
+---
+
+### TabBar
+
+**File:** `src/components/shell/TabBar.jsx`  
+**Role:** Mobile bottom nav — 4 tabs + center dump FAB
+
+```
+tabs: Поток · Разбор · Канбан · Ещё (settings)
+FAB: center above tab bar
+silence week: only Разбор + Ещё active
+```
+
+---
+
+### SettingsScreen
+
+**File:** `src/components/settings/SettingsScreen.jsx`  
+**Role:** Settings tab — FilterSettings + NotificationSettings
+
+```
+layout: tab content inside shell · max-w-lg centered content
+access: TabBar «Ещё» (mobile) · Sidebar «Настройки» (desktop)
+back: ← Назад on md+ only
+subtitle: «Миссия, фильтры и уведомления»
+```
+
+---
+
+### FilterSettings
+
+**File:** `src/components/settings/FilterSettings.jsx`  
+**Role:** Mission textarea + custom filter criteria (up to 5)
+
+```
+two sections: rounded-2xl border border-cream-dark/50 bg-white p-4 shadow-sm
+mission: textarea + «Сохранить» (disabled when clean) + «Сохранено» flash
+criteria: preview chain · list rows with X remove · input + «Добавить» · «N из 5»
+```
+
+---
+
+### NotificationSettings
+
+**File:** `src/components/settings/NotificationSettings.jsx`  
+**Role:** Push type toggles + pre-prompt on first enable (Q30, Q33)
+
+```
+section title: «Что можем напомнить»
+row: label + when + example · full-width tap · ToggleSwitch h-7 w-12
+types: morning · stuck · elephants · inactive · energy
+pre-prompt: bottom sheet on mobile, centered dialog on sm+
+```
+
+---
+
+### KanbanTab
+
+**File:** `src/components/tabs/KanbanTab.jsx`  
+**Role:** Kanban — day/week toggle, KanbanBoard, Elephants badge, Year drill-down
+
+```
+layout: PageContainer size=kanban md:max-w-5xl mx-auto
+header row: День|Неделя → «Музей побед» (ghost) → «Итоги месяца» (accent pill, elephantsPending only)
+view toggle: segmented control — bg-cream/40 border; active tab bg-white shadow-sm
+```
+
+---
+
+### KanbanBoard
+
+**File:** `src/components/kanban/KanbanBoard.jsx`  
+**Role:** Horizontal sortable columns — touch: tap→MoveCardSheet; fine-pointer desktop: dnd-kit drag; ⋯→edit/move
+
+```
+layout: mobile horizontal scroll; md:grid — 3 cols (day) / 4 cols (week)
+column header: text-sm font-medium sans + count pill (rounded-full bg-cream)
+column body: rounded-2xl border bg-white shadow-sm
+empty states: per-column copy (lib/kanbanEmptyState.js); progress accented dashed + warm-accent tint
+empty drag hint: secondary line md+ for queue + progress when drag enabled
+cards: StructuredCard compact shadow-none inside column
+stuck: ring-2 ring-amber-400/60
+drop target: border-warm-accent/40 bg-warm-accent/5
+```
+
+---
+
+### MoveCardSheet
+
+**File:** `src/components/kanban/MoveCardSheet.jsx`  
+**Role:** Mobile column picker bottom sheet
+
+---
+
+### ElephantsFlow
+
+**File:** `src/components/kanban/ElephantsFlow.jsx`  
+**Role:** 3-step monthly retrospective — done / carry / elephant
+
+```
+title: «Итоги месяца»; step 3 keeps «Слон месяца» metaphor
+link to year board: «Открыть музей побед»
+```
+
+---
+
+### YearBoard
+
+**File:** `src/components/kanban/YearBoard.jsx`  
+**Role:** Read-only 12-month «музей побед» with month drill-down
+
+```
+title: «Музей побед» · subtitle «Что уже получилось — по месяцам»
+month drill-down back: «← Музей побед»
+```
+
+---
+
+### StuckNudge / StuckSheet
+
+**Files:** `src/components/flow/StuckNudge.jsx`, `StuckSheet.jsx`  
+**Role:** Flow tab nudge for cards stuck ≥5 days; actions: kanban / next week / release
+
+```
+nudge: text row — AlertCircle amber + text-amber-700/90; no card chrome
+```
 
 ---
 
@@ -316,7 +617,63 @@ border-b bg-white/40 px-6 py-4
 title: font-serif «Неделя тишины» + secondary button bg-white shadow-sm
 ```
 
-**Inbox placeholder:** TabPageHeader + EmptyState (Inbox icon)
+**Inbox mode:** `ReviewInbox` + `FilterFlow` (see below)  
+**View toggle:** `ReviewViewToggle` — холст (LayoutGrid) · список (List); persisted in `useAppStore.reviewView`
+
+---
+
+### ReviewViewToggle
+
+**File:** `src/components/review/ReviewViewToggle.jsx`  
+**Role:** Switch between canvas and inbox in «Разбор»
+
+```
+rounded-lg border border-cream-dark bg-cream/50 p-0.5
+active: bg-white shadow-sm text-warm-text
+inactive: text-warm-muted
+icons: LayoutGrid (холст) · List (список)
+```
+
+---
+
+### ReviewInbox
+
+**File:** `src/components/review/ReviewInbox.jsx`  
+**Role:** Chronological raw cards in PanelList — tap edit, pill «Разобрать», ⋯ delete
+
+```
+layout: PageContainer md:max-w-[800px]; TabPageHeader + PanelList mt-6
+row: PanelRow — text flex-1 + rounded-full pill «Разобрать» + ⋯ menu
+edit: PanelSection inline textarea + save/cancel
+no per-item card boxes — single panel with dividers
+```
+
+---
+
+### FilterFlow
+
+**File:** `src/components/review/FilterFlow.jsx`  
+**Role:** Full filter pipeline — swipe steps + final commit
+
+```
+mobile: fixed inset-0 z-30 bg-cream
+desktop: md:static md:border-l md:grid-cols-2 right panel
+steps: Хочу/Должен → criteria (1 screen each) → final (tags + energy + actions)
+swipe: motion drag x, threshold 72px + duplicate buttons
+final actions: В поток · Пока не ясно · Отпустить
+```
+
+---
+
+### StructuredCard
+
+**File:** `src/components/cards/StructuredCard.jsx`  
+**Role:** Flat post-filter card — white, no rotation, optional chips
+
+```
+rounded-xl border border-cream-dark/50 bg-white shadow-sm px-4 py-3
+chips: rounded-full bg-cream text-xs text-warm-muted
+```
 
 ---
 
@@ -364,12 +721,6 @@ empty: «Нажми ◉ внизу — выгрузи первую мысль»
 
 | Component | Phase | Notes |
 |---|---|---|
-| `ReviewInbox` | S2 Phase 3 | Raw card list with inline edit |
-| `FlowDashboard` | 3 | WIP + pull queue |
-| `ReviewInbox` | 2 | Raw card list |
-| `FilterPipeline` | 2 | Swipe filter screens |
-| `KanbanBoard` | 3 | Day/week columns |
-| `EnergyHub` | 4 | Presets + sliders |
-| `FlowCard` | 2 | Flat card variant (post-filter) |
+| `EnergyHub` | 6 | Presets + sliders + recovery |
 
 Add each to this registry when implemented.

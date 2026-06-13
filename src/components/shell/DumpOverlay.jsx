@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { X } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { TABS, useAppStore } from '../../store/useAppStore'
 import { useToastStore } from '../../store/useToastStore'
-
-function DestinationHint({ children }) {
-  return (
-    <p className="m-0 text-center text-xs leading-relaxed text-warm-muted">
-      {children}
-    </p>
-  )
-}
+import { hapticTap } from '../../lib/haptics'
+import { useFinePointerDesktop } from '../../lib/useFinePointerDesktop'
 
 function CollapseDialog({ onSave, onDiscard, onCancel }) {
   return (
@@ -18,36 +13,36 @@ function CollapseDialog({ onSave, onDiscard, onCancel }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-10 flex items-center justify-center bg-warm-text/10 px-6 backdrop-blur-[2px]"
+      className="absolute inset-0 z-10 flex items-center justify-center bg-ink/10 px-6 backdrop-blur-[2px]"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full rounded-xl border border-cream-dark bg-white p-5 shadow-lg"
+        className="w-full rounded-2xl border border-line bg-surface p-5 shadow-(--shadow-float)"
       >
-        <p className="m-0 text-sm leading-relaxed text-warm-text">
+        <p className="m-0 text-sm leading-relaxed text-ink">
           Сохранить мысль перед закрытием?
         </p>
         <div className="mt-4 flex flex-col gap-2">
           <button
             type="button"
             onClick={onSave}
-            className="rounded-lg bg-warm-accent py-2 text-sm font-medium text-white hover:bg-warm-accent-hover"
+            className="rounded-xl bg-accent py-2 text-sm font-medium text-white hover:bg-accent-hover active:scale-[0.98] transition"
           >
             Сохранить
           </button>
           <button
             type="button"
             onClick={onDiscard}
-            className="rounded-lg border border-cream-dark py-2 text-sm text-warm-muted hover:bg-cream-dark"
+            className="rounded-xl border border-line py-2 text-sm text-ink-muted hover:bg-sunken transition"
           >
             Отменить
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="py-1 text-xs text-warm-muted hover:text-warm-text"
+            className="py-1 text-xs text-ink-muted hover:text-ink transition"
           >
             Продолжить писать
           </button>
@@ -57,67 +52,112 @@ function CollapseDialog({ onSave, onDiscard, onCancel }) {
   )
 }
 
-function DumpTextarea({ inputRef, text, onChange, onKeyDown, hint }) {
+function SplitDialog({ count, onSplit, onKeepOne, onCancel }) {
   return (
-    <>
-      <textarea
-        ref={inputRef}
-        value={text}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        placeholder="Что крутится в голове?"
-        rows={5}
-        className="w-full resize-none rounded-xl border border-cream-dark bg-white px-4 py-3 text-[15px] leading-relaxed text-warm-text placeholder:text-warm-muted/60 outline-none transition-shadow focus:shadow-md focus:ring-2 focus:ring-warm-accent/30"
-      />
-      <p className="text-center text-xs text-warm-muted">{hint}</p>
-    </>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-10 flex items-center justify-center bg-ink/10 px-6 backdrop-blur-[2px]"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="w-full rounded-2xl border border-line bg-surface p-5 shadow-(--shadow-float)"
+      >
+        <p className="m-0 text-sm font-medium text-ink">
+          Разбить на {count} мыслей?
+        </p>
+        <p className="mt-1 text-xs text-ink-muted leading-relaxed">
+          Каждый абзац станет отдельной карточкой.
+        </p>
+        <div className="mt-4 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onSplit}
+            className="rounded-xl bg-accent py-2 text-sm font-medium text-white hover:bg-accent-hover active:scale-[0.98] transition"
+          >
+            Разбить
+          </button>
+          <button
+            type="button"
+            onClick={onKeepOne}
+            className="rounded-xl border border-line py-2 text-sm text-ink-muted hover:bg-sunken transition"
+          >
+            Оставить одной
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="py-1 text-xs text-ink-muted hover:text-ink transition"
+          >
+            Продолжить писать
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   )
+}
+
+function getChunks(text) {
+  if (text.includes('\n\n')) {
+    const parts = text.split(/\n\n+/).map((s) => s.trim()).filter(Boolean)
+    if (parts.length >= 2) return parts
+  }
+  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean)
+  if (lines.length >= 3) return lines
+  return null
 }
 
 export default function DumpOverlay() {
   const open = useAppStore((s) => s.dumpOpen)
+
+  // The sheet mounts only while open, so its draft state resets on every close.
+  return (
+    <AnimatePresence>{open && <DumpSheet />}</AnimatePresence>
+  )
+}
+
+function DumpSheet() {
   const onClose = useAppStore((s) => s.closeDump)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
   const setTab = useAppStore((s) => s.setTab)
 
-  const [mode, setMode] = useState('idle')
   const [text, setText] = useState('')
   const [sessionCount, setSessionCount] = useState(0)
   const [showCollapseDialog, setShowCollapseDialog] = useState(false)
+  const [splitChunks, setSplitChunks] = useState([])
+  const [counterFlash, setCounterFlash] = useState(false)
   const inputRef = useRef(null)
   const addCard = useCardsStore((s) => s.addCard)
   const setLastAddedId = useCardsStore((s) => s.setLastAddedId)
   const showToast = useToastStore((s) => s.showToast)
   const clearToast = useToastStore((s) => s.clearToast)
+  const isDesktop = useFinePointerDesktop()
 
-  const destinationShort = silenceWeek
-    ? 'на холст «Разбор»'
-    : 'во вкладку «Разбор»'
+  const destinationShort = silenceWeek ? 'на холст «Разбор»' : 'во вкладку «Разбор»'
   const destinationHint = silenceWeek
     ? 'Мысли сохраняются на холст во вкладке «Разбор»'
     : 'Мысли сохраняются во вкладке «Разбор»'
 
-  const isInputActive = mode === 'capturing' || mode === 'flow'
-
   useEffect(() => {
-    if (open && isInputActive) inputRef.current?.focus()
-  }, [open, mode, isInputActive])
-
-  const resetState = () => {
-    setMode('idle')
-    setText('')
-    setSessionCount(0)
-    setShowCollapseDialog(false)
-  }
+    const id = requestAnimationFrame(() => inputRef.current?.focus())
+    return () => cancelAnimationFrame(id)
+  }, [])
 
   const saveCard = () => {
     const card = addCard(text)
     if (!card) return false
-
     setLastAddedId(card.id)
     setText('')
     setTimeout(() => setLastAddedId(null), 800)
     return true
+  }
+
+  const flashCounter = () => {
+    setCounterFlash(true)
+    setTimeout(() => setCounterFlash(false), 600)
   }
 
   const showSavedToast = (count) => {
@@ -125,15 +165,13 @@ export default function DumpOverlay() {
       count > 1
         ? `Сохранено · ${count} ${destinationShort}`
         : `Сохранено ${destinationShort}`
-
     showToast({
       variant: 'success',
       key: 'dump-save',
       message,
       actionLabel: 'Посмотреть',
       onAction: () => {
-        resetState()
-        onClose()
+        closeOverlay()
         setTab(TABS.review)
         clearToast()
       },
@@ -141,29 +179,51 @@ export default function DumpOverlay() {
   }
 
   const handleSave = () => {
-    if (!saveCard()) return
+    if (!text.trim()) return
 
-    let count = sessionCount
-    if (mode === 'capturing') {
-      count = 1
-      setSessionCount(1)
-      setMode('flow')
-    } else if (mode === 'flow') {
-      count = sessionCount + 1
-      setSessionCount(count)
+    const chunks = getChunks(text.trim())
+    if (chunks) {
+      setSplitChunks(chunks)
+      return
     }
 
+    if (!saveCard()) return
+    const count = sessionCount + 1
+    setSessionCount(count)
     showSavedToast(count)
+    hapticTap()
+    flashCounter()
     requestAnimationFrame(() => inputRef.current?.focus())
   }
 
-  const closeOverlay = () => {
-    resetState()
-    onClose()
+  const handleSplitConfirm = () => {
+    splitChunks.forEach((chunk) => addCard(chunk))
+    setSplitChunks([])
+    setText('')
+    const newCount = sessionCount + splitChunks.length
+    setSessionCount(newCount)
+    showSavedToast(newCount)
+    hapticTap()
+    flashCounter()
+    requestAnimationFrame(() => inputRef.current?.focus())
   }
 
+  const handleSplitKeepOne = () => {
+    setSplitChunks([])
+    if (!saveCard()) return
+    const count = sessionCount + 1
+    setSessionCount(count)
+    showSavedToast(count)
+    hapticTap()
+    flashCounter()
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  // Unmounting on close resets the draft, so closing is just the store action.
+  const closeOverlay = onClose
+
   const requestClose = () => {
-    if (text.trim() && isInputActive) {
+    if (text.trim()) {
       setShowCollapseDialog(true)
     } else {
       closeOverlay()
@@ -171,204 +231,132 @@ export default function DumpOverlay() {
   }
 
   const handleKeyDown = (e) => {
+    if (e.isComposing) return
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSave()
       return
     }
-
     if (e.key === 'Escape') {
-      if (mode === 'capturing') {
-        setText('')
-        setMode('idle')
-      } else if (mode === 'flow') {
-        if (showCollapseDialog) {
-          setShowCollapseDialog(false)
-        } else {
-          requestClose()
-        }
+      if (splitChunks.length > 0) {
+        setSplitChunks([])
+      } else if (showCollapseDialog) {
+        setShowCollapseDialog(false)
       } else {
-        closeOverlay()
+        requestClose()
       }
     }
   }
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-30 flex items-end justify-center md:items-center md:p-6"
-        >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-30 flex items-end justify-center md:items-center md:p-6"
+    >
+      <button
+        type="button"
+        aria-label="Закрыть"
+        onClick={requestClose}
+        className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 40 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Выгрузить мысль"
+        className="relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col rounded-t-3xl border border-line/60 bg-surface shadow-(--shadow-float) md:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
+          <div className="flex items-center gap-2">
+            <h2 className="m-0 text-[17px] font-semibold text-ink">
+              Выгрузить мысль
+            </h2>
+            {sessionCount > 0 && (
+              <motion.span
+                animate={counterFlash ? { scale: [1, 1.15, 1] } : {}}
+                transition={{ duration: 0.3 }}
+                className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${counterFlash ? 'bg-success-soft text-success' : 'bg-accent-soft text-accent'}`}
+              >
+                {sessionCount} за сессию
+              </motion.span>
+            )}
+          </div>
           <button
             type="button"
             aria-label="Закрыть"
             onClick={requestClose}
-            className="absolute inset-0 bg-warm-text/25 backdrop-blur-sm"
+            className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </header>
+
+        <div className="flex flex-col gap-4 px-6 py-5">
+          <textarea
+            ref={inputRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Что крутится в голове?"
+            rows={5}
+            className="w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-[15px] leading-relaxed text-ink placeholder:text-ink-faint outline-none transition focus:border-line-strong focus:ring-2 focus:ring-accent/30"
           />
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="relative z-10 flex w-full max-w-md flex-col rounded-t-2xl border border-cream-dark/60 bg-white shadow-xl md:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className="border-b border-cream-dark px-6 py-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="m-0 font-serif text-lg font-medium text-warm-text">
-                    {mode === 'flow' ? 'Режим потока' : 'Выгрузить мысль'}
-                  </h2>
-                  <p className="mt-0.5 text-sm text-warm-muted">
-                    {mode === 'flow' ? (
-                      <>
-                        Одна мысль за раз
-                        <span className="text-warm-accent"> · {sessionCount}</span>
-                      </>
-                    ) : (
-                      'Без планирования, без фильтров'
-                    )}
-                  </p>
-                </div>
-                {mode === 'flow' && (
-                  <button
-                    type="button"
-                    onClick={requestClose}
-                    className="shrink-0 rounded-lg border border-cream-dark px-3 py-1.5 text-xs text-warm-muted transition-colors hover:bg-cream-dark hover:text-warm-text"
-                  >
-                    Закрыть
-                  </button>
-                )}
-              </div>
-            </header>
+          {isDesktop && (
+            <p className="text-center text-xs text-ink-faint">
+              Enter — сохранить · Shift+Enter — новая строка · Esc — закрыть
+            </p>
+          )}
 
-            <div
-              className={
-                mode === 'flow'
-                  ? 'flex flex-col px-6 py-5'
-                  : 'flex flex-col items-center px-6 py-8'
-              }
+          <p className="text-center text-xs text-ink-muted">{destinationHint}</p>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!text.trim()}
+              className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <AnimatePresence mode="wait">
-                {mode === 'idle' && (
-                  <motion.div
-                    key="button"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex flex-col items-center gap-4"
-                  >
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => setMode('capturing')}
-                      className="flex h-28 w-28 items-center justify-center rounded-full bg-warm-accent text-base font-medium text-white shadow-lg shadow-warm-accent/30 transition-colors hover:bg-warm-accent-hover"
-                    >
-                      Начать
-                    </motion.button>
-                    <p className="max-w-[260px] text-center text-sm leading-relaxed text-warm-text/80">
-                      Одна кнопка — одна мысль. Без планирования, без фильтров.
-                    </p>
-                    <DestinationHint>{destinationHint}</DestinationHint>
-                  </motion.div>
-                )}
+              Сохранить
+            </button>
+            <button
+              type="button"
+              onClick={closeOverlay}
+              className="rounded-xl border border-line px-4 py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
+            >
+              Готово
+            </button>
+          </div>
+        </div>
 
-                {mode === 'capturing' && (
-                  <motion.div
-                    key="capturing"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex w-full flex-col gap-4"
-                  >
-                    <DumpTextarea
-                      inputRef={inputRef}
-                      text={text}
-                      onChange={(e) => setText(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      hint="Enter — сохранить · Shift+Enter — новая строка"
-                    />
-                    <DestinationHint>{destinationHint}</DestinationHint>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleSave}
-                        disabled={!text.trim()}
-                        className="flex-1 rounded-lg bg-warm-accent py-2.5 text-sm font-medium text-white transition-colors hover:bg-warm-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        Готово
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setText('')
-                          setMode('idle')
-                        }}
-                        className="rounded-lg border border-cream-dark px-4 py-2.5 text-sm text-warm-muted transition-colors hover:bg-cream-dark"
-                      >
-                        Отмена
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {mode === 'flow' && (
-                  <motion.div
-                    key="flow"
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex w-full flex-col gap-3"
-                  >
-                    <DumpTextarea
-                      inputRef={inputRef}
-                      text={text}
-                      onChange={(e) => setText(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      hint="Enter — следующая · Shift+Enter — строка · Esc — закрыть"
-                    />
-
-                    <DestinationHint>
-                      {sessionCount > 0
-                        ? `Выгружено ${sessionCount} — продолжай или нажми «Посмотреть» внизу`
-                        : destinationHint}
-                    </DestinationHint>
-
-                    <button
-                      type="button"
-                      onClick={handleSave}
-                      disabled={!text.trim()}
-                      className="rounded-lg bg-warm-accent py-2.5 text-sm font-medium text-white transition-colors hover:bg-warm-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Готово
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <AnimatePresence>
-              {showCollapseDialog && (
-                <CollapseDialog
-                  onSave={() => {
-                    handleSave()
-                    closeOverlay()
-                  }}
-                  onDiscard={closeOverlay}
-                  onCancel={() => setShowCollapseDialog(false)}
-                />
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        <AnimatePresence>
+          {showCollapseDialog && (
+            <CollapseDialog
+              onSave={() => {
+                handleSave()
+                closeOverlay()
+              }}
+              onDiscard={closeOverlay}
+              onCancel={() => setShowCollapseDialog(false)}
+            />
+          )}
+          {splitChunks.length > 0 && (
+            <SplitDialog
+              count={splitChunks.length}
+              onSplit={handleSplitConfirm}
+              onKeepOne={handleSplitKeepOne}
+              onCancel={() => setSplitChunks([])}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
   )
 }

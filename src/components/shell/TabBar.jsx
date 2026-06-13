@@ -1,11 +1,12 @@
 import clsx from 'clsx'
-import { Kanban, Inbox, Plus, Workflow } from 'lucide-react'
+import { BarChart3, Inbox, Kanban, Plus, Target } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
 
 const NAV_ITEMS = [
-  { id: TABS.flow, label: 'Поток', icon: Workflow },
-  { id: TABS.review, label: 'Разбор', icon: Inbox },
+  { id: TABS.today, label: 'Сегодня', icon: Target },
   { id: TABS.kanban, label: 'Канбан', icon: Kanban },
+  { id: TABS.review, label: 'Разбор', icon: Inbox },
+  { id: TABS.progress, label: 'Прогресс', icon: BarChart3 },
 ]
 
 export default function TabBar() {
@@ -13,19 +14,20 @@ export default function TabBar() {
   const setTab = useAppStore((s) => s.setTab)
   const openDump = useAppStore((s) => s.openDump)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
+  const elephantsPending = useAppStore((s) => s.elephantsPending)
 
   return (
     <>
       <button
         type="button"
         onClick={openDump}
-        aria-label="Выгрузить"
-        className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 z-30 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-warm-accent text-white shadow-lg shadow-warm-accent/30 ring-4 ring-cream transition-colors hover:bg-warm-accent-hover md:hidden"
+        aria-label="Выгрузить мысль"
+        className="hm-grad fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+12px)] left-1/2 z-30 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full text-white shadow-(--shadow-glow) transition-transform active:scale-95 md:hidden"
       >
         <Plus className="h-6 w-6" strokeWidth={2} />
       </button>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-cream-dark bg-cream/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)] pt-1 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex h-16 border-t border-line bg-glass-strong backdrop-blur-xl pb-[env(safe-area-inset-bottom)] md:hidden">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.id
@@ -36,29 +38,38 @@ export default function TabBar() {
               key={item.id}
               type="button"
               onClick={() => setTab(item.id)}
-              className={clsx(
-                'relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-colors',
-                isActive
-                  ? 'font-medium text-warm-text'
-                  : isSilenced
-                    ? 'text-warm-text/55'
-                    : 'text-warm-text/80',
-              )}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
+              className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 pt-1 text-[11px] transition-colors"
             >
+              {isActive && (
+                <span className="absolute top-1.5 h-1 w-8 rounded-full bg-accent shadow-[0_0_10px_var(--color-accent)]" />
+              )}
               <Icon
                 className={clsx(
-                  'h-5 w-5',
+                  'relative h-5 w-5 shrink-0',
                   isActive
-                    ? 'text-warm-accent'
+                    ? 'text-accent'
                     : isSilenced
-                      ? 'text-warm-text/50'
-                      : 'text-warm-text/65',
+                      ? 'text-ink-faint'
+                      : 'text-ink-faint',
                 )}
-                strokeWidth={1.75}
+                strokeWidth={isActive ? 2 : 1.75}
               />
-              {item.label}
-              {isActive && (
-                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-warm-accent" />
+              <span
+                className={clsx(
+                  'relative truncate',
+                  isActive
+                    ? 'font-medium text-accent'
+                    : isSilenced
+                      ? 'text-ink-faint/60'
+                      : 'text-ink-faint',
+                )}
+              >
+                {item.label}
+              </span>
+              {item.id === TABS.kanban && elephantsPending && !isActive && (
+                <span className="absolute right-[18%] top-2 h-1.5 w-1.5 rounded-full bg-accent" />
               )}
             </button>
           )

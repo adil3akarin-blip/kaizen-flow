@@ -1,23 +1,24 @@
-export default function EmptyState({ icon: Icon, title, description }) {
+export default function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="mt-8 flex flex-1 flex-col items-center justify-center px-4">
-      <div className="flex w-full max-w-sm flex-col items-center rounded-2xl border border-cream-dark/50 bg-white px-8 py-10 shadow-sm">
-        {Icon && (
-          <Icon
-            className="mb-4 h-8 w-8 text-warm-accent/45"
-            strokeWidth={1.5}
-            aria-hidden
-          />
-        )}
-        <p className="m-0 text-center font-serif text-base font-medium text-warm-text">
-          {title}
-        </p>
-        {description && (
-          <p className="mt-2 text-center text-sm leading-relaxed text-warm-muted">
-            {description}
-          </p>
-        )}
-      </div>
+    <div className="flex flex-col items-center py-12 px-4 text-center">
+      {Icon && (
+        <div className="hm-orb mb-4 flex h-16 w-16 items-center justify-center rounded-[22px]">
+          <Icon className="h-7 w-7 text-accent" strokeWidth={1.6} aria-hidden />
+        </div>
+      )}
+      <p className="m-0 text-lg font-bold tracking-tight text-ink">{title}</p>
+      {description && (
+        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-ink-muted">{description}</p>
+      )}
+      {action && (
+        <button
+          type="button"
+          onClick={action.onClick}
+          className="hm-grad mt-5 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-(--shadow-glow) transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+        >
+          {action.label}
+        </button>
+      )}
     </div>
   )
 }

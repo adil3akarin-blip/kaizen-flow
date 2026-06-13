@@ -149,6 +149,8 @@ Never install a new package without a clear reason. Before installing anything c
 | `clsx` | Conditional class names |
 | `@fontsource/lora` | Serif headings (Lora 500/600, self-hosted) |
 | `lucide-react` | Navigation and empty-state icons (tree-shaken) |
+| `@dnd-kit/react` | Kanban drag-and-drop (desktop columns) |
+| `@dnd-kit/helpers` | `move()` for multi-column sortable state |
 | `postcss`, `autoprefixer` | CSS pipeline for Tailwind |
 
 ### Approved dev dependencies
@@ -158,6 +160,7 @@ Never install a new package without a clear reason. Before installing anything c
 | `vite`, `@vitejs/plugin-react` | Build tool and dev server |
 | `eslint`, `@eslint/js`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `globals` | Linting |
 | `@types/react`, `@types/react-dom` | Editor hints only — project code is JavaScript |
+| `vite-plugin-pwa` | PWA manifest + Service Worker (offline shell) |
 
 ### Planned — install only when starting the corresponding phase
 
@@ -165,7 +168,6 @@ Update this list before adding any of these:
 
 | Package | Phase | Purpose |
 |---|---|---|
-| `vite-plugin-pwa` | S3 PWA | Manifest + Service Worker for offline shell |
 | Native `localStorage` / `IndexedDB` | S1 persistence | No library required initially |
 
 ### Explicitly out of scope for now
