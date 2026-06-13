@@ -4,6 +4,9 @@ import { X } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { TABS, useAppStore } from '../../store/useAppStore'
 import { useToastStore } from '../../store/useToastStore'
+import { recordLastDump } from '../../lib/pushActivity'
+import { syncPushRegistration } from '../../lib/pushClient'
+import { useSettingsStore } from '../../store/useSettingsStore'
 import { hapticTap } from '../../lib/haptics'
 import { useFinePointerDesktop } from '../../lib/useFinePointerDesktop'
 
@@ -152,6 +155,9 @@ function DumpSheet() {
     setLastAddedId(card.id)
     setText('')
     setTimeout(() => setLastAddedId(null), 800)
+    recordLastDump()
+    const prefs = useSettingsStore.getState().notificationPrefs
+    syncPushRegistration({ prefs }).catch(() => {})
     return true
   }
 
@@ -171,7 +177,6 @@ function DumpSheet() {
       message,
       actionLabel: 'Посмотреть',
       onAction: () => {
-        closeOverlay()
         setTab(TABS.review)
         clearToast()
       },
@@ -179,48 +184,57 @@ function DumpSheet() {
   }
 
   const handleSave = () => {
-    if (!text.trim()) return
+    if (!text.trim()) return null
 
     const chunks = getChunks(text.trim())
     if (chunks) {
       setSplitChunks(chunks)
-      return
+      return null
     }
 
-    if (!saveCard()) return
+    if (!saveCard()) return null
     const count = sessionCount + 1
     setSessionCount(count)
-    showSavedToast(count)
     hapticTap()
     flashCounter()
     requestAnimationFrame(() => inputRef.current?.focus())
+    return count
   }
 
   const handleSplitConfirm = () => {
     splitChunks.forEach((chunk) => addCard(chunk))
+    recordLastDump()
+    const prefs = useSettingsStore.getState().notificationPrefs
+    syncPushRegistration({ prefs }).catch(() => {})
     setSplitChunks([])
     setText('')
     const newCount = sessionCount + splitChunks.length
     setSessionCount(newCount)
-    showSavedToast(newCount)
     hapticTap()
     flashCounter()
     requestAnimationFrame(() => inputRef.current?.focus())
+    return newCount
   }
 
   const handleSplitKeepOne = () => {
     setSplitChunks([])
-    if (!saveCard()) return
+    if (!saveCard()) return null
     const count = sessionCount + 1
     setSessionCount(count)
-    showSavedToast(count)
     hapticTap()
     flashCounter()
     requestAnimationFrame(() => inputRef.current?.focus())
+    return count
   }
 
   // Unmounting on close resets the draft, so closing is just the store action.
   const closeOverlay = onClose
+
+  const finishSession = (savedCount) => {
+    const count = savedCount ?? sessionCount
+    if (count > 0) showSavedToast(count)
+    closeOverlay()
+  }
 
   const requestClose = () => {
     if (text.trim()) {
@@ -328,7 +342,7 @@ function DumpSheet() {
             </button>
             <button
               type="button"
-              onClick={closeOverlay}
+              onClick={() => finishSession()}
               className="rounded-xl border border-line px-4 py-2.5 text-sm text-ink-muted transition hover:border-line-strong hover:bg-sunken/60"
             >
               Готово
@@ -339,10 +353,7 @@ function DumpSheet() {
         <AnimatePresence>
           {showCollapseDialog && (
             <CollapseDialog
-              onSave={() => {
-                handleSave()
-                closeOverlay()
-              }}
+              onSave={() => finishSession(handleSave())}
               onDiscard={closeOverlay}
               onCancel={() => setShowCollapseDialog(false)}
             />

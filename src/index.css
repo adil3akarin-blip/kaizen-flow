@@ -39,6 +39,17 @@
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px rgb(15 23 42 / 0.08);
   --shadow-float: 0 18px 50px rgb(15 23 42 / 0.16);
   --shadow-glow: 0 10px 28px rgb(249 115 22 / 0.25);
+
+  /* Mobile tab bar + raised dump FAB (right-aligned) */
+  --spacing-mobile-tab-bar: 4rem;
+  --spacing-mobile-fab-gap: 12px;
+  --spacing-mobile-fab-size: 3.5rem;
+  --spacing-mobile-fab-bottom: calc(
+    var(--spacing-mobile-tab-bar) + var(--spacing-mobile-fab-gap) + env(safe-area-inset-bottom, 0px)
+  );
+  --spacing-mobile-chrome-bottom: calc(
+    var(--spacing-mobile-tab-bar) + env(safe-area-inset-bottom, 0px)
+  );
 }
 
 * {

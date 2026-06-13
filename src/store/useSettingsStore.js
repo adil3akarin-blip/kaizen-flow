@@ -4,6 +4,8 @@ import { generateId } from '../lib/id'
 import {
   buildDefaultNotificationPrefs,
 } from '../lib/notificationTypes'
+import { syncPushRegistration, unsubscribeFromPush } from '../lib/pushClient'
+import { enableNotificationsAfterPermission } from '../lib/pushEnable'
 import { safeGetItem, safeSetItem } from '../lib/persistStorage'
 import { setPomodoroDurations } from '../lib/timerUtils'
 
@@ -82,6 +84,18 @@ function loadNotificationPrefs() {
   return prefs
 }
 
+async function syncPushForPrefs(prefs, stuckCount = 0) {
+  const anyEnabled = Object.values(prefs).some(Boolean)
+  if (!anyEnabled) {
+    await unsubscribeFromPush()
+    return
+  }
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+    return
+  }
+  await syncPushRegistration({ prefs, stuckCount })
+}
+
 export const useSettingsStore = create((set, get) => ({
   personalMission: loadMission(),
   filterCriteria: loadCriteria(),
@@ -121,10 +135,11 @@ export const useSettingsStore = create((set, get) => ({
     set({ investmentTags: tags })
   },
 
-  setNotificationEnabled: (id, enabled) => {
+  setNotificationEnabled: (id, enabled, { stuckCount = 0 } = {}) => {
     const next = { ...get().notificationPrefs, [id]: enabled }
     safeSetItem(NOTIFICATIONS_KEY, JSON.stringify(next))
     set({ notificationPrefs: next })
+    syncPushForPrefs(next, stuckCount).catch(() => {})
     return next
   },
 
@@ -149,12 +164,13 @@ export const useSettingsStore = create((set, get) => ({
     })
   },
 
-  requestPushPermission: async () => {
+  requestPushPermission: async ({ stuckCount = 0 } = {}) => {
     if (typeof Notification === 'undefined') {
       return 'unsupported'
     }
 
     if (Notification.permission === 'granted') {
+      await enableNotificationsAfterPermission({ stuckCount, includeInactive: true })
       return 'granted'
     }
 
@@ -163,7 +179,11 @@ export const useSettingsStore = create((set, get) => ({
     }
 
     try {
-      return await Notification.requestPermission()
+      const result = await Notification.requestPermission()
+      if (result === 'granted') {
+        await enableNotificationsAfterPermission({ stuckCount, includeInactive: true })
+      }
+      return result
     } catch {
       return 'denied'
     }

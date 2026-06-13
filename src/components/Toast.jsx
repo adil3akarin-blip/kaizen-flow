@@ -20,7 +20,7 @@ export default function Toast() {
  exit={{ opacity: 0, y: 12 }}
  transition={{ type: 'spring', stiffness: 400, damping: 28 }}
  className={clsx(
- 'fixed bottom-[calc(7.25rem+env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-4 rounded-xl px-5 py-3 text-sm shadow-xl md:bottom-8',
+ 'fixed bottom-[calc(var(--spacing-mobile-fab-bottom)+var(--spacing-mobile-fab-size)+0.5rem)] left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-4 rounded-xl px-5 py-3 text-sm shadow-xl md:bottom-8',
  toast.variant === 'destructive'
  ? 'bg-ink text-white'
  : 'border border-line/60 border-l-4 border-l-accent bg-white text-ink',

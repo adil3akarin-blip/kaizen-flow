@@ -3,8 +3,10 @@ import clsx from 'clsx'
 import { Kanban } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { useAppStore, TABS } from '../../store/useAppStore'
+import { useSettingsStore } from '../../store/useSettingsStore'
 import { selectKanbanCards } from '../../lib/cardSelectors'
 import { selectNextWeekCount } from '../../lib/flowEmptyState'
+import { safeGetItem, safeRemoveItem } from '../../lib/persistStorage'
 import TabPageHeader from '../ui/TabPageHeader'
 import PageContainer from '../ui/PageContainer'
 import EmptyState from '../ui/EmptyState'
@@ -21,10 +23,17 @@ const VIEW_OPTIONS = [
 export default function KanbanTab() {
   const cards = useCardsStore((s) => s.cards)
   const elephantsPending = useAppStore((s) => s.elephantsPending)
+  const elephantsPrefEnabled = useSettingsStore((s) => s.notificationPrefs.elephants)
   const setTab = useAppStore((s) => s.setTab)
 
   const [view, setView] = useState('day')
-  const [showElephants, setShowElephants] = useState(false)
+  const [showElephants, setShowElephants] = useState(() => {
+    if (safeGetItem('kaizenflow-open-elephants') === '1') {
+      safeRemoveItem('kaizenflow-open-elephants')
+      return true
+    }
+    return false
+  })
 
   const kanbanCards = useMemo(() => selectKanbanCards(cards), [cards])
   const nextWeekCount = useMemo(() => selectNextWeekCount(cards), [cards])
@@ -78,7 +87,7 @@ export default function KanbanTab() {
                 ))}
               </div>
 
-              {elephantsPending && (
+              {elephantsPending && elephantsPrefEnabled && (
                 <button
                   type="button"
                   onClick={() => setShowElephants(true)}

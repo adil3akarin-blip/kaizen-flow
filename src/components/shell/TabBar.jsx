@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { BarChart3, Inbox, Kanban, Plus, Target } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
+import { useSettingsStore } from '../../store/useSettingsStore'
 
 const NAV_ITEMS = [
   { id: TABS.today, label: 'Сегодня', icon: Target },
@@ -15,6 +16,7 @@ export default function TabBar() {
   const openDump = useAppStore((s) => s.openDump)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
   const elephantsPending = useAppStore((s) => s.elephantsPending)
+  const elephantsPrefEnabled = useSettingsStore((s) => s.notificationPrefs.elephants)
 
   return (
     <>
@@ -22,7 +24,7 @@ export default function TabBar() {
         type="button"
         onClick={openDump}
         aria-label="Выгрузить мысль"
-        className="hm-grad fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+12px)] left-1/2 z-30 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full text-white shadow-(--shadow-glow) transition-transform active:scale-95 md:hidden"
+        className="hm-grad fixed right-4 bottom-(--spacing-mobile-fab-bottom) z-30 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-0 text-white shadow-(--shadow-glow) transition-transform [appearance:none] active:scale-95 md:hidden"
       >
         <Plus className="h-6 w-6" strokeWidth={2} />
       </button>
@@ -68,7 +70,7 @@ export default function TabBar() {
               >
                 {item.label}
               </span>
-              {item.id === TABS.kanban && elephantsPending && !isActive && (
+              {item.id === TABS.kanban && elephantsPending && elephantsPrefEnabled && !isActive && (
                 <span className="absolute right-[18%] top-2 h-1.5 w-1.5 rounded-full bg-accent" />
               )}
             </button>
