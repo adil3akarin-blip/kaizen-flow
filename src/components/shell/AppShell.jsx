@@ -3,6 +3,8 @@ import TabBar from './TabBar'
 import Sidebar from './Sidebar'
 import DumpOverlay from './DumpOverlay'
 import ManifestScreen from '../onboarding/ManifestScreen'
+import PwaInstallPrompt from '../pwa/PwaInstallPrompt'
+import PwaInstallSheet from '../pwa/PwaInstallSheet'
 import SettingsScreen from '../settings/SettingsScreen'
 import TodayTab from '../tabs/TodayTab'
 import ReviewTab from '../tabs/ReviewTab'
@@ -34,6 +36,8 @@ export default function AppShell() {
  </main>
  <TabBar />
  <DumpOverlay />
+ <PwaInstallPrompt />
+ <PwaInstallSheet />
  </div>
  )
 }

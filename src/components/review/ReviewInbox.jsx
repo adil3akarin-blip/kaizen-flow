@@ -51,7 +51,12 @@ function InboxRow({ card, isEditing, isLast, isFirst, canFilter, onStartEdit, on
   }
 
   return (
-    <div className="group relative flex overflow-hidden rounded-2xl border border-line/60 bg-surface shadow-(--shadow-card)">
+    <div
+      className={clsx(
+        'group relative flex rounded-2xl border border-line/60 bg-surface shadow-(--shadow-card)',
+        menuOpen ? 'z-20' : 'overflow-hidden',
+      )}
+    >
       <div
         className="w-1 shrink-0 rounded-l-2xl"
         style={{ backgroundColor: card.color?.bg ?? 'transparent' }}
