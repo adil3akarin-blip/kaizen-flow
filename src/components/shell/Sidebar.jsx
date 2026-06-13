@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { BarChart3, Kanban, Inbox, Plus, Settings, Target, Workflow } from 'lucide-react'
 import { TABS, useAppStore } from '../../store/useAppStore'
 import { useCardsStore } from '../../store/useCardsStore'
+import { useSettingsStore } from '../../store/useSettingsStore'
 
 const NAV_ITEMS = [
   { id: TABS.today, label: 'Сегодня', icon: Target },
@@ -17,6 +18,7 @@ export default function Sidebar() {
   const openDump = useAppStore((s) => s.openDump)
   const silenceWeek = useAppStore((s) => s.silenceWeek)
   const elephantsPending = useAppStore((s) => s.elephantsPending)
+  const elephantsPrefEnabled = useSettingsStore((s) => s.notificationPrefs.elephants)
   const cards = useCardsStore((s) => s.cards)
   const rawCount = useMemo(
     () => cards.filter((c) => c.status === 'raw').length,
@@ -114,7 +116,7 @@ export default function Sidebar() {
                     {rawCount}
                   </span>
                 )}
-                {item.id === TABS.kanban && elephantsPending && (
+                {item.id === TABS.kanban && elephantsPending && elephantsPrefEnabled && (
                   <span className="ml-auto h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_var(--color-accent)]" />
                 )}
               </button>

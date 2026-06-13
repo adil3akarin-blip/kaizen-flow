@@ -1,3 +1,4 @@
+import { useSettingsStore } from '../../store/useSettingsStore'
 import StuckNudge from './StuckNudge'
 
 function FlowHint({ rawCount, onGoReview }) {
@@ -23,8 +24,9 @@ function FlowHint({ rawCount, onGoReview }) {
 }
 
 export default function FlowStatusPanel({ rawCount, onGoReview, stuckCards, showHints }) {
+  const stuckPrefEnabled = useSettingsStore((s) => s.notificationPrefs.stuck)
   const hasHint = showHints && rawCount > 0
-  const hasStuck = stuckCards.length > 0
+  const hasStuck = stuckPrefEnabled && stuckCards.length > 0
 
   return (
     <div className="flex flex-col gap-3">

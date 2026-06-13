@@ -55,6 +55,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 5 — Push & Polish
 
 - [x] 17 Push Notification Settings
+- [x] 18 Web Push (VAPID + SW + Cloudflare Worker cron)
 
 ### Редизайн «Modern Calm» (2026-06-12)
 

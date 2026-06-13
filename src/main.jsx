@@ -10,15 +10,7 @@ import { useCardsStore } from './store/useCardsStore'
 // Initialize settings early so saved Pomodoro durations apply before any timer starts.
 import './store/useSettingsStore'
 
-if (import.meta.env.DEV && 'serviceWorker' in navigator) {
- navigator.serviceWorker.getRegistrations().then((regs) => {
- regs.forEach((r) => r.unregister())
- })
-}
-
-if (import.meta.env.PROD) {
- registerSW({ immediate: true })
-}
+registerSW({ immediate: true })
 
 // C3: sync state when another tab writes to localStorage while this tab is hidden
 initStorageSync(() => {
@@ -33,7 +25,7 @@ initStorageSync(() => {
 })
 
 createRoot(document.getElementById('root')).render(
- <StrictMode>
- <App />
- </StrictMode>,
+  <StrictMode>
+    <App />
+  </StrictMode>,
 )
