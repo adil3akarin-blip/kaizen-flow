@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { getSphere } from '../../lib/labelSets'
 
 const WANT_LABELS = {
  want: 'Хочу',
@@ -7,21 +8,27 @@ const WANT_LABELS = {
 }
 
 const TONE_CLASS = {
- indigo: 'border-indigo/20 bg-indigo/10 text-indigo',
- orange: 'border-accent/20 bg-accent-soft text-accent',
+ accent: 'border-accent/20 bg-accent-soft text-accent',
  teal: 'border-teal/20 bg-teal/10 text-teal',
  neutral: 'border-line bg-glass text-ink-muted',
 }
 
 export default function StructuredCard({ card, className, compact = false }) {
+ const sphere = getSphere(card.sphere)
  const chips = []
 
  if (card.wantMust) {
- chips.push({ key: 'want', label: WANT_LABELS[card.wantMust], tone: 'indigo' })
+ chips.push({
+ key: 'want',
+ label: WANT_LABELS[card.wantMust],
+ tone: card.wantMust === 'want' ? 'accent' : 'neutral',
+ })
  }
  if (card.timeInvestment) {
  chips.push({ key: 'invest', label: card.timeInvestment, tone: 'teal' })
  }
+
+ const hasLabels = sphere || chips.length > 0
 
  return (
  <div
@@ -40,8 +47,24 @@ export default function StructuredCard({ card, className, compact = false }) {
  {card.text}
  </p>
 
- {chips.length > 0 && (
+ {hasLabels && (
  <div className="mt-2 flex flex-wrap gap-1.5">
+ {sphere && (
+ <span
+ className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold"
+ style={{
+ borderColor: `${sphere.dot}33`,
+ background: sphere.soft,
+ color: sphere.text,
+ }}
+ >
+ <span
+ className="h-1.5 w-1.5 rounded-full"
+ style={{ background: sphere.dot }}
+ />
+ {sphere.label}
+ </span>
+ )}
  {chips.map((chip) => (
  <span
  key={chip.key}

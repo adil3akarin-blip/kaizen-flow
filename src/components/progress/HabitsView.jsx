@@ -117,7 +117,7 @@ function HabitCard({ habit, log, now, todayKey, onToggleToday, onEdit }) {
             type="button"
             onClick={() => setRange(r.id)}
             className={clsx(
-              'rounded-lg px-2.5 py-1 text-xs font-semibold transition',
+              'rounded-lg px-3 py-1.5 text-xs font-semibold transition',
               range === r.id
                 ? 'bg-sunken text-ink'
                 : 'text-ink-faint hover:text-ink-muted',
@@ -184,7 +184,7 @@ export default function HabitsView() {
         <button
           type="button"
           onClick={openNew}
-          className="hm-grad flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-(--shadow-glow) transition-transform hover:-translate-y-0.5"
+          className="hm-grad flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-(--shadow-glow) transition-transform hover:-translate-y-0.5"
         >
           <Plus className="h-4 w-4" strokeWidth={2.4} />
           Новая привычка

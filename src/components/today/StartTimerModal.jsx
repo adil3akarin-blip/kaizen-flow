@@ -164,7 +164,7 @@ export default function StartTimerModal({ open, onClose }) {
             type="button"
             onClick={() => setTab(t.id)}
             className={clsx(
-              'flex-1 rounded-lg py-2 text-xs font-semibold transition',
+              'flex-1 rounded-lg py-2.5 text-xs font-semibold transition',
               tab === t.id
                 ? 'bg-surface text-ink shadow-sm'
                 : 'text-ink-muted hover:text-ink',
@@ -314,7 +314,7 @@ export default function StartTimerModal({ open, onClose }) {
                   type="button"
                   onClick={() => setMode(m.id)}
                   className={clsx(
-                    'flex-1 rounded-lg py-1.5 text-xs font-semibold transition',
+                    'flex-1 rounded-lg py-2.5 text-xs font-semibold transition',
                     mode === m.id ? 'bg-surface text-ink shadow-sm' : 'text-ink-muted hover:text-ink',
                   )}
                 >

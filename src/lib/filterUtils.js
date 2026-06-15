@@ -44,6 +44,7 @@ export function buildFilterDraft(card, criteria) {
  wantMust: card.wantMust ?? null,
  missionCriteriaResults,
  timeInvestment: card.timeInvestment ?? null,
+ sphere: card.sphere ?? null,
  }
 }
 

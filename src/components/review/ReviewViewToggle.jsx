@@ -15,13 +15,13 @@ export default function ReviewViewToggle({ value, onChange }) {
         aria-pressed={value === REVIEW_VIEWS.canvas}
         onClick={() => onChange(REVIEW_VIEWS.canvas)}
         className={clsx(
-          'rounded-lg p-2 transition',
+          'flex h-10 w-10 items-center justify-center rounded-lg transition',
           value === REVIEW_VIEWS.canvas
             ? 'hm-grad text-white shadow-(--shadow-glow)'
             : 'text-ink-muted hover:text-ink',
         )}
       >
-        <LayoutGrid className="h-4 w-4" strokeWidth={1.75} />
+        <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </button>
       <button
         type="button"
@@ -29,13 +29,13 @@ export default function ReviewViewToggle({ value, onChange }) {
         aria-pressed={value === REVIEW_VIEWS.inbox}
         onClick={() => onChange(REVIEW_VIEWS.inbox)}
         className={clsx(
-          'rounded-lg p-2 transition',
+          'flex h-10 w-10 items-center justify-center rounded-lg transition',
           value === REVIEW_VIEWS.inbox
             ? 'hm-grad text-white shadow-(--shadow-glow)'
             : 'text-ink-muted hover:text-ink',
         )}
       >
-        <List className="h-4 w-4" strokeWidth={1.75} />
+        <List className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </button>
     </div>
   )

@@ -61,7 +61,7 @@ function ChipGroup({ options, value, onChange }) {
           type="button"
           onClick={() => onChange(o.id)}
           className={clsx(
-            'rounded-lg px-3 py-1.5 text-xs font-semibold transition',
+            'rounded-lg px-3 py-2 text-xs font-semibold transition',
             value === o.id
               ? 'bg-accent-soft text-accent'
               : 'text-ink-muted hover:bg-sunken/60 hover:text-ink',
@@ -242,7 +242,7 @@ export default function TimeStatsView() {
                     type="button"
                     onClick={() => removeSession(s.id)}
                     aria-label="Удалить сессию"
-                    className="shrink-0 rounded-lg p-1.5 text-ink-faint transition hover:bg-sunken hover:text-danger md:opacity-0 md:group-hover:opacity-100"
+                    className="-mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-ink-faint transition hover:bg-sunken hover:text-danger md:h-9 md:w-9 md:opacity-0 md:group-hover:opacity-100"
                   >
                     <Trash2 className="h-4 w-4" strokeWidth={1.75} />
                   </button>

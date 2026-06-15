@@ -5,7 +5,7 @@ import {
 } from './cardUtils'
 import { DONE_COLUMN, IN_PROGRESS_COLUMN } from './kanbanUtils'
 
-const VALID_STATUSES = new Set(['raw', 'filtered', 'wip', 'done'])
+const VALID_STATUSES = new Set(['raw', 'filtered', 'wip', 'done', 'board'])
 const VALID_KANBAN_COLUMNS = new Set([
  'queue',
  IN_PROGRESS_COLUMN,
@@ -32,8 +32,29 @@ export function sanitizeCardsOnLoad(cards) {
  delete next.energyCost
  delete next.resultEffort
 
- if (!VALID_STATUSES.has(next.status)) {
+ // Cards on a custom board live outside the Kaizen flow: keep their column
+ // and a neutral 'board' status (or 'done' so they count toward the streak).
+ if (next.boardId && next.boardId !== 'flow') {
+ next.status = next.status === 'done' ? 'done' : 'board'
+ if (next.status === 'done') {
+ if (typeof next.completedAt !== 'number') {
+ next.completedAt = next.createdAt ?? Date.now()
+ }
+ } else {
+ delete next.completedAt
+ }
+ delete next.x
+ delete next.y
+ return next
+ }
+
+ if (!VALID_STATUSES.has(next.status) || next.status === 'board') {
  next.status = 'raw'
+ }
+
+ // Flow cards carry an explicit boardId after migration.
+ if (next.status !== 'raw') {
+ next.boardId = 'flow'
  }
 
  if (next.status === 'raw') {

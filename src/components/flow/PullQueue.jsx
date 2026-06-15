@@ -3,6 +3,7 @@ import { ListTodo, MoreHorizontal } from 'lucide-react'
 import { useCardsStore } from '../../store/useCardsStore'
 import { selectWipCard } from '../../lib/cardSelectors'
 import { selectOrderedPullQueue } from '../../lib/kanbanOrderUtils'
+import { getSphere } from '../../lib/labelSets'
 import CardEditSheet from '../cards/CardEditSheet'
 import WidgetCard from '../ui/WidgetCard'
 import WipGateDialog from './WipGateDialog'
@@ -14,14 +15,24 @@ const WANT_LABELS = {
 }
 
 function QueueChips({ card }) {
+ const sphere = getSphere(card.sphere)
  const chips = []
  if (card.wantMust) chips.push({ key: 'want', label: WANT_LABELS[card.wantMust] })
  if (card.timeInvestment) chips.push({ key: 'time', label: card.timeInvestment })
 
- if (chips.length === 0) return null
+ if (!sphere && chips.length === 0) return null
 
  return (
  <div className="mt-1.5 flex flex-wrap gap-1">
+ {sphere && (
+ <span
+ className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+ style={{ background: sphere.soft, color: sphere.text }}
+ >
+ <span className="h-1.5 w-1.5 rounded-full" style={{ background: sphere.dot }} />
+ {sphere.label}
+ </span>
+ )}
  {chips.map(({ key, label }) => (
  <span key={key} className="rounded-full bg-sunken px-2 py-0.5 text-xs font-medium text-ink-muted">
  {label}
@@ -127,7 +138,7 @@ export default function PullQueue({ excludeCardId, onGateOpenChange }) {
  type="button"
  onClick={(e) => { e.stopPropagation(); setEditCardId(card.id) }}
  aria-label="Ещё"
- className="shrink-0 rounded-xl p-1.5 text-ink-faint hover:bg-sunken transition"
+ className="-mr-1.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-faint hover:bg-sunken transition"
  >
  <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
  </button>

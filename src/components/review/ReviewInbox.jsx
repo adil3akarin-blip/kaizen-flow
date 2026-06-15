@@ -75,7 +75,7 @@ function InboxRow({ card, isEditing, isLast, isFirst, canFilter, onStartEdit, on
             <button
               type="button"
               onClick={() => onFilter(card.id)}
-              className="rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-accent transition hover:bg-accent hover:text-white"
+              className="rounded-full bg-accent-soft px-4 py-2 text-xs font-semibold text-accent transition hover:bg-accent hover:text-white"
             >
               Разобрать
             </button>
@@ -86,7 +86,7 @@ function InboxRow({ card, isEditing, isLast, isFirst, canFilter, onStartEdit, on
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Ещё"
               aria-expanded={menuOpen}
-              className="rounded-lg p-1.5 text-ink-faint hover:bg-sunken hover:text-ink-muted transition"
+              className="-mr-1 flex h-11 w-11 items-center justify-center rounded-lg text-ink-faint hover:bg-sunken hover:text-ink-muted transition"
             >
               <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
             </button>
@@ -189,7 +189,7 @@ export default function ReviewInbox({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:py-8">
+      <div className="min-h-0 flex-1 overflow-y-auto pt-4 pb-24 sm:pt-6 md:pt-8 md:pb-8">
         <PageContainer>
           {header}
           <div className="mt-6 flex flex-col gap-2">

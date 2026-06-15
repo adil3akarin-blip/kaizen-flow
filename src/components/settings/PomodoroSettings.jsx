@@ -6,7 +6,7 @@ function Stepper({ label, value, suffix, min, max, step, onChange }) {
   const atMin = value <= min
   const atMax = value >= max
   const btn =
-    'flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink transition hover:bg-sunken disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'
+    'flex h-10 w-10 items-center justify-center rounded-lg border border-line text-lg text-ink transition hover:bg-sunken disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'
   return (
     <div className="flex items-center justify-between rounded-xl border border-line/50 bg-surface px-4 py-3">
       <span className="text-sm text-ink">{label}</span>
