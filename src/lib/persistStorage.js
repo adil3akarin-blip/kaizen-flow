@@ -40,6 +40,7 @@ export function loadCardsPersisted() {
     return {
       cards: data.cards,
       columnOrder: data.columnOrder ?? null,
+      boardOrders: data.boardOrders ?? null,
     }
   } catch {
     // C5: back up corrupted data before returning null
@@ -53,9 +54,12 @@ export function loadCardsPersisted() {
   }
 }
 
-export function saveCardsPersisted(cards, columnOrder) {
+export function saveCardsPersisted(cards, columnOrder, boardOrders) {
   try {
-    localStorage.setItem(CARDS_KEY, JSON.stringify({ cards, columnOrder }))
+    localStorage.setItem(
+      CARDS_KEY,
+      JSON.stringify({ cards, columnOrder, boardOrders }),
+    )
   } catch {
     // C4: show one-time toast on quota/private-mode failure
     if (!quotaToastShown) {

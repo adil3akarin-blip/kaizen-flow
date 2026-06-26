@@ -10,7 +10,7 @@ import { move } from '@dnd-kit/helpers'
 import { MoreHorizontal } from 'lucide-react'
 import clsx from 'clsx'
 import { useCardsStore } from '../../store/useCardsStore'
-import { selectKanbanCards, selectWipCard } from '../../lib/cardSelectors'
+import { selectFlowBoardCards, selectWipCard } from '../../lib/cardSelectors'
 import {
  columnOrderEquals,
  findCardColumnIndex,
@@ -216,7 +216,7 @@ function KanbanSortableCard({
  onPointerDown={(e) => e.stopPropagation()}
  onClick={() => onEditTap(card.id)}
  aria-label="Ещё"
- className="absolute right-1 top-1 rounded-lg p-1 text-ink-muted opacity-100 transition-opacity hover:bg-sunken md:opacity-0 md:group-hover:opacity-100"
+ className="absolute right-0.5 top-0.5 flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted opacity-100 transition-opacity hover:bg-sunken md:opacity-0 md:group-hover:opacity-100"
  >
  <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
  </button>
@@ -244,7 +244,7 @@ export default function KanbanBoard({ view }) {
  const [pendingVia, setPendingVia] = useState('sheet')
 
  const columns = view === 'day' ? DAY_COLUMNS : WEEK_COLUMNS
- const kanbanCards = useMemo(() => selectKanbanCards(cards), [cards])
+ const kanbanCards = useMemo(() => selectFlowBoardCards(cards), [cards])
 
  const liveMoveCard = moveCardId
  ? kanbanCards.find((c) => c.id === moveCardId) ?? null

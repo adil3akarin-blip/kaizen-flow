@@ -116,6 +116,27 @@ body::after {
   background: rgba(15, 23, 42, 0.28);
 }
 
+/* Scrollbar visible only while scrolling */
+.scrollbar-autohide {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s;
+}
+.scrollbar-autohide:hover,
+.scrollbar-autohide:active,
+.scrollbar-autohide.is-scrolling {
+  scrollbar-color: rgba(15, 23, 42, 0.18) transparent;
+}
+.scrollbar-autohide::-webkit-scrollbar-thumb {
+  background: transparent;
+  transition: background 0.3s;
+}
+.scrollbar-autohide:hover::-webkit-scrollbar-thumb,
+.scrollbar-autohide:active::-webkit-scrollbar-thumb,
+.scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.18);
+}
+
 /* Baseline keyboard-focus ring. Components that render their own ring opt out
    with `focus-visible:outline-none`. */
 :focus-visible {

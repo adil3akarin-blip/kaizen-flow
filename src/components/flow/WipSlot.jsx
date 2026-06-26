@@ -74,7 +74,7 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
       className="hm-accent-line relative overflow-hidden"
     >
       <div className="flex flex-col gap-4">
-        <div className="relative flex items-start gap-3 pr-9">
+        <div className="relative flex items-start gap-3 pr-11">
           <span className="hm-tick mt-1" />
           <StructuredCard
             card={wipCard}
@@ -84,7 +84,7 @@ export default function WipSlot({ suggestedCard, emptyCta, onPullSuggested }) {
             type="button"
             onClick={() => setEditOpen(true)}
             aria-label="Ещё"
-            className="absolute right-0 top-0 rounded-xl p-1.5 text-ink-faint transition hover:bg-sunken hover:text-ink"
+            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-xl text-ink-faint transition hover:bg-sunken hover:text-ink"
           >
             <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
           </button>

@@ -1,5 +1,5 @@
 import { isSortable } from '@dnd-kit/dom/sortable'
-import { selectKanbanCards } from './cardSelectors'
+import { selectFlowBoardCards } from './cardSelectors'
 import {
  DONE_COLUMN,
  IN_PROGRESS_COLUMN,
@@ -42,7 +42,7 @@ export function columnOrderEquals(a, b) {
 }
 
 export function syncColumnOrderWithCards(cards, columnOrder) {
- const kanbanCards = selectKanbanCards(cards)
+ const kanbanCards = selectFlowBoardCards(cards)
  const kanbanIds = new Set(kanbanCards.map((card) => card.id))
  const next = createEmptyColumnOrder()
  const placed = new Set()
@@ -251,4 +251,84 @@ export function selectOrderedPullQueue(cards, columnOrder) {
  return selectOrderedCardsInColumn(cards, columnOrder, 'queue').filter(
  (card) => card.status === 'filtered',
  )
+}
+
+// ---------------------------------------------------------------------------
+// Board-scoped order helpers (custom boards). These mirror the flow helpers but
+// operate on an arbitrary column-id list instead of the fixed flow columns, and
+// place cards by `card.kanbanColumn` (the column id within the board).
+// ---------------------------------------------------------------------------
+
+export function createEmptyBoardOrder(columnIds) {
+ const order = {}
+ for (const id of columnIds) order[id] = []
+ return order
+}
+
+export function syncBoardOrder(boardCards, order, columnIds) {
+ const colSet = new Set(columnIds)
+ const fallback = columnIds[0]
+ const ids = new Set(boardCards.map((c) => c.id))
+ const next = createEmptyBoardOrder(columnIds)
+ const placed = new Set()
+
+ for (const columnId of columnIds) {
+ for (const id of order?.[columnId] ?? []) {
+ if (!ids.has(id) || placed.has(id)) continue
+ next[columnId].push(id)
+ placed.add(id)
+ }
+ }
+
+ for (const card of [...boardCards].sort((a, b) => a.createdAt - b.createdAt)) {
+ if (placed.has(card.id)) continue
+ const columnId = colSet.has(card.kanbanColumn) ? card.kanbanColumn : fallback
+ if (!next[columnId]) continue
+ next[columnId].push(card.id)
+ placed.add(card.id)
+ }
+
+ return next
+}
+
+export function removeFromBoardOrder(order, id, columnIds) {
+ const next = createEmptyBoardOrder(columnIds)
+ for (const columnId of columnIds) {
+ next[columnId] = (order?.[columnId] ?? []).filter((itemId) => itemId !== id)
+ }
+ return next
+}
+
+export function moveInBoardOrder(order, cardId, toColumnId, columnIds, index) {
+ const next = removeFromBoardOrder(order, cardId, columnIds)
+ const column = [...(next[toColumnId] ?? [])]
+ const insertAt = typeof index === 'number' ? index : column.length
+ column.splice(Math.max(0, Math.min(insertAt, column.length)), 0, cardId)
+ next[toColumnId] = column
+ return next
+}
+
+export function reorderInBoardOrder(order, columnId, fromIndex, toIndex) {
+ const column = [...(order?.[columnId] ?? [])]
+ if (
+ fromIndex < 0 ||
+ toIndex < 0 ||
+ fromIndex >= column.length ||
+ toIndex >= column.length ||
+ fromIndex === toIndex
+ ) {
+ return order
+ }
+ const [item] = column.splice(fromIndex, 1)
+ column.splice(toIndex, 0, item)
+ return { ...order, [columnId]: column }
+}
+
+export function findCardBoardColumn(order, columnIds, cardId) {
+ const id = String(cardId)
+ for (const columnId of columnIds) {
+ const index = (order?.[columnId] ?? []).indexOf(id)
+ if (index !== -1) return { columnId, index }
+ }
+ return null
 }

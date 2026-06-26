@@ -1,16 +1,25 @@
 import { create } from 'zustand'
 import { useTimerStore } from './useTimerStore'
+import { useHabitsStore } from './useHabitsStore'
+import { collectActiveDays, computeFlowStreak } from '../lib/streakUtils'
 import { createCard, generatePosition } from '../lib/cardUtils'
 import { sanitizeCardsOnLoad } from '../lib/cardSanitize'
 import { selectWipCard } from '../lib/cardSelectors'
 import { hapticTap } from '../lib/haptics'
 import {
  buildColumnOrderFromCards,
+ createEmptyBoardOrder,
+ moveInBoardOrder,
  moveInColumnOrder,
+ removeFromBoardOrder,
  removeIdFromColumnOrder,
+ reorderInBoardOrder,
  reorderInColumnOrder,
  syncColumnOrderWithCards,
 } from '../lib/kanbanOrderUtils'
+import { roleToStatus } from '../lib/boardUtils'
+import { useBoardsStore } from './useBoardsStore'
+import { generateId } from '../lib/id'
 import {
  columnToStatus,
  DONE_COLUMN,
@@ -33,13 +42,30 @@ function getInitialCardsState() {
  cards,
  persisted.columnOrder ?? buildColumnOrderFromCards(cards),
  )
- return { cards, columnOrder }
+ const boardOrders =
+ persisted.boardOrders && typeof persisted.boardOrders === 'object'
+ ? persisted.boardOrders
+ : {}
+ return { cards, columnOrder, boardOrders }
  }
 
  return {
  cards: [],
  columnOrder: buildColumnOrderFromCards([]),
+ boardOrders: {},
  }
+}
+
+// Look up a custom board's column role / column id list at action time. Read
+// via getState() (not import) so the two stores stay free of an import cycle.
+function boardColumnRole(boardId, columnId) {
+ const board = useBoardsStore.getState().boards.find((b) => b.id === boardId)
+ return board?.columns.find((c) => c.id === columnId)?.role ?? 'plain'
+}
+
+function boardColumnIds(boardId) {
+ const board = useBoardsStore.getState().boards.find((b) => b.id === boardId)
+ return (board?.columns ?? []).map((c) => c.id)
 }
 
 const initialState = getInitialCardsState()
@@ -50,9 +76,34 @@ function maybeHapticForColumn(columnId) {
  }
 }
 
+function pluralDays(n) {
+ const mod10 = n % 10
+ const mod100 = n % 100
+ if (mod10 === 1 && mod100 !== 11) return 'день'
+ if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'дня'
+ return 'дней'
+}
+
+// «Момент завершения» — тёплая микро-обратная связь при закрытии дела
+// (Progress Principle). Спокойно, без давления: показываем живой поток.
+function celebrateCompletion() {
+ const activeDays = collectActiveDays(
+ useCardsStore.getState().cards,
+ useTimerStore.getState().sessions,
+ useHabitsStore.getState().log,
+ )
+ const { streak } = computeFlowStreak(activeDays)
+ const message =
+ streak > 1
+ ? `Готово. Поток держится — ${streak} ${pluralDays(streak)} подряд`
+ : 'Готово. Поток начался — так держать!'
+ useToastStore.getState().showToast({ variant: 'success', message, key: 'flow-complete' })
+}
+
 export const useCardsStore = create((set, get) => ({
  cards: initialState.cards,
  columnOrder: initialState.columnOrder,
+ boardOrders: initialState.boardOrders,
  pendingDelete: null,
  lastAddedId: null,
 
@@ -199,6 +250,7 @@ export const useCardsStore = create((set, get) => ({
  wantMust: null,
  missionCriteriaResults: [],
  timeInvestment: null,
+ sphere: null,
  }
  }),
  }))
@@ -256,6 +308,7 @@ export const useCardsStore = create((set, get) => ({
  ),
  }))
  hapticTap()
+ celebrateCompletion()
  },
 
  discardWip: () => {
@@ -372,6 +425,7 @@ export const useCardsStore = create((set, get) => ({
  wantMust: null,
  missionCriteriaResults: [],
  timeInvestment: null,
+ sphere: null,
  rotation: 0,
  x: position.x,
  y: position.y,
@@ -380,17 +434,215 @@ export const useCardsStore = create((set, get) => ({
  }
  })
  },
+
+ // --- Custom boards ------------------------------------------------------
+
+ setBoardOrder: (boardId, order) =>
+ set((state) => ({
+ boardOrders: { ...state.boardOrders, [boardId]: order },
+ })),
+
+ addBoardCard: (boardId, columnId, text) => {
+ const trimmed = (text ?? '').trim()
+ if (!trimmed) return null
+
+ const status = roleToStatus(boardColumnRole(boardId, columnId))
+ const card = {
+ id: generateId(),
+ text: trimmed,
+ boardId,
+ kanbanColumn: columnId,
+ status,
+ createdAt: Date.now(),
+ ...(status === 'done' ? { completedAt: Date.now() } : {}),
+ }
+
+ set((state) => {
+ const colIds = boardColumnIds(boardId)
+ const order = state.boardOrders[boardId] ?? createEmptyBoardOrder(colIds)
+ return {
+ cards: [...state.cards, card],
+ boardOrders: {
+ ...state.boardOrders,
+ [boardId]: moveInBoardOrder(order, card.id, columnId, colIds),
+ },
+ lastAddedId: card.id,
+ }
+ })
+ return card
+ },
+
+ updateBoardCardText: (id, text) => {
+ const trimmed = (text ?? '').trim()
+ if (!trimmed) return false
+ set((state) => ({
+ cards: state.cards.map((c) => (c.id === id ? { ...c, text: trimmed } : c)),
+ }))
+ return true
+ },
+
+ moveBoardCard: (boardId, cardId, toColumnId, options = {}) => {
+ const card = get().cards.find((c) => c.id === cardId)
+ if (!card) return { ok: false, reason: 'not-found' }
+
+ const status = roleToStatus(boardColumnRole(boardId, toColumnId))
+ const wasDone = card.status === 'done'
+ const colIds = boardColumnIds(boardId)
+
+ set((state) => {
+ const order = state.boardOrders[boardId] ?? createEmptyBoardOrder(colIds)
+ return {
+ cards: state.cards.map((c) =>
+ c.id === cardId
+ ? {
+ ...c,
+ kanbanColumn: toColumnId,
+ status,
+ completedAt:
+ status === 'done' ? c.completedAt ?? Date.now() : undefined,
+ }
+ : c,
+ ),
+ boardOrders: {
+ ...state.boardOrders,
+ [boardId]: moveInBoardOrder(order, cardId, toColumnId, colIds, options.index),
+ },
+ }
+ })
+
+ if (status === 'done' && !wasDone) {
+ hapticTap()
+ celebrateCompletion()
+ }
+ return { ok: true }
+ },
+
+ // Card-only column/status update — used after a drag has already committed the
+ // board order (so we don't re-move the order here).
+ applyBoardCardColumn: (cardId, columnId) => {
+ const card = get().cards.find((c) => c.id === cardId)
+ if (!card) return
+ const status = roleToStatus(boardColumnRole(card.boardId, columnId))
+ const wasDone = card.status === 'done'
+ if (card.kanbanColumn === columnId && card.status === status) return
+ set((state) => ({
+ cards: state.cards.map((c) =>
+ c.id === cardId
+ ? {
+ ...c,
+ kanbanColumn: columnId,
+ status,
+ completedAt: status === 'done' ? c.completedAt ?? Date.now() : undefined,
+ }
+ : c,
+ ),
+ }))
+ if (status === 'done' && !wasDone) {
+ hapticTap()
+ celebrateCompletion()
+ }
+ },
+
+ // Re-derive the status of every card in a column after its role changed
+ // (e.g. user toggled a column to/from «Сделано»).
+ syncColumnCardsStatus: (boardId, columnId) => {
+ const status = roleToStatus(boardColumnRole(boardId, columnId))
+ set((state) => ({
+ cards: state.cards.map((c) =>
+ c.boardId === boardId && c.kanbanColumn === columnId
+ ? {
+ ...c,
+ status,
+ completedAt: status === 'done' ? c.completedAt ?? Date.now() : undefined,
+ }
+ : c,
+ ),
+ }))
+ },
+
+ reorderBoardCard: (boardId, columnId, fromIndex, toIndex) => {
+ set((state) => ({
+ boardOrders: {
+ ...state.boardOrders,
+ [boardId]: reorderInBoardOrder(
+ state.boardOrders[boardId] ?? {},
+ columnId,
+ fromIndex,
+ toIndex,
+ ),
+ },
+ }))
+ },
+
+ removeBoardCard: (id) => {
+ const card = get().cards.find((c) => c.id === id)
+ if (!card) return
+ const boardId = card.boardId
+ const colIds = boardColumnIds(boardId)
+ set((state) => ({
+ cards: state.cards.filter((c) => c.id !== id),
+ boardOrders: {
+ ...state.boardOrders,
+ [boardId]: removeFromBoardOrder(
+ state.boardOrders[boardId] ?? createEmptyBoardOrder(colIds),
+ id,
+ colIds,
+ ),
+ },
+ }))
+ },
+
+ // Move every card from one column into another (used when deleting a column).
+ // Call BEFORE removing the column from the boards store so both ids resolve.
+ reassignColumnCards: (boardId, fromColumnId, toColumnId) => {
+ const status = roleToStatus(boardColumnRole(boardId, toColumnId))
+ const colIds = boardColumnIds(boardId)
+ set((state) => {
+ let order = state.boardOrders[boardId] ?? createEmptyBoardOrder(colIds)
+ for (const id of [...(order[fromColumnId] ?? [])]) {
+ order = moveInBoardOrder(order, id, toColumnId, colIds)
+ }
+ return {
+ cards: state.cards.map((c) =>
+ c.boardId === boardId && c.kanbanColumn === fromColumnId
+ ? {
+ ...c,
+ kanbanColumn: toColumnId,
+ status,
+ completedAt:
+ status === 'done' ? c.completedAt ?? Date.now() : undefined,
+ }
+ : c,
+ ),
+ boardOrders: { ...state.boardOrders, [boardId]: order },
+ }
+ })
+ },
+
+ deleteBoardCards: (boardId) => {
+ set((state) => {
+ const boardOrders = { ...state.boardOrders }
+ delete boardOrders[boardId]
+ return {
+ cards: state.cards.filter((c) => c.boardId !== boardId),
+ boardOrders,
+ }
+ })
+ },
 }))
 
-const debouncedPersistCards = createDebouncedPersist((cards, columnOrder) => {
- saveCardsPersisted(cards, columnOrder)
-})
+const debouncedPersistCards = createDebouncedPersist(
+ (cards, columnOrder, boardOrders) => {
+ saveCardsPersisted(cards, columnOrder, boardOrders)
+ },
+)
 
 useCardsStore.subscribe((state, prev) => {
  if (
  state.cards !== prev.cards ||
- state.columnOrder !== prev.columnOrder
+ state.columnOrder !== prev.columnOrder ||
+ state.boardOrders !== prev.boardOrders
  ) {
- debouncedPersistCards(state.cards, state.columnOrder)
+ debouncedPersistCards(state.cards, state.columnOrder, state.boardOrders)
  }
 })

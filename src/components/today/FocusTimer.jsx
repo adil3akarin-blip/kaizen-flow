@@ -93,7 +93,7 @@ export default function FocusTimer({ cardId, embedded = false }) {
             type="button"
             onClick={() => handleMode(m.id)}
             className={clsx(
-              'flex-1 rounded-lg py-1.5 text-xs font-medium transition',
+              'flex-1 rounded-lg py-2.5 text-xs font-medium transition',
               mode === m.id
                 ? 'bg-surface text-ink shadow-sm'
                 : 'text-ink-muted hover:text-ink',

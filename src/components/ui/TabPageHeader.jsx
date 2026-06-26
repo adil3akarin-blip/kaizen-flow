@@ -20,7 +20,7 @@ export default function TabPageHeader({ title, subtitle, eyebrow, hideSettings =
           type="button"
           onClick={openSettings}
           aria-label="Настройки"
-          className="shrink-0 rounded-xl p-2 text-ink-faint transition hover:bg-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 md:hidden"
+          className="-mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-faint transition hover:bg-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 md:hidden"
         >
           <Settings className="h-5 w-5" strokeWidth={1.75} />
         </button>

@@ -14,6 +14,7 @@ import {
   shouldShowSwipeHint,
 } from '../../lib/filterUtils'
 import StructuredCard from '../cards/StructuredCard'
+import { LIFE_SPHERES } from '../../lib/labelSets'
 
 const SWIPE_THRESHOLD = 72
 
@@ -149,7 +150,7 @@ export default function FilterFlow({ cardId, onClose }) {
           type="button"
           onClick={onClose}
           aria-label="Назад"
-          className="rounded-xl p-2 text-ink-muted hover:bg-sunken md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-muted hover:bg-sunken md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
         </button>
@@ -201,7 +202,7 @@ export default function FilterFlow({ cardId, onClose }) {
             <button
               type="button"
               onClick={() => handleWantMust('unknown')}
-              className="text-sm text-ink-faint hover:text-ink-muted transition"
+              className="mx-auto rounded-lg px-4 py-2.5 text-sm text-ink-faint hover:text-ink-muted transition"
             >
               Не знаю
             </button>
@@ -223,7 +224,7 @@ export default function FilterFlow({ cardId, onClose }) {
             <button
               type="button"
               onClick={() => handleCriterionAnswer('skip')}
-              className="text-sm text-ink-faint hover:text-ink-muted transition"
+              className="mx-auto rounded-lg px-4 py-2.5 text-sm text-ink-faint hover:text-ink-muted transition"
             >
               Пропустить
             </button>
@@ -236,6 +237,40 @@ export default function FilterFlow({ cardId, onClose }) {
 
             <div>
               <p className="m-0 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+                Сфера жизни
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {LIFE_SPHERES.map((s) => {
+                  const active = draft.sphere === s.id
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => patchDraft({ sphere: active ? null : s.id })}
+                      className={clsx(
+                        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
+                        !active &&
+                          'border-line bg-sunken text-ink-muted hover:text-ink',
+                      )}
+                      style={
+                        active
+                          ? { borderColor: `${s.dot}40`, background: s.soft, color: s.text }
+                          : undefined
+                      }
+                    >
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: s.dot }}
+                      />
+                      {s.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="m-0 text-xs font-semibold uppercase tracking-wider text-ink-faint">
                 Куда инвестирую время
               </p>
               <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
@@ -245,7 +280,7 @@ export default function FilterFlow({ cardId, onClose }) {
                     type="button"
                     onClick={() => patchDraft({ timeInvestment: draft.timeInvestment === tag ? null : tag })}
                     className={clsx(
-                      'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition',
+                      'shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition',
                       draft.timeInvestment === tag
                         ? 'bg-accent-soft text-accent'
                         : 'bg-sunken text-ink-muted hover:text-ink',
@@ -289,7 +324,7 @@ export default function FilterFlow({ cardId, onClose }) {
           <button
             type="button"
             onClick={() => setStep((s) => Math.max(0, s - 1))}
-            className="flex items-center gap-1 text-sm text-ink-muted hover:text-ink transition"
+            className="-my-1 flex items-center gap-1 py-1 text-sm text-ink-muted hover:text-ink transition"
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
             Назад

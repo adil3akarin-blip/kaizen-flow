@@ -18,6 +18,7 @@ import PullQueue from '../flow/PullQueue'
 import TodayHabits from '../today/TodayHabits'
 import DailySummary from '../today/DailySummary'
 import ActiveTimerWidget from '../today/ActiveTimerWidget'
+import FlowStreakHero from '../today/FlowStreakHero'
 
 export default function TodayTab() {
   const [queueOverlayOpen, setQueueOverlayOpen] = useState(false)
@@ -73,11 +74,15 @@ export default function TodayTab() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="min-h-0 flex-1 overflow-y-auto py-4 sm:py-6 md:py-8">
+      <div className="min-h-0 flex-1 overflow-y-auto pt-4 pb-24 sm:pt-6 md:pt-8 md:pb-8">
         <PageContainer size="wide">
           <TabPageHeader eyebrow="Фокус сейчас" title="Сегодня" />
 
           <div className="mt-5">
+            <FlowStreakHero />
+          </div>
+
+          <div className="mt-4">
             <DailySummary />
           </div>
 
