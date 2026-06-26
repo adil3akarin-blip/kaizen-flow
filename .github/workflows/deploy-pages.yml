@@ -26,7 +26,6 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm install --no-audit --no-fund
       - run: npm run build:pages
         env:
           VITE_VAPID_PUBLIC_KEY: ${{ secrets.VITE_VAPID_PUBLIC_KEY }}
